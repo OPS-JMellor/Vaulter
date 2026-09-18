@@ -1,0 +1,22 @@
+# Credentials — NEVER commit
+credentials.json
+*.json.key
+service-account*.json
+
+# Clasp auth
+.clasprc.json
+
+# Node
+node_modules/
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# Claude local settings
+.claude/settings.local.json
