@@ -6,7 +6,7 @@
   <title>Vaulter</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     /* ── Tokens ───────────────────────────────────────────── */
@@ -23,7 +23,7 @@
       --sev-critical: #ad2122; --sev-high: #b4410c; --sev-medium: #8a6400; --sev-low: #4a5368;
       --warn-bg: #fff6d6; --warn-bd: #f0d78a; --warn-fg: #6b4f00; --demo: #f5b400; --demo-fg: #1d2a5d;
       --overlay: rgba(15,20,36,.5); --toast-bg: #1d2a5d; --toast-fg: #ffffff; --skel-a: #e6e8f2; --skel-b: #f0f2f9;
-      --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
+      --mono: 'Lexend', sans-serif;   /* codes, plates and numbers use the body face; Joel asked for no mono */
     }
     :root[data-theme="dark"] {
       --page: #0f1424; --panel: #182036; --plate: #1f2942; --border: #34405e; --divider: #26304a; --divider-2: #26304a;
@@ -47,7 +47,8 @@
     button { cursor: pointer; }
     a { color: var(--accent); }
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    .mono { font-family: var(--mono); }
+    .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+    .stat .v, .plate, .readout, .bulk-pos { font-variant-numeric: tabular-nums; }
     .wrap { max-width: 1360px; margin: 0 auto; padding: 0 32px; }
     .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
     @media (max-width: 700px) { .wrap { padding: 0 16px; } }
