@@ -48,7 +48,8 @@ clasp open      # open in the Apps Script editor
 | `Scheduler.js` | Trigger installation and schedule logic |
 | `SheetSetup.js` | Sheet scaffolding and default alert rules |
 | `WebApp.js` | Dashboard backend, access control, AI review |
-| `index.html` | Dashboard UI |
+| `index.html` | Dashboard UI: flag queue with detail pane, bulk review page, AI filtered log, access and settings. One page, no framework |
+| `Demo.html` | Sample data and a stand-in for `google.script.run`, used by demo mode |
 
 ### Notable mechanics
 
@@ -60,6 +61,19 @@ clasp open      # open in the Apps Script editor
   `suggestAlertCriteria` proposes new keyword rules.
 - **Role-based access.** The dashboard access list is managed in-sheet via
   `getAccessList` / `addAccessUser` / `updateAccessRole`.
+- **Dashboard design.** Built from the Claude Design canvas at
+  https://claude.ai/artifact/553fY9zStYZD2waHeRuwNW (Oct 2026): Lexend plus IBM Plex Mono, navy header
+  with a mono readout strip, three "box" panels (7-day stats, 14-day activity, two-pane flag queue),
+  one status-chip system (Unreviewed, AI Needs Review, AI Genuine Concern, AI Cleared, Reviewed),
+  square severity chips, a timeline per flag, a bulk review page instead of a modal, dark mode and a
+  phone layout. Colours and spacing are CSS variables at the top of `index.html`; dividers inside
+  panels, no boxes in boxes. The page computes the stats and trend from the flags it loads
+  (newest 300) so the server only ships rows plus a pipeline readout.
+- **Demo mode.** The "Demo" toggle in the dashboard header (or `?demo=1` on the web app
+  URL) swaps every server call for the in-browser sample data in `Demo.html`: fictional students
+  on a `demo.orono.k12.mn.us` domain, canned AI verdicts, a simulated import. Nothing in demo
+  mode reads or writes the sheets, calls Vault or Gemini, or sends email. The choice is remembered
+  per browser; "Reset sample data" restores the starting set. Still gated by `isAuthorized_`.
 
 ### Credentials
 

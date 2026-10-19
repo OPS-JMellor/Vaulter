@@ -1,1510 +1,1558 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Vaulter Dashboard</title>
+  <title>Vaulter</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body { font-family: 'Lexend', sans-serif; background: #f0f2f9; color: #333; min-height: 100vh; }
-
-    /* ── Header ─────────────────────────────────────────── */
-    header {
-      background: linear-gradient(135deg, #1a2660 0%, #2d3f89 55%, #3b50ad 100%);
-      color: #fff;
-      padding: 0 28px;
-      height: 64px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      box-shadow: 0 2px 12px rgba(29,42,93,.35);
+    /* ── Tokens ───────────────────────────────────────────── */
+    :root {
+      --page: #d5dae3; --panel: #ffffff; --plate: #e8ebf0; --border: #9ea6b8; --divider: #e3e6ee; --divider-2: #eceef4;
+      --text: #1a2033; --text2: #4a5368; --head: #1d2a5d; --accent: #2d3f89; --ctrl: #8a92a6; --rivet: #8a92a6;
+      --sel: #eef1fa; --sel-bar: #2d3f89; --count-bg: #eceef4; --count-fg: #1d2a5d; --count-act-bg: #2d3f89; --count-act-fg: #ffffff;
+      --chip-act-bg: #1d2a5d; --chip-act-fg: #ffffff; --btn-bg: #1d2a5d; --btn-fg: #ffffff; --btn2-bg: #ffffff; --btn2-fg: #1d2a5d; --ai: #2d3f89;
+      --bar-cur: #2d3f89; --bar-prev: #9aa5cf; --bar-zero: #c5cad6; --track: #eceef4; --crit: #ad2122;
+      --hdr: #1d2a5d; --hdr-sub: #d3d8ec; --hdr-rule: #46538a; --readout: #2d3f89; --mark: #ad2122; --input-bg: #ffffff;
+      --tl-line: #c5cad6; --tl-done: #2d3f89; --tl-skip: #8a92a6;
+      --st-unrev: #1d2a5d; --st-needs: #7a5200; --st-concern: #ad2122; --st-cleared: #1d5e40; --st-rev-bg: #1d2a5d; --st-rev-fg: #ffffff;
+      --v-concern: #ad2122; --v-needs: #7a5200; --v-clear: #1d5e40; --ok: #1d5e40; --ok-dot: #8ee6b4;
+      --sev-critical: #ad2122; --sev-high: #b4410c; --sev-medium: #8a6400; --sev-low: #4a5368;
+      --warn-bg: #fff6d6; --warn-bd: #f0d78a; --warn-fg: #6b4f00; --demo: #f5b400; --demo-fg: #1d2a5d;
+      --overlay: rgba(15,20,36,.5); --toast-bg: #1d2a5d; --toast-fg: #ffffff; --skel-a: #e6e8f2; --skel-b: #f0f2f9;
+      --mono: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace;
     }
-    header h1 { font-size: 20px; font-weight: 700; letter-spacing: .2px; }
-    header .org-tag { font-size: 11px; opacity: .45; font-weight: 400; }
-    header .subtitle { font-size: 12px; opacity: .6; margin-left: auto; font-weight: 400; }
-
-    /* ── Tabs ───────────────────────────────────────────── */
-    .tab-nav { background: #fff; border-bottom: 1px solid #e2e5f0; padding: 0 28px; display: flex; }
-    .tab-btn {
-      padding: 14px 22px; font-size: 13px; font-weight: 600;
-      font-family: 'Lexend', sans-serif; color: #888; cursor: pointer;
-      border: none; background: none; border-bottom: 3px solid transparent;
-      margin-bottom: -1px; transition: color .15s;
-    }
-    .tab-btn.active { color: #2d3f89; border-bottom-color: #ad2122; }
-    .tab-btn:hover:not(.active) { color: #2d3f89; }
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
-
-    .container { max-width: 1160px; margin: 0 auto; padding: 28px 20px; }
-
-    /* ── Cards ──────────────────────────────────────────── */
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
-    .card {
-      background: #fff; border-radius: 14px;
-      padding: 20px 22px; display: flex; align-items: center; gap: 16px;
-      box-shadow: 0 1px 3px rgba(29,42,93,.06), 0 4px 14px rgba(29,42,93,.05);
-      transition: transform .18s ease, box-shadow .18s ease;
-    }
-    .card.clickable { cursor: pointer; }
-    .card.clickable:hover { transform: translateY(-2px); box-shadow: 0 4px 20px rgba(29,42,93,.13); }
-    .card-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .card.warn .card-icon     { background: #fff0f0; }
-    .card.critical .card-icon { background: #fde8e8; }
-    .card-body .label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: .8px; font-weight: 600; }
-    .card-body .value { font-size: 36px; font-weight: 700; line-height: 1.1; margin-top: 4px; color: #2d3f89; }
-    .card.warn .card-body .value     { color: #c13435; }
-    .card.critical .card-body .value { color: #ad2122; }
-    .card-body .sublabel { font-size: 10px; color: #bbb; margin-top: 3px; }
-
-    /* ── Sections ───────────────────────────────────────── */
-    .section {
-      background: #fff; border-radius: 14px;
-      padding: 20px 24px; margin-bottom: 20px;
-      box-shadow: 0 1px 3px rgba(29,42,93,.05), 0 2px 8px rgba(29,42,93,.04);
-    }
-    .section h2 {
-      font-size: 11px; font-weight: 700; color: #aaa;
-      text-transform: uppercase; letter-spacing: 1px;
-      padding-bottom: 12px; margin-bottom: 16px;
-      border-bottom: 1px solid #f0f2f9;
+    :root[data-theme="dark"] {
+      --page: #0f1424; --panel: #182036; --plate: #1f2942; --border: #34405e; --divider: #26304a; --divider-2: #26304a;
+      --text: #e8ecf5; --text2: #a9b2c8; --head: #c9d3f2; --accent: #8fa2e8; --ctrl: #6b7799; --rivet: #6b7799;
+      --sel: #22305a; --sel-bar: #8fa2e8; --count-bg: #26304a; --count-fg: #c9d3f2; --count-act-bg: #0f1424; --count-act-fg: #c9d3f2;
+      --chip-act-bg: #c9d3f2; --chip-act-fg: #0f1424; --btn-bg: #c9d3f2; --btn-fg: #0f1424; --btn2-bg: #182036; --btn2-fg: #c9d3f2; --ai: #8fa2e8;
+      --bar-cur: #8fa2e8; --bar-prev: #44527d; --bar-zero: #34405e; --track: #26304a; --crit: #ff8a8b;
+      --hdr: #0a0f1d; --hdr-sub: #a9b2c8; --hdr-rule: #26304a; --readout: #16204a; --mark: #ff8a8b; --input-bg: #0f1424;
+      --tl-line: #34405e; --tl-done: #8fa2e8; --tl-skip: #6b7799;
+      --st-unrev: #e8ecf5; --st-needs: #f0c060; --st-concern: #ff8a8b; --st-cleared: #6fd3a0; --st-rev-bg: #c9d3f2; --st-rev-fg: #0f1424;
+      --v-concern: #ff8a8b; --v-needs: #f0c060; --v-clear: #6fd3a0; --ok: #6fd3a0;
+      --warn-bg: #2b2300; --warn-bd: #6b5200; --warn-fg: #f0c060; --demo: #f0c060; --demo-fg: #0f1424;
+      --overlay: rgba(0,0,0,.6); --toast-bg: #c9d3f2; --toast-fg: #0f1424; --skel-a: #1f2942; --skel-b: #26304a;
     }
 
-    /* ── Tables ─────────────────────────────────────────── */
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: 13px; }
-    th {
-      padding: 9px 12px; text-align: left; font-weight: 600;
-      color: #999; border-bottom: 1px solid #eef0f8; white-space: nowrap;
-      font-size: 11px; text-transform: uppercase; letter-spacing: .6px; background: #fafbff;
-    }
-    td { padding: 11px 12px; border-bottom: 1px solid #f4f5fc; vertical-align: top; }
-    tr:last-child td { border-bottom: none; }
-    tbody tr { transition: background .1s; }
-    tbody tr:hover td { background: #f0f2f9; }
+    /* ── Base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { background: var(--page); color: var(--text); font: 14px/1.5 'Lexend', sans-serif; min-height: 100vh; }
+    button, input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+    button { cursor: pointer; }
+    a { color: var(--accent); }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .mono { font-family: var(--mono); }
+    .wrap { max-width: 1360px; margin: 0 auto; padding: 0 32px; }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    @media (max-width: 700px) { .wrap { padding: 0 16px; } }
 
-    /* Severity left-border accent */
-    tbody tr[data-sev="critical"] { border-left: 3px solid #ad2122; }
-    tbody tr[data-sev="high"]     { border-left: 3px solid #d44c00; }
-    tbody tr[data-sev="medium"]   { border-left: 3px solid #b07d00; }
-    tbody tr[data-sev="low"]      { border-left: 3px solid #4356a0; }
+    /* ── Header ───────────────────────────────────────────── */
+    .hdr { background: var(--hdr); color: #fff; }
+    .hdr-in { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; min-height: 64px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-name { font-size: 20px; font-weight: 600; letter-spacing: .01em; }
+    .brand-rule { width: 1px; height: 20px; background: var(--hdr-rule); }
+    .brand-sub { font-size: 13px; color: var(--hdr-sub); }
+    .nav { display: flex; flex-wrap: wrap; gap: 4px; flex: 1 1 auto; }
+    .nav-btn { background: none; border: 0; color: var(--hdr-sub); padding: 20px 12px 18px; border-bottom: 3px solid transparent; font-size: 14px; }
+    .nav-btn:hover { color: #fff; }
+    .nav-btn[aria-current="page"] { color: #fff; border-bottom-color: #fff; font-weight: 500; }
+    .hdr-right { display: flex; align-items: center; gap: 12px; }
+    .icon-btn { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; background: transparent; color: #fff; border: 1px solid var(--hdr-rule); border-radius: 4px; }
+    .icon-btn:hover { background: rgba(255,255,255,.08); }
+    .icon-btn svg { display: none; }
+    :root[data-theme="light"] .icon-btn .ico-moon, :root[data-theme="dark"] .icon-btn .ico-sun { display: block; }
+    .user { display: flex; align-items: center; gap: 10px; }
+    .user-text { text-align: right; line-height: 1.3; }
+    .user-name { display: block; font-size: 13px; font-weight: 500; }
+    .user-sub { display: block; font-size: 12px; color: var(--hdr-sub); }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: #2d3f89; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+    .pill { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .3px; color: #fff; background: rgba(255,255,255,.1); border: 1px solid var(--hdr-rule); border-radius: 4px; padding: 0 11px 0 8px; height: 40px; }
+    .pill:hover { background: rgba(255,255,255,.18); }
+    .pill-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.4); }
+    body.demo .pill { background: var(--demo); border-color: var(--demo); color: var(--demo-fg); }
+    body.demo .pill-dot { background: var(--demo-fg); }
+    @media (max-width: 900px) { .nav-btn { padding: 14px 10px 12px; } .user-text { display: none; } .brand-sub, .brand-rule { display: none; } }
 
-    /* ── Badges ─────────────────────────────────────────── */
-    .badge { display: inline-block; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; color: #fff; }
-    .badge-critical { background: #ad2122; }
-    .badge-high     { background: #d44c00; }
-    .badge-medium   { background: #b07d00; }
-    .badge-low      { background: #4356a0; }
+    /* ── Readout strip ────────────────────────────────────── */
+    .readout { background: var(--readout); color: #fff; font-size: 12px; font-weight: 500; letter-spacing: .03em; }
+    .readout-in { display: flex; flex-wrap: wrap; gap: 4px 24px; align-items: center; padding-top: 8px; padding-bottom: 8px; }
+    .ro-item { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+    .ro-item.strong { font-weight: 600; }
+    .ro-item.right { margin-left: auto; }
+    .ro-dot { width: 8px; height: 8px; background: var(--ok-dot); }
+    .ro-dot.off { background: #c5cad6; }
+    @media (max-width: 700px) { .readout { font-size: 11px; } .ro-item.right { margin-left: 0; } }
 
-    .query-preview { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #777; font-style: italic; }
+    /* ── Demo banner ──────────────────────────────────────── */
+    .demo-banner { display: none; background: var(--warn-bg); border-bottom: 1px solid var(--warn-bd); color: var(--warn-fg); font-size: 12.5px; }
+    body.demo .demo-banner { display: block; }
+    .demo-banner .wrap { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 9px; padding-bottom: 9px; }
+    .demo-banner .sp { flex: 1; }
+    .demo-banner button { font-size: 11px; font-weight: 600; padding: 5px 11px; border-radius: 4px; border: 1px solid var(--warn-bd); background: var(--panel); color: var(--warn-fg); }
 
-    /* ── Buttons ─────────────────────────────────────────── */
-    .btn {
-      padding: 8px 16px; border: none; border-radius: 7px; cursor: pointer;
-      font-size: 13px; font-weight: 600; font-family: 'Lexend', sans-serif;
-      transition: background .15s, box-shadow .15s, transform .1s;
-    }
-    .btn:active { transform: scale(.97); }
-    .btn-primary { background: #2d3f89; color: #fff; box-shadow: 0 1px 4px rgba(45,63,137,.28); }
-    .btn-primary:hover { background: #1d2a5d; box-shadow: 0 3px 10px rgba(45,63,137,.36); }
-    .btn-secondary { background: #eaecf5; color: #1d2a5d; }
-    .btn-secondary:hover { background: #d8dbee; }
+    /* ── Pages ────────────────────────────────────────────── */
+    .page { display: none; }
+    .page.active { display: block; }
+    .page-in { padding-top: 24px; padding-bottom: 48px; display: flex; flex-direction: column; gap: 24px; }
+    .titlebar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; }
+    .titlebar h1, .display { margin: 0; font-size: 28px; line-height: 1.2; font-weight: 600; color: var(--head); }
+    .titlebar p { margin: 6px 0 0; color: var(--text2); }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
-    /* ── Run log ─────────────────────────────────────────── */
-    .run-status-success { color: #2d7a2d; font-weight: 700; }
-    .run-status-error   { color: #ad2122; font-weight: 700; }
-
-    /* ── Settings ────────────────────────────────────────── */
-    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-    @media (max-width: 700px) { .settings-grid { grid-template-columns: 1fr; } }
-    .field { margin-bottom: 16px; }
-    .field label { display: block; font-size: 11px; font-weight: 700; color: #666; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
-    .field .hint { font-size: 11px; color: #bbb; margin-top: 4px; font-weight: 400; }
-    .field input, .field select, .field textarea {
-      width: 100%; padding: 9px 11px; border: 1px solid #e0e3ee;
-      border-radius: 7px; font-size: 13px; font-family: 'Lexend', sans-serif;
-      color: #333; background: #fff; transition: border-color .15s, box-shadow .15s;
-    }
-    .field input:focus, .field select:focus, .field textarea:focus {
-      outline: none; border-color: #2d3f89; box-shadow: 0 0 0 3px rgba(45,63,137,.12);
-    }
-    .ou-list { border: 1px solid #e0e3ee; border-radius: 7px; max-height: 260px; overflow-y: auto; padding: 6px 0; }
-    .ou-item { display: flex; align-items: center; gap: 10px; padding: 6px 12px; cursor: pointer; font-size: 13px; transition: background .1s; }
-    .ou-item:hover { background: #f0f2f9; }
-    .ou-item input[type=checkbox] { width: 15px; height: 15px; cursor: pointer; flex-shrink: 0; accent-color: #2d3f89; }
-    .ou-path { font-family: monospace; font-size: 12px; color: #555; }
-    .settings-actions { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
-    .save-status { font-size: 13px; color: #2d7a2d; font-weight: 600; display: none; }
-
-    /* ── Skeleton / Loading ──────────────────────────────── */
-    .skeleton-wrap { max-width: 1160px; margin: 0 auto; padding: 28px 20px; }
-    .skeleton-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px; }
-    .skel { border-radius: 14px; }
-    .skel-card { height: 90px; }
-    .skel-section { height: 220px; }
-    .skel-section-sm { height: 160px; margin-top: 20px; }
-    .shimmer {
-      background: linear-gradient(90deg, #e6e8f2 25%, #f0f2f9 50%, #e6e8f2 75%);
-      background-size: 400% 100%;
-      animation: shimmer 1.6s ease-in-out infinite;
-    }
-    @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
-
-    /* ── Misc ────────────────────────────────────────────── */
-    .loading { text-align: center; padding: 48px; color: #bbb; }
-    .empty-state { text-align: center; padding: 40px; color: #ccc; font-size: 14px; }
+    /* ── Buttons ──────────────────────────────────────────── */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; border-radius: 4px; font-size: 14px; font-weight: 500; border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn:disabled { opacity: .55; cursor: default; }
+    .btn-1 { background: var(--btn-bg); color: var(--btn-fg); border-color: var(--btn-bg); }
+    .btn-2 { background: var(--btn2-bg); color: var(--btn2-fg); border-color: var(--ctrl); }
+    .btn-ai { background: var(--btn2-bg); color: var(--ai); border-color: var(--ai); }
+    .btn-danger { background: var(--btn2-bg); color: var(--crit); border-color: var(--crit); }
+    .btn-link { background: none; border: 0; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; padding: 0 8px; }
+    .btn-lg { min-height: 48px; padding: 0 18px; font-size: 15px; }
+    .btn svg { flex: none; }
+    .spin { animation: spin 1.1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Boxes and plates ─────────────────────────────────── */
+    .box { background: var(--panel); border: 1px solid var(--border); border-radius: 3px; }
+    .plate { display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--plate); border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--head); margin: 0; font-weight: 400; }
+    .plate b { font-weight: 600; }
+    .plate .sp { margin-left: auto; }
+    .plate .rivet { width: 6px; height: 6px; border-radius: 50%; background: var(--rivet); flex: none; }
+    .box-body { padding: 20px 24px; }
+    .box h2.sec-title, h2.sec-title { margin: 0; font-size: 16px; font-weight: 600; color: var(--head); }
+    h3.label, .label { margin: 0; font-size: 13px; font-weight: 600; color: var(--head); }
+    .meta { font-size: 13px; color: var(--text2); }
+    .help { margin: 0; font-size: 13px; color: var(--text2); }
+    @media (max-width: 700px) { .box-body { padding: 16px; } .plate { padding: 6px 12px; font-size: 11px; } }
+
+    /* ── Stats ────────────────────────────────────────────── */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--divider); }
+    .stat { background: var(--panel); padding: 20px 24px; display: flex; flex-direction: column; gap: 4px; }
+    .stat .v { font-family: var(--mono); font-size: 34px; font-weight: 500; line-height: 1.2; color: var(--head); }
+    .stat.crit .v { color: var(--crit); }
+    @media (max-width: 700px) { .stats { grid-template-columns: repeat(2, 1fr); } .stat { padding: 12px 14px; } .stat .v { font-size: 26px; } }
+
+    /* ── Trend ────────────────────────────────────────────── */
+    .trend { display: flex; flex-wrap: wrap; }
+    .chart { flex: 2 1 520px; min-width: 0; padding: 20px 24px 16px; display: flex; flex-direction: column; gap: 16px; }
+    .chart-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline; }
+    .legend { display: flex; gap: 16px; font-size: 12px; color: var(--text2); }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend i { width: 10px; height: 10px; display: inline-block; }
+    .bars { position: relative; height: 128px; display: flex; align-items: flex-end; gap: 8px; border-bottom: 1px solid var(--border); }
+    .bars .grid { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--divider); }
+    .bar-col { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; position: relative; min-width: 0; }
+    .bar-col .n { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+    .bar-col .bar { display: block; width: 100%; max-width: 36px; background: var(--bar-prev); }
+    .bar-col .bar.cur { background: var(--bar-cur); }
+    .bar-col .bar.zero { background: var(--bar-zero); }
+    .bar-labels { display: flex; gap: 8px; }
+    .bar-labels span { flex: 1 1 0; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--text2); white-space: nowrap; min-width: 0; overflow: hidden; }
+    .cats { flex: 1 1 300px; padding: 20px 24px; border-left: 1px solid var(--divider); display: flex; flex-direction: column; gap: 14px; }
+    .cat { display: grid; grid-template-columns: 112px 1fr 24px; align-items: center; gap: 12px; font-size: 13px; }
+    .cat .track { height: 8px; background: var(--track); }
+    .cat .fill { display: block; height: 8px; background: var(--bar-cur); }
+    .cat .n { text-align: right; font-family: var(--mono); font-weight: 600; color: var(--head); }
+    @media (max-width: 900px) { .cats { border-left: 0; border-top: 1px solid var(--divider); } .bar-labels span:nth-child(even) { visibility: hidden; } }
+
+    /* ── Chips ────────────────────────────────────────────── */
+    .sev { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; line-height: 1.5; color: #fff; background: var(--sev-low); white-space: nowrap; }
+    .sev-critical { background: var(--sev-critical); } .sev-high { background: var(--sev-high); } .sev-medium { background: var(--sev-medium); } .sev-low { background: var(--sev-low); }
+    .st { display: inline-flex; align-items: center; gap: 6px; padding: 1px 10px 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; line-height: 1.6; white-space: nowrap; background: var(--panel); border: 1.5px solid currentColor; }
+    .st .d { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex: none; }
+    .st-unrev { color: var(--st-unrev); } .st-unrev .d { background: transparent; border: 2px solid currentColor; }
+    .st-needs { color: var(--st-needs); } .st-concern { color: var(--st-concern); } .st-cleared { color: var(--st-cleared); }
+    .st-reviewed { color: var(--st-rev-fg); background: var(--st-rev-bg); border-color: var(--st-rev-bg); }
+    .v-concern { color: var(--v-concern); } .v-needs { color: var(--v-needs); } .v-clear { color: var(--v-clear); }
+    mark { background: none; color: var(--mark); font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+
+    /* ── Filters and controls ─────────────────────────────── */
+    .chip { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border-radius: 4px; font-size: 13px; font-weight: 500; background: var(--panel); color: var(--head); border: 1px solid var(--ctrl); }
+    .chip[aria-pressed="true"] { background: var(--chip-act-bg); color: var(--chip-act-fg); border-color: var(--chip-act-bg); }
+    .chip .n { font-family: var(--mono); font-size: 12px; font-weight: 600; padding: 0 6px; border-radius: 999px; background: var(--count-bg); color: var(--count-fg); }
+    .chip[aria-pressed="true"] .n { background: var(--count-act-bg); color: var(--count-act-fg); }
+    .chip .sw { width: 10px; height: 10px; border-radius: 2px; }
+    .chip[aria-pressed="true"] .sw { outline: 1px solid var(--chip-act-fg); }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--head); }
+    .ctl { width: 100%; min-height: 40px; padding: 8px 10px; border: 1px solid var(--ctrl); border-radius: 4px; background: var(--input-bg); color: var(--text); font-size: 14px; font-weight: 400; line-height: 1.5; }
+    textarea.ctl { resize: vertical; }
+    select.ctl { padding-top: 0; padding-bottom: 0; }
+    .ctl:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45,63,137,.18); }
+    .search { position: relative; }
+    .search svg { position: absolute; left: 10px; top: 12px; }
+    .search .ctl { padding-left: 34px; }
+    .hint { font-size: 12px; color: var(--text2); font-weight: 400; }
+
+    /* ── Flag queue ───────────────────────────────────────── */
+    .queue { display: flex; flex-wrap: wrap; align-items: stretch; overflow: hidden; }
+    .qlist { flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+    .qfilters { padding: 16px; display: flex; flex-direction: column; gap: 12px; border-bottom: 1px solid var(--border); }
+    .qfilters .two { display: flex; flex-wrap: wrap; gap: 8px; }
+    .qfilters .two .field:first-child { flex: 1 1 140px; } .qfilters .two .field:last-child { flex: 2 1 200px; }
+    .showing { margin: 0; padding: 10px 16px; font-size: 12px; color: var(--text2); border-bottom: 1px solid var(--divider); }
+    .rows { display: flex; flex-direction: column; max-height: 1100px; overflow-y: auto; }
+    .row { display: block; width: 100%; text-align: left; color: var(--text); padding: 14px 16px; border: 0; border-bottom: 1px solid var(--divider); background: var(--panel); }
+    .row:hover { background: var(--sel); }
+    .row[aria-current="true"] { background: var(--sel); box-shadow: inset -3px 0 0 var(--sel-bar); }
+    .row .top { display: flex; align-items: center; gap: 8px; }
+    .row .cat { font-size: 13px; font-weight: 600; }
+    .row .rel { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--text2); }
+    .row .who { display: block; margin-top: 4px; font-family: var(--mono); font-size: 12px; color: var(--text2); }
+    .row .txt { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; margin-top: 6px; font-size: 14px; line-height: 1.45; }
+    .row .foot { display: block; margin-top: 8px; }
+    .qdetail { flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; }
+    .back { display: none; }
+    .dhead { padding: 20px 28px; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--divider); }
+    .dhead .chips-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .dhead h2 { margin: 10px 0 0; font-size: 20px; line-height: 1.3; font-weight: 600; color: var(--head); }
+    .dbody { display: flex; flex-wrap: wrap; flex: 1 1 auto; }
+    .dmain { flex: 999 1 420px; min-width: 0; padding: 24px 28px; display: flex; flex-direction: column; gap: 24px; }
+    .dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px 24px; }
+    .dl div { display: flex; flex-direction: column; gap: 2px; }
+    .dl dt { font-size: 13px; font-weight: 600; color: var(--head); }
+    .dl dd { margin: 0; font-size: 14px; }
+    .dl dd.mono { font-size: 13px; word-break: break-all; }
+    .sec { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--divider); padding-top: 20px; }
+    .prompt { margin: 0; font-size: 16px; line-height: 1.65; white-space: pre-wrap; word-break: break-word; }
+    .verdict { margin: 0; font-size: 16px; font-weight: 600; }
+    .assess { margin: 0; font-size: 14px; font-weight: 500; }
+    .reason { margin: 0; font-size: 14px; color: var(--text2); }
+    .ai-head { display: flex; align-items: center; gap: 8px; }
+    .ai-head .stamp { font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--text2); }
+    .tl-aside { flex: 1 1 240px; padding: 24px; border-left: 1px solid var(--divider); display: flex; flex-direction: column; gap: 12px; }
+    .tl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+    .tl li { display: flex; gap: 12px; }
+    .tl .rail { display: flex; flex-direction: column; align-items: center; width: 12px; flex: none; }
+    .tl .dot { width: 12px; height: 12px; border-radius: 2px; margin-top: 4px; flex: none; border: 2px solid var(--tl-done); background: transparent; }
+    .tl .dot.done { background: var(--tl-done); }
+    .tl .dot.skip { border-color: var(--tl-skip); }
+    .tl .line { flex: 1 1 auto; width: 2px; background: var(--tl-line); margin: 2px 0; }
+    .tl li:last-child .line { display: none; }
+    .tl .body { display: flex; flex-direction: column; gap: 2px; padding-bottom: 18px; }
+    .tl .t { font-size: 14px; font-weight: 500; }
+    .tl .m { font-size: 13px; color: var(--text2); }
+    .empty { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 40px; text-align: center; }
+    .empty h2 { margin: 0; font-size: 20px; font-weight: 600; color: var(--head); }
+    .empty p { margin: 0; max-width: 420px; color: var(--text2); }
+    .empty .actions { justify-content: center; align-items: center; gap: 16px; margin-top: 8px; }
+    @media (max-width: 900px) {
+      .qlist { border-right: 0; flex-basis: 100%; }
+      .qdetail { display: none; flex-basis: 100%; }
+      .queue.show-detail .qlist { display: none; }
+      .queue.show-detail .qdetail { display: flex; }
+      .back { display: inline-flex; }
+      .dhead, .dmain { padding: 16px; }
+      .tl-aside { border-left: 0; border-top: 1px solid var(--divider); padding: 16px; }
+      .rows { max-height: none; }
+    }
+
+    /* ── Bulk review ──────────────────────────────────────── */
+    .bulk-in { max-width: 880px; margin: 0 auto; gap: 20px; }
+    .bulk-top { display: flex; flex-direction: column; gap: 12px; }
+    .bulk-title { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .bulk-pos { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--head); }
+    .prog { display: grid; gap: 4px; }
+    .prog span { height: 6px; background: var(--bar-zero); }
+    .prog span.done { background: var(--accent); }
+    .prog span.now { background: var(--panel); border: 2px solid var(--accent); }
+    .counts { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 13px; color: var(--text2); }
+    .counts b { color: var(--text); font-weight: 600; }
+    .case-head { padding: 20px 28px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; border-bottom: 1px solid var(--divider); }
+    .case-head .who { font-family: var(--mono); font-size: 12px; color: var(--text2); }
+    .case-head .st { margin-left: auto; }
+    .case-sec { padding: 24px 28px; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(--divider); }
+    .case-sec:last-child { border-bottom: 0; }
+    .case-sec .prompt { font-size: 18px; line-height: 1.6; }
+    .case-sec .verdict { font-size: 20px; }
+    .case-sec .assess { font-size: 15px; }
+    .case-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .case-actions .btn { flex: 1 1 200px; }
+    .case-actions .btn-link { flex: 0 1 120px; }
+    .thinking { display: flex; align-items: center; gap: 10px; color: var(--text2); }
+    .log { list-style: none; margin: 0; padding: 0; }
+    .log li { display: grid; grid-template-columns: 28px 88px 1fr auto; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--divider); font-size: 13px; }
+    .log li:last-child { border-bottom: 0; }
+    .log li[aria-current="step"] { background: var(--sel); font-weight: 500; }
+    .log .i { color: var(--text2); } .log li[aria-current="step"] .i { color: var(--head); font-weight: 600; }
+    .log .desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .log .res { color: var(--text2); } .log .res.strong { color: var(--accent); font-weight: 500; } .log .res.now { color: var(--head); font-weight: 600; }
+    @media (max-width: 700px) { .case-head, .case-sec { padding: 16px; } .log li { grid-template-columns: 24px 72px 1fr auto; padding: 10px 12px; gap: 8px; } }
+
+    /* ── Tables ───────────────────────────────────────────── */
+    .table-wrap { overflow-x: auto; }
+    .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .tbl th { padding: 10px 14px; text-align: left; font-family: var(--mono); font-weight: 600; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--head); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .tbl td { padding: 11px 14px; border-bottom: 1px solid var(--divider); vertical-align: top; }
+    .tbl tr:last-child td { border-bottom: 0; }
+    .tbl .mono { font-size: 12px; }
+    .tbl .muted { color: var(--text2); }
+    .tbl .empty-row { text-align: center; padding: 32px; color: var(--text2); }
+    .run-ok { color: var(--ok); font-weight: 600; } .run-bad { color: var(--crit); font-weight: 600; }
+    .kw { font-family: var(--mono); font-size: 12px; background: var(--count-bg); color: var(--head); padding: 1px 6px; border-radius: 3px; }
+
+    /* ── Settings / access forms ──────────────────────────── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    .form-grid .box-body, .form-col { display: flex; flex-direction: column; gap: 16px; }
+    .ou-list { border: 1px solid var(--ctrl); border-radius: 4px; max-height: 260px; overflow-y: auto; padding: 6px 0; background: var(--input-bg); }
+    .ou-item { display: flex; align-items: center; gap: 10px; padding: 7px 12px; cursor: pointer; font-size: 13px; font-weight: 400; }
+    .ou-item:hover { background: var(--sel); }
+    .ou-item input { width: 16px; height: 16px; accent-color: var(--accent); flex: none; }
+    .ou-path { font-family: var(--mono); font-size: 12px; }
+    .inline-form { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+    .inline-form .field { flex: 1 1 240px; } .inline-form .field.narrow { flex: 0 1 160px; }
+    .status-line { font-size: 13px; }
+    .status-line.ok { color: var(--ok); } .status-line.bad { color: var(--crit); }
+    @media (max-width: 800px) { .form-grid { grid-template-columns: 1fr; } }
+
+    /* ── Modal, toasts, skeleton ──────────────────────────── */
+    .modal { display: none; position: fixed; inset: 0; background: var(--overlay); z-index: 1000; align-items: center; justify-content: center; padding: 16px; }
+    .modal.open { display: flex; }
+    .modal .box { width: 100%; max-width: 680px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+    .modal .scroll { overflow-y: auto; flex: 1 1 auto; }
+    .modal-foot { padding: 14px 20px; border-top: 1px solid var(--divider); display: flex; justify-content: flex-end; gap: 10px; }
+    .crit-item { border-bottom: 1px solid var(--divider); padding: 14px 0; display: flex; flex-direction: column; gap: 6px; }
+    .crit-item .top { display: flex; align-items: center; gap: 10px; }
+    .crit-item .top label { font-weight: 600; flex: 1; cursor: pointer; }
+    .crit-item .kws { font-size: 12px; color: var(--text2); padding-left: 26px; line-height: 1.6; }
+    .toasts { position: fixed; right: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 2000; }
+    .toast { background: var(--toast-bg); color: var(--toast-fg); padding: 10px 14px; border-radius: 4px; font-size: 13px; max-width: 360px; box-shadow: 0 6px 24px rgba(0,0,0,.25); animation: fadeIn .2s ease-out; }
+    .toast.bad { background: var(--crit); color: #fff; }
+    .skel { border-radius: 3px; background: linear-gradient(90deg, var(--skel-a) 25%, var(--skel-b) 50%, var(--skel-a) 75%); background-size: 400% 100%; animation: shimmer 1.6s ease-in-out infinite; }
+    @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
-    .fade-in { animation: fadeIn .28s ease-out; }
+    .fade-in { animation: fadeIn .25s ease-out; }
+    .loading { text-align: center; padding: 48px; color: var(--text2); }
   </style>
 </head>
 <body>
 
-<header>
-  <svg width="30" height="30" viewBox="0 0 24 24" fill="none">
-    <path d="M12 2L4 6v6c0 5.25 3.5 10.15 8 11.35C16.5 22.15 20 17.25 20 12V6L12 2z" fill="rgba(255,255,255,.18)" stroke="rgba(255,255,255,.8)" stroke-width="1.5" stroke-linejoin="round"/>
-    <path d="M9 12l2 2 4-4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg>
-  <h1>Vaulter</h1>
-  <span class="org-tag">Orono Technology</span>
-  <span class="subtitle" id="lastRunLabel">Loading…</span>
+<header class="hdr">
+  <div class="wrap hdr-in">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="11.5" stroke="#fff" stroke-width="2"/><circle cx="14" cy="14" r="4" stroke="#fff" stroke-width="2"/><path d="M14 2.5v3M14 22.5v3M2.5 14h3M22.5 14h3M5.9 5.9 8 8M20 20l2.1 2.1M22.1 5.9 20 8M8 20l-2.1 2.1" stroke="#fff" stroke-width="1.6"/><circle cx="14" cy="14" r="1.5" fill="#ff8a8b"/></svg>
+      <span class="brand-name">Vaulter</span>
+      <span class="brand-rule"></span>
+      <span class="brand-sub">Orono Public Schools</span>
+    </div>
+    <nav class="nav" aria-label="Main">
+      <button class="nav-btn" data-page="dashboard" aria-current="page" onclick="switchPage('dashboard')">Dashboard</button>
+      <button class="nav-btn" data-page="bulk" onclick="switchPage('bulk')">Bulk review</button>
+      <button class="nav-btn" data-page="filtered" onclick="switchPage('filtered')">AI filtered log</button>
+      <button class="nav-btn" data-page="access" onclick="switchPage('access')">Access</button>
+      <button class="nav-btn" data-page="settings" onclick="switchPage('settings')">Settings</button>
+    </nav>
+    <div class="hdr-right">
+      <button class="pill" id="demoToggle" onclick="toggleDemo()" aria-pressed="false" title="Switch between live data and sample data"><span class="pill-dot"></span><span id="demoToggleLabel">Demo</span></button>
+      <button class="icon-btn" id="themeToggle" onclick="toggleTheme()" aria-pressed="false" aria-label="Dark mode">
+        <svg class="ico-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+        <svg class="ico-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>
+      </button>
+      <div class="user">
+        <span class="user-text"><span class="user-name" id="userName"></span><span class="user-sub" id="userSub"></span></span>
+        <span class="avatar" id="userAvatar" aria-hidden="true"></span>
+      </div>
+    </div>
+  </div>
 </header>
 
-<!-- Tab navigation -->
-<nav class="tab-nav">
-  <button class="tab-btn active" onclick="switchTab('dashboard')">Dashboard</button>
-  <button class="tab-btn" onclick="switchTab('filtered')">AI Filtered Log</button>
-  <button class="tab-btn" onclick="switchTab('access')">Access</button>
-  <button class="tab-btn" onclick="switchTab('settings')">Settings</button>
-</nav>
+<div class="readout"><div class="wrap readout-in" id="readoutIn"><span class="ro-item">LOADING…</span></div></div>
 
-<!-- Dashboard tab -->
-<div id="tab-dashboard" class="tab-panel active">
-  <div class="container">
-    <div id="loadingState">
-      <div class="skeleton-wrap">
-        <div class="skeleton-cards">
-          <div class="skel skel-card shimmer"></div>
-          <div class="skel skel-card shimmer"></div>
-        </div>
-        <div class="skel skel-section shimmer"></div>
-        <div class="skel skel-section-sm shimmer"></div>
+<div class="demo-banner" id="demoBanner">
+  <div class="wrap">
+    <strong>Demo mode</strong>
+    <span>Sample data only. Nothing on this page reads or writes the real Vault sheets, and no email is sent.</span>
+    <span class="sp"></span>
+    <button onclick="resetDemo()">Reset sample data</button>
+    <button onclick="toggleDemo()">Exit demo</button>
+  </div>
+</div>
+
+<!-- ── Dashboard ───────────────────────────────────────────── -->
+<main id="page-dashboard" class="page active">
+  <div class="wrap page-in">
+    <div class="titlebar">
+      <div>
+        <h1>Flag review</h1>
+        <p>Student Gemini prompts from Google Vault, scanned against keyword rules and checked by AI.</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-2" id="dashRunBtn" onclick="runNow()"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Run import now</button>
+        <button class="btn btn-1" id="bulkBtn" onclick="startBulkReview()">Bulk review</button>
       </div>
     </div>
+
+    <div id="dashSkeleton">
+      <div class="skel" style="height:120px;margin-bottom:24px;"></div>
+      <div class="skel" style="height:240px;margin-bottom:24px;"></div>
+      <div class="skel" style="height:520px;"></div>
+    </div>
+
     <div id="dashContent" style="display:none;">
+      <section class="box" aria-label="Last 7 days" style="margin-bottom:24px;">
+        <h2 class="plate"><span class="rivet"></span><b>BOX 01</b><span>LAST 7 DAYS</span><span class="sp" id="statsRange"></span><span class="rivet"></span></h2>
+        <div class="stats" id="stats"></div>
+      </section>
 
-      <div id="exportBanner" style="display:none;align-items:center;gap:10px;background:#eef1fb;border:1px solid #c5cdf5;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;color:#2d3f89;">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2d3f89" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;animation:spin 1.2s linear infinite;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-        <span id="exportBannerText">Vault exports are processing…</span>
-      </div>
-
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
-        <div style="display:flex;align-items:center;gap:12px;">
-          <button class="btn btn-primary" id="dashRunBtn" onclick="runNow()">Run Import Now</button>
-          <span id="dashRunStatus" style="font-size:13px;color:#666;display:none;"></span>
-        </div>
-      </div>
-
-      <div class="cards">
-        <div class="card warn">
-          <div class="card-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c13435" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="label">Flagged Prompts</div>
-            <div class="value" id="statFlagged">—</div>
-          </div>
-        </div>
-        <div class="card critical clickable" id="unreviewedCard" onclick="filterUnreviewed()" title="Click to view unreviewed flags">
-          <div class="card-icon">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ad2122" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/>
-            </svg>
-          </div>
-          <div class="card-body">
-            <div class="label">Unreviewed Flags</div>
-            <div class="value" id="statUnreviewed">—</div>
-            <div class="sublabel">Click to review ↓</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="section">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-            <h2 style="margin:0;" id="flaggedSectionTitle">Flagged Prompts</h2>
-            <div style="display:flex;gap:4px;">
-              <button id="filterAllBtn" onclick="setFlagFilter('all')" style="font-size:11px;padding:3px 10px;border:1px solid #2d3f89;border-radius:12px;background:#2d3f89;color:#fff;cursor:pointer;font-family:'Lexend',sans-serif;">All</button>
-              <button id="filterUnreviewedBtn" onclick="setFlagFilter('unreviewed')" style="font-size:11px;padding:3px 10px;border:1px solid #dde0ee;border-radius:12px;background:#fff;color:#666;cursor:pointer;font-family:'Lexend',sans-serif;">Unreviewed</button>
+      <section class="box" aria-label="Activity" style="margin-bottom:24px;">
+        <h2 class="plate"><span class="rivet"></span><b>BOX 02</b><span>ACTIVITY</span><span class="sp">14 DAYS</span><span class="rivet"></span></h2>
+        <div class="trend">
+          <div class="chart">
+            <div class="chart-head">
+              <h3 class="sec-title" style="margin:0;font-size:16px;font-weight:600;color:var(--head);">Flags per day, last 14 days</h3>
+              <span class="legend"><span><i style="background:var(--bar-prev)"></i>Days 8 to 14</span><span><i style="background:var(--bar-cur)"></i>Last 7 days</span></span>
             </div>
+            <div id="chart" role="img"></div>
           </div>
-          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
-            <button class="btn" onclick="startBulkReview()" style="font-size:12px;padding:6px 14px;border:1px solid #2d3f89;background:#fff;color:#2d3f89;">Bulk AI Review</button>
-            <button class="btn" onclick="clearAllFlagged()" style="font-size:12px;padding:6px 14px;border:1px solid #ad2122;background:#fff;color:#ad2122;">Clear All</button>
+          <div class="cats">
+            <h3 class="sec-title" style="margin:0;font-size:16px;font-weight:600;color:var(--head);">By category, last 7 days</h3>
+            <div id="cats"></div>
           </div>
         </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Severity</th>
-                <th>Category</th>
-                <th>Student</th>
-                <th>OU</th>
-                <th>Time</th>
-                <th>Prompt</th>
-                <th>Reviewed</th>
-              </tr>
-            </thead>
-            <tbody id="flaggedBody"></tbody>
-          </table>
-        </div>
-      </div>
+      </section>
 
-      <div class="section">
-        <h2>Recent Runs</h2>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Started</th>
-                <th>Status</th>
-                <th>Imported</th>
-                <th>Flagged</th>
-                <th>Alerted</th>
-                <th>Error</th>
-              </tr>
-            </thead>
-            <tbody id="runLogBody"></tbody>
-          </table>
-        </div>
-      </div>
-
-    </div><!-- /dashContent -->
-  </div>
-</div>
-
-<!-- AI Filtered Log tab -->
-<div id="tab-filtered" class="tab-panel">
-  <div class="container">
-    <div id="filteredLoadingState" class="loading">Loading filtered log…</div>
-    <div id="filteredContent" style="display:none;">
-      <div class="section">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-          <div>
-            <h2 style="margin:0;">AI-Filtered False Positives</h2>
-            <p style="font-size:12px;color:#aaa;margin-top:6px;">Items that triggered a keyword but were dismissed by AI during import as likely false positives.</p>
+      <section class="box" aria-label="Flag queue">
+        <h2 class="plate"><span class="rivet"></span><b>BOX 03</b><span>FLAG QUEUE</span><span class="sp" id="queuePlateRight"></span><span class="rivet"></span></h2>
+        <div class="queue" id="queue">
+          <div class="qlist">
+            <div class="qfilters">
+              <div class="chips" role="group" aria-label="Status filter" id="statusChips"></div>
+              <div class="chips" role="group" aria-label="Severity filter" id="sevChips"></div>
+              <div class="two">
+                <label class="field">Category
+                  <select class="ctl" id="catFilter" onchange="setCat(this.value)"><option value="">All categories</option></select>
+                </label>
+                <label class="field">Search
+                  <span class="search">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.75" stroke="var(--text2)" stroke-width="1.5"/><path d="M10.5 10.5 14 14" stroke="var(--text2)" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    <input type="search" class="ctl" id="searchBox" placeholder="Prompt text, keyword or grade" oninput="setQuery(this.value)">
+                  </span>
+                </label>
+              </div>
+            </div>
+            <p class="showing" id="showing"></p>
+            <div class="rows" id="rows"></div>
           </div>
-          <button class="btn" onclick="clearFilteredLog()" style="font-size:12px;padding:6px 14px;border:1px solid #ad2122;background:#fff;color:#ad2122;flex-shrink:0;">Clear Log</button>
+          <div class="qdetail" id="detail"></div>
         </div>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Student</th>
-                <th>OU</th>
-                <th>Category</th>
-                <th>Keyword</th>
-                <th>AI Reasoning</th>
-                <th>Prompt</th>
-              </tr>
-            </thead>
-            <tbody id="filteredBody"></tbody>
-          </table>
-        </div>
-      </div>
+      </section>
     </div>
   </div>
-</div>
+</main>
 
-<!-- Access tab -->
-<div id="tab-access" class="tab-panel">
-  <div class="container">
-    <div id="accessLoadingState" class="loading">Loading access list…</div>
-    <div id="accessContent" style="display:none;">
-
-      <div class="section" style="margin-bottom:24px;">
-        <h2>Add User</h2>
-        <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap;">
-          <div class="field" style="margin-bottom:0;flex:1;min-width:240px;">
-            <label>Email Address</label>
-            <input type="email" id="accessNewEmail" placeholder="user@orono.k12.mn.us" />
-          </div>
-          <div class="field" style="margin-bottom:0;min-width:140px;">
-            <label>Role</label>
-            <select id="accessNewRole">
-              <option value="Viewer">Viewer</option>
-              <option value="Admin">Admin</option>
-            </select>
-          </div>
-          <button class="btn btn-primary" onclick="addAccessUser()" style="height:38px;">Add User</button>
-        </div>
-        <div id="accessAddStatus" style="font-size:13px;margin-top:8px;display:none;"></div>
-        <p style="margin-top:12px;font-size:12px;color:#80868b;">
-          Users added here can view the Vaulter dashboard when you share the web app URL with them.
-          Only users with an <strong>@orono.k12.mn.us</strong> Google account can sign in.
-        </p>
+<!-- ── Bulk review ─────────────────────────────────────────── -->
+<main id="page-bulk" class="page">
+  <div class="wrap page-in bulk-in">
+    <div class="bulk-top">
+      <button class="btn-link" style="align-self:flex-start;padding:0;min-height:32px;display:inline-flex;align-items:center;gap:6px;font-size:13px;" onclick="bulkExit()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M8.5 3 4.5 7l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Back to dashboard · finish later</button>
+      <div class="bulk-title">
+        <h1 class="display">Bulk AI review</h1>
+        <span class="bulk-pos" id="bulkPos"></span>
       </div>
+      <div class="prog" id="bulkProg" role="progressbar" aria-label="Review progress"></div>
+      <p class="counts" id="bulkCounts"></p>
+    </div>
+    <article class="box" id="bulkCase" aria-label="Current flag"></article>
+    <section class="box" aria-label="Session log">
+      <h2 class="plate"><span class="rivet"></span><b>SESSION LOG</b><span class="sp" id="bulkLogCount"></span><span class="rivet"></span></h2>
+      <ol class="log" id="bulkLog"></ol>
+    </section>
+  </div>
+</main>
 
-      <div class="section">
-        <h2>Authorized Users</h2>
+<!-- ── AI filtered log ─────────────────────────────────────── -->
+<main id="page-filtered" class="page">
+  <div class="wrap page-in">
+    <div class="titlebar">
+      <div>
+        <h1>AI filtered log</h1>
+        <p>Prompts that matched a keyword but were dismissed by AI during import as likely false positives.</p>
+      </div>
+      <div class="actions"><button class="btn btn-danger" onclick="clearFilteredLog()">Clear log</button></div>
+    </div>
+    <div id="filteredLoading" class="loading">Loading filtered log…</div>
+    <section class="box" id="filteredBox" style="display:none;">
+      <h2 class="plate"><span class="rivet"></span><b>AI FILTERED</b><span class="sp" id="filteredCount"></span><span class="rivet"></span></h2>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>Time</th><th>Student</th><th>Grade</th><th>Category</th><th>Keyword</th><th>AI assessment</th><th>Prompt</th></tr></thead>
+          <tbody id="filteredBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ── Access ──────────────────────────────────────────────── -->
+<main id="page-access" class="page">
+  <div class="wrap page-in">
+    <div class="titlebar">
+      <div>
+        <h1>Access</h1>
+        <p>Who can open this dashboard. Only @orono.k12.mn.us Google accounts can sign in.</p>
+      </div>
+    </div>
+    <div id="accessLoading" class="loading">Loading access list…</div>
+    <div id="accessContent" style="display:none;">
+      <section class="box" style="margin-bottom:24px;">
+        <h2 class="plate"><span class="rivet"></span><b>ADD USER</b><span class="rivet" style="margin-left:auto;"></span></h2>
+        <div class="box-body">
+          <div class="inline-form">
+            <label class="field">Email address<input type="email" class="ctl" id="accessNewEmail" placeholder="user@orono.k12.mn.us"></label>
+            <label class="field narrow">Role<select class="ctl" id="accessNewRole"><option value="Viewer">Viewer</option><option value="Admin">Admin</option></select></label>
+            <button class="btn btn-1" onclick="addAccessUser()">Add user</button>
+          </div>
+          <p class="status-line" id="accessAddStatus" style="margin:8px 0 0;display:none;"></p>
+        </div>
+      </section>
+      <section class="box">
+        <h2 class="plate"><span class="rivet"></span><b>AUTHORIZED USERS</b><span class="sp" id="accessCount"></span><span class="rivet"></span></h2>
         <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Email</th>
-                <th>Role</th>
-                <th>Added By</th>
-                <th>Added</th>
-                <th></th>
-              </tr>
-            </thead>
+          <table class="tbl">
+            <thead><tr><th>Email</th><th>Role</th><th>Added by</th><th>Added</th><th></th></tr></thead>
             <tbody id="accessBody"></tbody>
           </table>
         </div>
-      </div>
+      </section>
+    </div>
+  </div>
+</main>
 
+<!-- ── Settings ────────────────────────────────────────────── -->
+<main id="page-settings" class="page">
+  <div class="wrap page-in">
+    <div class="titlebar">
+      <div>
+        <h1>Settings</h1>
+        <p>Import schedule, alert delivery and pipeline tools.</p>
+      </div>
+    </div>
+    <div id="settingsLoading" class="loading">Loading settings…</div>
+    <div id="settingsContent" style="display:none;">
+      <section class="box" style="margin-bottom:24px;">
+        <h2 class="plate"><span class="rivet"></span><b>PIPELINE</b><span class="sp" id="settingsPlateRight"></span><span class="rivet"></span></h2>
+        <div class="box-body" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="actions" style="align-items:center;">
+            <button class="btn btn-2" id="runNowBtn" onclick="runNow()">Run import now</button>
+            <button class="btn btn-ai" onclick="suggestCriteria()"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="6.5" y="6.5" width="3" height="3" fill="currentColor"/><path d="M6 1.5V4M10 1.5V4M6 12v2.5M10 12v2.5M1.5 6H4M1.5 10H4M12 6h2.5M12 10h2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Suggest alert criteria</button>
+            <button class="btn btn-2" onclick="clearVaultDataRows()">Clear Vault_Data</button>
+            <span class="status-line" id="runNowStatus" style="display:none;"></span>
+          </div>
+          <p class="help">Run import now queues Vault exports for the selected OUs; records appear when the exports finish. Suggest alert criteria asks Gemini for K-12 keyword rules you can review and add to the Alerts_Config sheet.</p>
+        </div>
+        <div class="table-wrap" style="border-top:1px solid var(--divider);">
+          <table class="tbl">
+            <thead><tr><th>Started</th><th>Status</th><th>Exports</th><th>Flagged</th><th>Alerted</th><th>Error</th></tr></thead>
+            <tbody id="runLogBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="form-grid">
+        <section class="box">
+          <h2 class="plate"><span class="rivet"></span><b>IMPORT</b><span class="rivet" style="margin-left:auto;"></span></h2>
+          <div class="box-body">
+            <div class="field">Organizational units to import
+              <span class="hint">Where to pull Gemini activity from</span>
+              <div class="ou-list" id="ouList"><div class="loading" style="padding:16px;">Loading OUs…</div></div>
+            </div>
+            <label class="field">Date range<select class="ctl" id="settingDateRange"><option value="day">Past 24 hours</option><option value="week">Past 7 days</option><option value="month">Past 30 days</option></select></label>
+            <label class="field">Import frequency<select class="ctl" id="settingFrequency" onchange="toggleScheduleFields()"><option value="hourly">Hourly</option><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label>
+            <label class="field" id="fieldImportTime">Import time<input type="time" class="ctl" id="settingImportTime"><span class="hint">Time of day to run, 24-hour</span></label>
+            <label class="field" id="fieldImportDay" style="display:none;">Import day<select class="ctl" id="settingImportDay"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select></label>
+            <label class="field">Status<select class="ctl" id="settingStatus"><option value="Active">Active</option><option value="Paused">Paused</option></select></label>
+          </div>
+        </section>
+        <div class="form-col">
+          <section class="box">
+            <h2 class="plate"><span class="rivet"></span><b>ALERTS</b><span class="rivet" style="margin-left:auto;"></span></h2>
+            <div class="box-body">
+              <label class="field">Alert recipients<textarea class="ctl" id="settingAlertRecipients" rows="3" placeholder="counselor@orono.k12.mn.us, principal@orono.k12.mn.us"></textarea><span class="hint">Comma-separated. Every new flag goes to these addresses on the next run.</span></label>
+              <label class="field">From name<input type="text" class="ctl" id="settingFromName" placeholder="Vaulter Alerts"></label>
+              <label class="field">Reply-to<input type="email" class="ctl" id="settingReplyTo" placeholder="technology@orono.k12.mn.us"></label>
+              <label class="field">Alert cooldown, hours<input type="number" class="ctl" id="settingAlertCooldown" min="0" step="1" placeholder="1"><span class="hint">Minimum hours between repeat alerts for the same student</span></label>
+            </div>
+          </section>
+          <section class="box">
+            <h2 class="plate"><span class="rivet"></span><b>ADMIN</b><span class="rivet" style="margin-left:auto;"></span></h2>
+            <div class="box-body">
+              <label class="field">Admin email<input type="email" class="ctl" id="settingAdminEmail" placeholder="superadmin@orono.k12.mn.us"><span class="hint">Super-admin the service account impersonates. Needs Vault and Admin SDK access.</span></label>
+              <p class="help">Dashboard access is managed on the <a href="#" onclick="switchPage('access');return false;">Access</a> page.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+      <div class="actions" style="align-items:center;gap:12px;">
+        <button class="btn btn-1" id="saveSettingsBtn" onclick="saveSettings()">Save settings</button>
+        <span class="status-line ok" id="saveStatus" style="display:none;">Settings saved.</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ── Suggest criteria modal ──────────────────────────────── -->
+<div id="criteriaModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="criteriaTitle">
+  <div class="box">
+    <h2 class="plate" id="criteriaTitle"><span class="rivet"></span><b>AI SUGGESTED CRITERIA</b><span class="sp"></span><button class="btn-link" style="padding:0 4px;" onclick="closeCriteria()" aria-label="Close">Close</button></h2>
+    <p class="help" style="padding:14px 20px;border-bottom:1px solid var(--divider);">Gemini suggested these K-12 safety categories. Check the ones to add to the Alerts_Config sheet, then apply.</p>
+    <div class="scroll" style="padding:4px 20px;">
+      <div id="criteriaLoading" class="thinking" style="padding:20px 0;"><svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span id="criteriaLoadingText">Generating suggestions with AI…</span></div>
+      <div id="criteriaResults" style="display:none;"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-2" onclick="closeCriteria()">Cancel</button>
+      <button class="btn btn-1" id="criteriaApplyBtn" onclick="applyCriteriaSuggestions()" style="display:none;">Apply selected</button>
     </div>
   </div>
 </div>
 
-<!-- Settings tab -->
-<div id="tab-settings" class="tab-panel">
-  <div class="container">
-    <div id="settingsLoadingState" class="loading">Loading settings…</div>
-    <div id="settingsContent" style="display:none;">
+<div class="toasts" id="toasts" aria-live="polite"></div>
 
-      <div class="section" style="margin-bottom:24px;">
-        <h2>Pipeline Actions</h2>
-        <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-          <button class="btn btn-primary" id="runNowBtn" onclick="runNow()">Run Import Now</button>
-          <button class="btn" onclick="suggestCriteria()" style="border:1px solid #2d3f89;color:#2d3f89;background:#fff;">✦ Suggest Alert Criteria</button>
-          <button class="btn" onclick="clearVaultDataRows()" style="border:1px solid #999;color:#666;background:#fff;">Clear Vault Data</button>
-          <span id="runNowStatus" style="font-size:13px;color:#5f6368;display:none;"></span>
-        </div>
-        <p style="margin-top:10px;font-size:12px;color:#80868b;">
-          Manually triggers the full import → scan → alert pipeline. This may take a minute.<br>
-          "Suggest Alert Criteria" uses AI to generate K-12 safety keyword rules you can review and apply to your Alerts_Config sheet.
-        </p>
-      </div>
-
-      <div class="settings-grid">
-
-        <!-- Import Settings -->
-        <div>
-          <div class="section">
-            <h2>Import Settings</h2>
-
-            <div class="field">
-              <label>Organizational Units to Import</label>
-              <div class="hint" style="margin-bottom:8px;">Select which OUs to pull Gemini activity from</div>
-              <div class="ou-list" id="ouList">
-                <div class="loading" style="padding:16px;">Loading OUs…</div>
-              </div>
-            </div>
-
-            <div class="field">
-              <label>Date Range</label>
-              <select id="settingDateRange">
-                <option value="day">Past 24 hours</option>
-                <option value="week">Past 7 days</option>
-                <option value="month">Past 30 days</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label>Import Frequency</label>
-              <select id="settingFrequency" onchange="toggleScheduleFields()">
-                <option value="hourly">Hourly</option>
-                <option value="daily">Daily</option>
-                <option value="weekly">Weekly</option>
-              </select>
-            </div>
-
-            <div class="field" id="fieldImportTime">
-              <label>Import Time</label>
-              <input type="time" id="settingImportTime" />
-              <div class="hint">Time of day to run (24-hour)</div>
-            </div>
-
-            <div class="field" id="fieldImportDay" style="display:none;">
-              <label>Import Day</label>
-              <select id="settingImportDay">
-                <option>Monday</option><option>Tuesday</option><option>Wednesday</option>
-                <option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label>Status</label>
-              <select id="settingStatus">
-                <option value="Active">Active</option>
-                <option value="Paused">Paused</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <!-- Notification & Access Settings -->
-        <div>
-          <div class="section">
-            <h2>Admin & Access</h2>
-
-            <div class="field">
-              <label>Admin Email</label>
-              <input type="email" id="settingAdminEmail" placeholder="superadmin@yourdomain.org" />
-              <div class="hint">Super-admin account the service account impersonates. Must have Vault + Admin SDK access.</div>
-            </div>
-
-            <div class="field">
-              <label>Dashboard Access</label>
-              <div style="font-size:13px;color:#555;padding:9px 0;">Manage authorized users in the <a href="#" onclick="switchTab('access');document.querySelectorAll('.tab-btn')[2].click();return false;" style="color:#2d3f89;font-weight:600;">Access</a> tab.</div>
-            </div>
-          </div>
-
-          <div class="section">
-            <h2>Alert Notifications</h2>
-
-            <div class="field">
-              <label>Alert Recipients</label>
-              <textarea id="settingAlertRecipients" rows="3" placeholder="admin@yourdomain.org, counselor@yourdomain.org"></textarea>
-              <div class="hint">Comma-separated emails that receive flagged content alerts</div>
-            </div>
-
-            <div class="field">
-              <label>From Name</label>
-              <input type="text" id="settingFromName" placeholder="Vaulter Alerts" />
-            </div>
-
-            <div class="field">
-              <label>Reply-To</label>
-              <input type="email" id="settingReplyTo" placeholder="admin@yourdomain.org" />
-            </div>
-
-            <div class="field">
-              <label>Alert Cooldown (hours)</label>
-              <input type="number" id="settingAlertCooldown" min="0" step="1" placeholder="1" />
-              <div class="hint">Minimum hours between repeat alerts for the same user</div>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /settings-grid -->
-
-      <div class="settings-actions">
-        <button class="btn btn-primary" onclick="saveSettings()">Save Settings</button>
-        <span class="save-status" id="saveStatus">Settings saved.</span>
-      </div>
-
-    </div><!-- /settingsContent -->
-  </div>
-</div>
+<?!= include_('Demo') ?>
 
 <script>
-  // ── Tab switching ──────────────────────────────────────────
+  // ════════════════════════════════════════════════════════════
+  // Vaulter dashboard. Every server call goes through rpc(), which is
+  // google.script.run normally and the sample-data stand-in from
+  // Demo.html when demo mode is on.
+  // ════════════════════════════════════════════════════════════
 
-  let filteredLoaded = false;
-  let accessLoaded = false;
+  const SIGNED_IN_USER = '<?= userEmail ?>';
+  const USER_ROLE      = '<?= userRole ?>';
+  const DEMO_PARAM     = '<?= demoParam ?>';
+  const DEMO_KEY  = 'vaulter.demo';
+  const THEME_KEY = 'vaulter.theme';
 
-  function switchTab(name) {
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    document.getElementById('tab-' + name).classList.add('active');
-    event.target.classList.add('active');
+  const SEV_ORDER    = { Critical: 0, High: 1, Medium: 2, Low: 3 };
+  const SEVERITIES   = ['Critical', 'High', 'Medium', 'Low'];
+  const CATEGORIES   = ['Self-Harm', 'Violence', 'Sexual Content', 'Drugs', 'Harassment', 'Cheating'];
+  const STATUS_LABEL = { unrev: 'Unreviewed', needs: 'AI Needs Review', concern: 'AI Genuine Concern', cleared: 'AI Cleared', reviewed: 'Reviewed' };
+  const OPEN         = { unrev: 1, needs: 1, concern: 1 };
+  const VERDICT_CLS  = { 'Genuine Concern': 'v-concern', 'Needs Review': 'v-needs', 'Likely False Positive': 'v-clear' };
+  const AI_ICON = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="6.5" y="6.5" width="3" height="3" fill="currentColor"/><path d="M6 1.5V4M10 1.5V4M6 12v2.5M10 12v2.5M1.5 6H4M1.5 10H4M12 6h2.5M12 10h2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  const SPINNER = '<svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+  const CHECK = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3 8.5 3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const CROSS = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+  const EYE = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8Z" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/></svg>';
 
-    if (name === 'settings' && !settingsLoaded) loadSettings();
-    if (name === 'filtered' && !filteredLoaded) loadFilteredLog();
-    if (name === 'access' && !accessLoaded) loadAccessList();
+  const S = {
+    demo: false, page: 'dashboard', dashLoaded: false,
+    flags: [], totals: { all: 0, unreviewed: 0 }, runLog: [], pipeline: null, pending: 0,
+    filter: { status: 'all', sev: null, cat: '', q: '' },
+    sel: null, revealed: {}, aiPreview: {}, aiBusy: false, saving: false,
+    loaded: { filtered: false, access: false, settings: false },
+    bulk: { active: false, queue: [], idx: 0, results: {} },
+  };
+
+  // ── Demo and theme ─────────────────────────────────────────
+
+  S.demo = DEMO_PARAM === '1';
+  if (!S.demo && DEMO_PARAM !== '0') { try { S.demo = localStorage.getItem(DEMO_KEY) === '1'; } catch (e) {} }
+  try { if (localStorage.getItem(THEME_KEY) === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}
+
+  function rpc() { return S.demo ? demoRunner() : google.script.run; }
+
+  function applyChrome() {
+    document.body.classList.toggle('demo', S.demo);
+    el('demoToggle').setAttribute('aria-pressed', S.demo ? 'true' : 'false');
+    el('demoToggleLabel').textContent = S.demo ? 'Demo on' : 'Demo';
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    el('themeToggle').setAttribute('aria-pressed', dark ? 'true' : 'false');
   }
 
-  function loadFilteredLog() {
-    document.getElementById('filteredLoadingState').style.display = 'block';
-    document.getElementById('filteredContent').style.display = 'none';
-    google.script.run
+  function toggleTheme() {
+    const dark = document.documentElement.getAttribute('data-theme') !== 'dark';
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    try { localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light'); } catch (e) {}
+    applyChrome();
+  }
+
+  function toggleDemo() {
+    S.demo = !S.demo;
+    try { localStorage.setItem(DEMO_KEY, S.demo ? '1' : '0'); } catch (e) {}
+    if (S.demo) resetDemoData();
+    reloadApp();
+  }
+
+  function resetDemo() { resetDemoData(); reloadApp(); }
+
+  function reloadApp() {
+    S.loaded = { filtered: false, access: false, settings: false };
+    S.flags = []; S.sel = null; S.revealed = {}; S.aiPreview = {}; S.dashLoaded = false;
+    S.filter = { status: 'all', sev: null, cat: '', q: '' };
+    S.bulk = { active: false, queue: [], idx: 0, results: {} };
+    el('searchBox').value = '';
+    el('queue').classList.remove('show-detail');
+    switchPage('dashboard');
+    initApp();
+  }
+
+  // ── Boot ───────────────────────────────────────────────────
+
+  function initApp() {
+    applyChrome();
+    renderUser();
+    loadDashboard();
+    checkExportStatus();
+    startExportPolling();
+  }
+
+  function renderUser() {
+    const local = (SIGNED_IN_USER || '').split('@')[0];
+    const words = local.split(/[._-]+/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1));
+    el('userName').textContent   = words.join(' ') || SIGNED_IN_USER || 'Signed in';
+    el('userSub').textContent    = USER_ROLE ? USER_ROLE + ' · Orono Public Schools' : 'Orono Public Schools';
+    el('userAvatar').textContent = (words.map(w => w[0]).join('').slice(0, 2) || '?').toUpperCase();
+  }
+
+  // ── Pages ──────────────────────────────────────────────────
+
+  function switchPage(name) {
+    if (name === 'bulk' && !S.bulk.active) { startBulkReview(); return; }
+    S.page = name;
+    document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
+    document.querySelectorAll('.nav-btn').forEach(b => {
+      if (b.dataset.page === name) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    if (name === 'filtered' && !S.loaded.filtered) loadFilteredLog();
+    if (name === 'access'   && !S.loaded.access)   loadAccessList();
+    if (name === 'settings' && !S.loaded.settings) loadSettings();
+    window.scrollTo({ top: 0 });
+  }
+
+  // ── Dashboard data ─────────────────────────────────────────
+
+  function loadDashboard(opts) {
+    const quiet = opts && opts.quiet;
+    if (!quiet && !S.dashLoaded) { el('dashSkeleton').style.display = 'block'; el('dashContent').style.display = 'none'; }
+    rpc()
       .withSuccessHandler(data => {
-        filteredLoaded = true;
-        renderFilteredLog(data);
-        document.getElementById('filteredLoadingState').style.display = 'none';
-        const el = document.getElementById('filteredContent');
-        el.style.display = 'block';
-        el.classList.add('fade-in');
+        S.flags    = data.flags || [];
+        S.totals   = data.totals || { all: S.flags.length, unreviewed: 0 };
+        S.runLog   = data.runLog || [];
+        S.pipeline = data.pipeline || null;
+        if (S.pipeline && typeof S.pipeline.pendingExports === 'number') S.pending = S.pipeline.pendingExports;
+        S.dashLoaded = true;
+        el('dashSkeleton').style.display = 'none';
+        const c = el('dashContent'); c.style.display = 'block'; if (!quiet) c.classList.add('fade-in');
+        renderDashboard();
       })
       .withFailureHandler(err => {
-        document.getElementById('filteredLoadingState').textContent = 'Error: ' + err.message;
+        el('dashSkeleton').innerHTML = '<div class="box"><div class="empty"><h2>Could not load the dashboard</h2><p>' + esc(err.message) + '</p><div class="actions"><button class="btn btn-1" onclick="loadDashboard()">Try again</button></div></div></div>';
+        toast('Error loading data: ' + err.message, 'bad');
       })
-      .getFilteredLog();
+      .getDashboardData();
   }
 
-  function renderFilteredLog(rows) {
-    const tbody = document.getElementById('filteredBody');
-    if (!rows || rows.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="7" class="empty-state">No filtered items yet — they appear here after the next import run.</td></tr>';
-      return;
+  function renderDashboard() {
+    renderReadout();
+    const st = computeStats();
+    renderStats(st);
+    renderTrend(st);
+    renderCategoryOptions();
+    if (!S.sel || !S.flags.some(f => f.flagId === S.sel)) {
+      const first = visibleFlags()[0];
+      S.sel = first ? first.flagId : null;
     }
-    tbody.innerHTML = rows.map(r => `
-      <tr>
-        <td style="white-space:nowrap;color:#555;font-size:12px;">${escHtml(String(r.filteredAt).substring(0,16))}</td>
-        <td style="font-size:12px;">${escHtml(maskEmail(r.userEmail))}</td>
-        <td style="font-size:12px;color:#888;">${escHtml(r.ouPath || '—')}</td>
-        <td><span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:#eef1fb;color:#2d3f89;">${escHtml(r.category)}</span></td>
-        <td><code style="font-size:11px;background:#f5f6fc;padding:1px 5px;border-radius:3px;">${escHtml(r.keyword)}</code></td>
-        <td style="font-size:12px;color:#2d7a2d;max-width:260px;">${escHtml(r.assessment)}<br><span style="color:#888;font-size:11px;">${escHtml(r.reasoning)}</span></td>
-        <td><div class="query-preview" style="max-width:220px;">${escHtml((r.promptText || '').substring(0, 90))}${(r.promptText||'').length > 90 ? '…' : ''}</div></td>
-      </tr>`).join('');
+    renderList();
+    renderDetail();
+    renderRunLog();
+    el('bulkBtn').textContent = 'Bulk review' + (S.totals.unreviewed ? ' · ' + S.totals.unreviewed + ' unreviewed' : '');
   }
 
-  function clearFilteredLog() {
-    if (!confirm('Clear all AI-filtered log entries? This cannot be undone.')) return;
-    google.script.run
-      .withSuccessHandler(() => {
-        filteredLoaded = false;
-        renderFilteredLog([]);
-      })
-      .withFailureHandler(err => alert('Error: ' + err.message))
-      .clearFilteredLog();
+  // ── Derived values ─────────────────────────────────────────
+
+  function isReviewed(f) { return f.reviewed === 'TRUE' || f.reviewed === true; }
+
+  function parseAINotes(notes) {
+    if (!notes || !String(notes).startsWith('AI (')) return null;
+    const m = String(notes).match(/^AI \(([^)]+)\): (.+?) — (.+)$/s);
+    return m ? { severity: m[1], assessment: m[2], reasoning: m[3] } : null;
   }
 
-  // ── Dashboard ──────────────────────────────────────────────
+  function aiNoteString(ai) { return 'AI (' + ai.severity + '): ' + ai.assessment + ' — ' + ai.reasoning; }
 
-  google.script.run
-    .withSuccessHandler(data => renderDashboard(data))
-    .withFailureHandler(err => {
-      document.getElementById('loadingState').textContent = 'Error loading data: ' + err.message;
-    })
-    .getDashboardData();
-
-  // ── Export status banner ───────────────────────────────────
-  let exportPollInterval = null;
-
-  function checkExportStatus() {
-    google.script.run
-      .withSuccessHandler(status => {
-        const banner = document.getElementById('exportBanner');
-        const text   = document.getElementById('exportBannerText');
-        if (status.count > 0) {
-          text.textContent = `${status.count} Vault export${status.count > 1 ? 's' : ''} processing in the background — records will appear when complete.`;
-          banner.style.display = 'flex';
-        } else {
-          if (banner.style.display === 'flex') {
-            // Just finished — refresh dashboard data
-            google.script.run.withSuccessHandler(data => renderDashboard(data)).getDashboardData();
-          }
-          banner.style.display = 'none';
-          if (exportPollInterval) {
-            clearInterval(exportPollInterval);
-            exportPollInterval = null;
-          }
-        }
-      })
-      .getPendingExportStatus();
+  function statusOf(f) {
+    if (isReviewed(f)) return f.reviewedBy === 'AI Auto-Review' ? 'cleared' : 'reviewed';
+    const ai = parseAINotes(f.notes);
+    if (ai) return ai.severity === 'Genuine Concern' ? 'concern' : 'needs';
+    return 'unrev';
   }
 
-  // Poll every 30 seconds
-  checkExportStatus();
-  exportPollInterval = setInterval(checkExportStatus, 30000);
+  function isOpen(f) { return !!OPEN[statusOf(f)]; }
 
-  let _flagFilter = 'all';
-
-  function setFlagFilter(filter) {
-    _flagFilter = filter;
-    document.getElementById('filterAllBtn').style.background        = filter === 'all' ? '#2d3f89' : '#fff';
-    document.getElementById('filterAllBtn').style.color             = filter === 'all' ? '#fff' : '#666';
-    document.getElementById('filterAllBtn').style.borderColor       = filter === 'all' ? '#2d3f89' : '#dde0ee';
-    document.getElementById('filterUnreviewedBtn').style.background = filter === 'unreviewed' ? '#ad2122' : '#fff';
-    document.getElementById('filterUnreviewedBtn').style.color      = filter === 'unreviewed' ? '#fff' : '#666';
-    document.getElementById('filterUnreviewedBtn').style.borderColor= filter === 'unreviewed' ? '#ad2122' : '#dde0ee';
-    const title = document.getElementById('flaggedSectionTitle');
-    title.textContent = filter === 'unreviewed' ? 'Unreviewed Flags' : 'Flagged Prompts';
-    renderFlaggedTable(_flaggedData);
+  function codeOf(flagId) {
+    const s = String(flagId || '');
+    const hex = s.replace(/[^a-z0-9]/gi, '');
+    const short = /^[0-9a-f]{8}-/i.test(s) ? hex.slice(0, 4) : hex.slice(-4);
+    return 'VLT-' + short.toUpperCase();
   }
-
-  function filterUnreviewed() {
-    setFlagFilter('unreviewed');
-    document.getElementById('flaggedBody').closest('.section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  function renderDashboard(data) {
-    document.getElementById('loadingState').style.display = 'none';
-    const dash = document.getElementById('dashContent');
-    dash.style.display = 'block';
-    dash.classList.add('fade-in');
-
-    const s = data.summary;
-    document.getElementById('statFlagged').textContent    = s.totalFlagged.toLocaleString();
-    document.getElementById('statUnreviewed').textContent = s.unreviewedCount.toLocaleString();
-    document.getElementById('lastRunLabel').textContent   = 'Last run: ' + (s.lastRun || 'Never');
-
-    // Pulse the unreviewed card if there are items to review
-    const card = document.getElementById('unreviewedCard');
-    card.style.outline = s.unreviewedCount > 0 ? '2px solid #ad2122' : 'none';
-
-    renderFlaggedTable(data.flagged);
-    renderRunLog(data.runLog);
-  }
-
-  // Store flagged data for modal access
-  let _flaggedData = [];
 
   function maskEmail(email) {
-    if (!email || !email.includes('@')) return email;
+    if (!email || !email.includes('@')) return email || '—';
     const [local, domain] = email.split('@');
     return local.substring(0, 2).toUpperCase() + '***@' + domain;
   }
 
-  function friendlyOU(ouPath) {
-    if (!ouPath || ouPath === '/') return 'All Users';
-    const parts = ouPath.replace(/^\//, '').split('/');
-    return parts[parts.length - 1];
+  function toDate(v) {
+    if (!v) return null;
+    if (v instanceof Date) return v;
+    let s = String(v).trim();
+    if (/^\d{4}-\d{2}-\d{2} \d/.test(s)) s = s.replace(' ', 'T');
+    const d = new Date(s);
+    return isNaN(d) ? null : d;
+  }
+  function startOfDay(d) { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
+  function dayDiff(d, now) { return Math.round((startOfDay(now) - startOfDay(d)) / 86400000); }
+  function fmtTime(d) { return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); }
+  function fmtWhen(v) {
+    const d = toDate(v); if (!d) return v ? String(v) : '—';
+    const n = dayDiff(d, new Date());
+    if (n === 0) return 'Today ' + fmtTime(d);
+    if (n === 1) return 'Yesterday ' + fmtTime(d);
+    if (n > 1 && n < 7) return d.toLocaleDateString([], { weekday: 'short' }) + ' ' + fmtTime(d);
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + fmtTime(d);
+  }
+  function fmtRel(v) {
+    const d = toDate(v); if (!d) return '';
+    const m = Math.floor((Date.now() - d) / 60000);
+    if (m < 1) return 'Just now';
+    if (m < 60) return m + 'm ago';
+    const n = dayDiff(d, new Date());
+    if (n === 0) return Math.floor(m / 60) + 'h ago';
+    if (n === 1) return 'Yesterday';
+    if (n < 7) return n + 'd ago';
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  }
+  function fmtDay(v) {
+    const d = toDate(v); if (!d) return '';
+    const n = dayDiff(d, new Date());
+    if (n === 0) return 'today';
+    if (n === 1) return 'yesterday';
+    if (n < 7) return d.toLocaleDateString([], { weekday: 'long' });
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  }
+  function fmtShortDate(d) { return d.toLocaleDateString([], { month: 'short', day: 'numeric' }).toUpperCase(); }
+
+  function computeStats() {
+    const now = new Date();
+    const start7 = startOfDay(now); start7.setDate(start7.getDate() - 6);
+    const start14 = new Date(start7); start14.setDate(start14.getDate() - 7);
+    const inRange = (f, a, b) => { const d = toDate(f.timestamp); return !!d && d >= a && (!b || d < b); };
+    const thisWeek = S.flags.filter(f => inRange(f, start7));
+    const prevWeek = S.flags.filter(f => inRange(f, start14, start7));
+    const open     = S.flags.filter(isOpen);
+    const oldest   = open.reduce((a, b) => (!a || (toDate(b.timestamp) || 0) < (toDate(a.timestamp) || 0)) ? b : a, null);
+    const critOpen = open.filter(f => f.severity === 'Critical');
+    const cleared  = thisWeek.filter(f => statusOf(f) === 'cleared').length;
+    const days = [];
+    for (let i = 13; i >= 0; i--) { const d = startOfDay(now); d.setDate(d.getDate() - i); days.push({ d, n: 0 }); }
+    S.flags.forEach(f => { const d = toDate(f.timestamp); if (!d) return; const i = 13 - dayDiff(d, now); if (i >= 0 && i < 14) days[i].n++; });
+    const catMap = {};
+    thisWeek.forEach(f => { const c = f.category || 'Other'; catMap[c] = (catMap[c] || 0) + 1; });
+    const cats = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+    return { thisWeek, prevWeek, open, oldest, critOpen, cleared, days, cats, start7, now };
   }
 
-  function parseAINotes(notes) {
-    if (!notes || !notes.startsWith('AI (')) return null;
-    const m = notes.match(/^AI \(([^)]+)\): (.+?) — (.+)$/s);
-    if (!m) return null;
-    return { severity: m[1], assessment: m[2], reasoning: m[3] };
+  // ── Readout, stats, trend ──────────────────────────────────
+
+  function renderReadout() {
+    const p = S.pipeline || {};
+    const paused = p.status === 'Paused';
+    const last = p.lastRun;
+    const parts = [];
+    parts.push('<span class="ro-item strong"><span class="ro-dot ' + (paused ? 'off' : '') + '"></span>PIPELINE ' + (paused ? 'PAUSED' : 'ACTIVE') + '</span>');
+    if (last) parts.push('<span class="ro-item">LAST RUN ' + esc(fmtWhen(last.completedAt || last.startedAt).toUpperCase()) + ' · ' + (last.status === 'SUCCESS' ? 'OK' : 'ERROR') + '</span>');
+    else parts.push('<span class="ro-item">NO RUNS YET</span>');
+    if (p.nextRun) parts.push('<span class="ro-item">NEXT RUN ' + esc(String(p.nextRun).toUpperCase()) + '</span>');
+    if (S.pending > 0) parts.push('<span class="ro-item strong">' + SPINNER + S.pending + ' EXPORT' + (S.pending > 1 ? 'S' : '') + ' PROCESSING</span>');
+    parts.push('<span class="ro-item right">KEYWORD RULES · ' + (p.ruleCount == null ? '—' : p.ruleCount) + ' ACTIVE</span>');
+    el('readoutIn').innerHTML = parts.join('');
   }
 
-  function renderFlaggedTable(flagged) {
-    if (flagged !== undefined) _flaggedData = flagged || [];
-    const tbody = document.getElementById('flaggedBody');
-    const visible = _flagFilter === 'unreviewed'
-      ? _flaggedData.filter(f => f.reviewed !== 'TRUE' && f.reviewed !== true)
-      : _flaggedData;
-    if (!visible.length) {
-      tbody.innerHTML = `<tr><td colspan="7" class="empty-state">${_flagFilter === 'unreviewed' ? 'No unreviewed flags.' : 'No flagged prompts.'}</td></tr>`;
-      return;
-    }
-    const sc = { Critical: 'critical', High: 'high', Medium: 'medium', Low: 'low' };
-    tbody.innerHTML = visible.map((f, i) => {
-      const ai = parseAINotes(f.notes);
-      const promptPreview = escHtml((f.queryText || '').substring(0, 80)) + ((f.queryText||'').length > 80 ? '…' : '');
-      const aiSummary = ai
-        ? `<div style="font-size:11px;color:#555;margin-top:3px;font-style:italic;line-height:1.4;">${escHtml(ai.assessment)}</div>`
-        : '';
-      let reviewedCell;
-      if (f.reviewed === 'TRUE' || f.reviewed === true) {
-        reviewedCell = f.reviewedBy === 'AI Auto-Review'
-          ? '<span style="color:#2d7a2d;font-size:11px;font-weight:600;">&#10003; AI Cleared</span>'
-          : '<span style="color:#2d7a2d;font-weight:600;">&#10003; Reviewed</span>';
-      } else if (ai) {
-        const aiColors = { 'Genuine Concern': '#ad2122', 'Needs Review': '#b07d00', 'Likely False Positive': '#2d7a2d' };
-        const color = aiColors[ai.severity] || '#7a6000';
-        reviewedCell = `<span style="background:#fff3b0;color:${color};font-size:11px;font-weight:600;padding:2px 6px;border-radius:10px;">AI: ${escHtml(ai.severity)}</span>`;
-      } else {
-        reviewedCell = '<span style="color:#999;">—</span>';
-      }
-      return `
-        <tr data-sev="${(f.severity||'').toLowerCase()}" style="cursor:pointer;" onclick="openFlagModal(${i})">
-          <td><span class="badge badge-${sc[f.severity] || 'low'}">${escHtml(f.severity)}</span></td>
-          <td>${escHtml(f.category)}</td>
-          <td>${escHtml(maskEmail(f.userEmail))}</td>
-          <td>${escHtml(f.ouPath || '—')}</td>
-          <td>${escHtml(String(f.timestamp).substring(0,16).replace('T',' '))}</td>
-          <td><div class="query-preview">${promptPreview}</div>${aiSummary}</td>
-          <td>${reviewedCell}</td>
-        </tr>`;
+  function renderStats(st) {
+    el('statsRange').textContent = fmtShortDate(st.start7) + ' TO ' + fmtShortDate(st.now);
+    const pct = st.thisWeek.length ? Math.round(st.cleared / st.thisWeek.length * 100) + '%' : '—';
+    const crit = st.critOpen[0];
+    const critMeta = crit ? (crit.alertSent === 'TRUE' ? 'Alert sent ' + fmtWhen(crit.alertSentAt).toLowerCase() : 'Alert email pending') : 'None open';
+    const stat = (label, value, meta, cls) =>
+      '<div class="stat ' + (cls || '') + '"><span class="label">' + label + '</span><span class="v">' + value + '</span><span class="meta">' + esc(meta) + '</span></div>';
+    el('stats').innerHTML = [
+      stat('Flagged, last 7 days', st.thisWeek.length, st.prevWeek.length + ' the 7 days before'),
+      stat('Unreviewed', S.totals.unreviewed, st.oldest ? 'Oldest from ' + fmtDay(st.oldest.timestamp) : 'All caught up'),
+      stat('Critical unreviewed', st.critOpen.length, critMeta, 'crit'),
+      stat('Auto-cleared by AI', pct, st.cleared + ' of ' + st.thisWeek.length + ' this week'),
+    ].join('');
+  }
+
+  function renderTrend(st) {
+    const max = Math.max(1, ...st.days.map(d => d.n));
+    const total7 = st.days.slice(7).reduce((a, d) => a + d.n, 0);
+    const totalPrev = st.days.slice(0, 7).reduce((a, d) => a + d.n, 0);
+    const cols = st.days.map((d, i) => {
+      const h = d.n ? Math.max(4, Math.round(d.n / max * 112)) : 2;
+      return '<span class="bar-col"><span class="n">' + d.n + '</span><span class="bar ' + (d.n === 0 ? 'zero' : i >= 7 ? 'cur' : '') + '" style="height:' + h + 'px"></span></span>';
     }).join('');
+    const labels = st.days.map((d, i) => '<span>' + ((i === 0 || i === 7) ? d.d.toLocaleDateString([], { month: 'short' }) + ' ' : '') + d.d.getDate() + '</span>').join('');
+    el('chart').setAttribute('aria-label', 'Flags per day for the last 14 days. Days 8 to 14 total ' + totalPrev + ', last 7 days total ' + total7 + '.');
+    el('chart').innerHTML = '<div class="bars"><span class="grid" style="top:0"></span><span class="grid" style="top:64px"></span>' + cols + '</div><div class="bar-labels">' + labels + '</div>';
+    const catMax = Math.max(1, ...st.cats.map(c => c[1]));
+    el('cats').innerHTML = st.cats.length
+      ? st.cats.map(c => '<div class="cat"><span>' + esc(c[0]) + '</span><span class="track"><span class="fill" style="width:' + Math.round(c[1] / catMax * 100) + '%"></span></span><span class="n">' + c[1] + '</span></div>').join('')
+      : '<p class="help">No flags in the last 7 days.</p>';
+    el('cats').style.display = 'flex'; el('cats').style.flexDirection = 'column'; el('cats').style.gap = '14px';
   }
 
-  function openFlagModal(index) {
-    const f = _flaggedData[index];
-    if (!f) return;
-    _currentFlag = f;
-    document.getElementById('aiReviewBox').style.display = 'none';
-    document.getElementById('modalNotes').value = '';
-    const aiBtn = document.getElementById('modalAIBtn');
-    aiBtn.disabled = false;
-    aiBtn.textContent = 'Review with AI';
-    const sc = { Critical: '#ad2122', High: '#d44c00', Medium: '#b07d00', Low: '#2d3f89' };
-    document.getElementById('modalSeverity').textContent  = f.severity;
-    document.getElementById('modalSeverity').style.color  = sc[f.severity] || '#333';
-    document.getElementById('modalCategory').textContent  = f.category;
-    document.getElementById('modalOU').textContent        = f.ouPath || '—';
-    document.getElementById('modalTime').textContent      = String(f.timestamp).substring(0,19).replace('T',' ');
-    const promptEl  = document.getElementById('modalPrompt');
-    const promptText = f.queryText || '';
-    if (f.matchedKeyword) {
-      const kw = f.matchedKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const re = new RegExp(`(${kw})`, 'gi');
-      // Split on the keyword, escape each piece, then rejoin with highlight
-      promptEl.innerHTML = promptText.split(re).map((part, i) =>
-        i % 2 === 1
-          ? `<mark style="background:#fff3b0;border-radius:3px;padding:0 2px;font-weight:600;">${escHtml(part)}</mark>`
-          : escHtml(part)
-      ).join('');
+  // ── Flag queue ─────────────────────────────────────────────
+
+  function visibleFlags() {
+    const f = S.filter, q = f.q.trim().toLowerCase();
+    return S.flags.filter(x => {
+      if (f.status === 'unrev' && !isOpen(x)) return false;
+      if (f.sev && x.severity !== f.sev) return false;
+      if (f.cat && x.category !== f.cat) return false;
+      if (q) {
+        const hay = [x.queryText, x.matchedKeyword, x.ouPath, x.category, x.userEmail, x.severity].join(' ').toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function setStatus(v) { S.filter.status = v; afterFilter(); }
+  function setSev(v)    { S.filter.sev = S.filter.sev === v ? null : v; afterFilter(); }
+  function setCat(v)    { S.filter.cat = v; afterFilter(); }
+  function setQuery(v)  { S.filter.q = v; afterFilter(); }
+  function clearFilters() { S.filter = { status: 'all', sev: null, cat: '', q: '' }; el('searchBox').value = ''; el('catFilter').value = ''; afterFilter(); }
+  function afterFilter() {
+    const vis = visibleFlags();
+    if (!vis.some(f => f.flagId === S.sel)) S.sel = vis[0] ? vis[0].flagId : null;
+    renderList(); renderDetail();
+  }
+
+  function renderCategoryOptions() {
+    const seen = new Set(CATEGORIES);
+    S.flags.forEach(f => { if (f.category) seen.add(f.category); });
+    const sel = el('catFilter');
+    const current = S.filter.cat;
+    sel.innerHTML = '<option value="">All categories</option>' + [...seen].map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join('');
+    sel.value = current;
+  }
+
+  function chip(label, count, pressed, onclick, swatch) {
+    return '<button type="button" class="chip" aria-pressed="' + (pressed ? 'true' : 'false') + '" onclick="' + onclick + '">' +
+      (swatch ? '<span class="sw" style="background:' + swatch + '"></span>' : '') + esc(label) + '<span class="n">' + count + '</span></button>';
+  }
+
+  function renderList() {
+    const all = S.flags, vis = visibleFlags();
+    const openCount = all.filter(isOpen).length;
+    el('statusChips').innerHTML =
+      chip('All', all.length, S.filter.status === 'all', "setStatus('all')") +
+      chip('Unreviewed', openCount, S.filter.status === 'unrev', "setStatus('unrev')");
+    el('sevChips').innerHTML = SEVERITIES.map(s =>
+      chip(s, all.filter(f => f.severity === s).length, S.filter.sev === s, "setSev('" + s + "')", 'var(--sev-' + s.toLowerCase() + ')')
+    ).join('');
+    el('showing').textContent = 'Showing ' + vis.length + ' of ' + all.length + (all.length < S.totals.all ? ' loaded' : '') + ' · newest first';
+
+    const rows = el('rows');
+    if (!all.length) {
+      rows.innerHTML = emptyState('No flags yet', 'No student prompts have matched a keyword rule' + lastRunSentence() + '.', '<button class="btn btn-1" onclick="runNow()">Run import now</button>');
+    } else if (!vis.length) {
+      const msg = S.filter.status === 'unrev' && !S.filter.sev && !S.filter.cat && !S.filter.q
+        ? ['No unreviewed flags', 'All ' + all.length + ' loaded flags have been reviewed by a person or cleared by AI' + lastRunSentence() + '.', '<button class="btn btn-2" onclick="setStatus(\'all\')">Show all flags</button>']
+        : ['No matches', 'Nothing matches those filters.', '<button class="btn btn-2" onclick="clearFilters()">Clear filters</button>'];
+      rows.innerHTML = emptyState(msg[0], msg[1], msg[2]);
     } else {
-      promptEl.textContent = promptText;
+      rows.innerHTML = vis.map(f => {
+        const st = statusOf(f);
+        return '<button type="button" class="row" data-id="' + esc(f.flagId) + '" aria-current="' + (f.flagId === S.sel ? 'true' : 'false') + '">' +
+          '<span class="top"><span class="sev sev-' + sevCls(f.severity) + '">' + esc(f.severity || '—') + '</span><span class="cat">' + esc(f.category) + '</span><span class="rel">' + esc(fmtRel(f.timestamp)) + '</span></span>' +
+          '<span class="who">' + esc(maskEmail(f.userEmail)) + ' · ' + esc(f.ouPath || '—') + '</span>' +
+          '<span class="txt">' + esc(f.queryText) + '</span>' +
+          '<span class="foot">' + stChip(st) + '</span></button>';
+      }).join('');
     }
-    document.getElementById('modalStudentMasked').textContent  = maskEmail(f.userEmail);
-    document.getElementById('modalStudentRevealed').textContent = f.userEmail;
-    document.getElementById('modalStudentRevealed').style.display = 'none';
-    document.getElementById('modalRevealBtn').style.display = 'inline';
-    document.getElementById('modalReviewedStatus').innerHTML =
-      (f.reviewed === 'TRUE' || f.reviewed === true)
-        ? `<span style="color:#2d7a2d;font-weight:600;">&#10003; Reviewed by ${escHtml(f.reviewedBy)}</span>`
-        : '';
-    const btn = document.getElementById('modalMarkReviewedBtn');
-    btn.disabled = false;
-    btn.textContent = 'Mark Reviewed';
-    if (f.reviewed === 'TRUE' || f.reviewed === true) {
-      btn.style.display = 'none';
-    } else {
-      btn.style.display = 'inline-block';
-      btn.onclick = () => markReviewed(f.flagId);
-    }
-    // Pre-populate AI review box if inline AI already ran during import
-    const existingAI = parseAINotes(f.notes);
-    if (existingAI) {
-      const aiColors = { 'Genuine Concern': '#ad2122', 'Likely False Positive': '#2d7a2d', 'Needs Review': '#b07d00' };
-      const badge = document.getElementById('aiSeverityBadge');
-      badge.textContent      = existingAI.severity;
-      badge.style.background = aiColors[existingAI.severity] || '#666';
-      badge.style.color      = '#fff';
-      document.getElementById('aiAssessment').textContent  = existingAI.assessment;
-      document.getElementById('aiReasoning').textContent   = existingAI.reasoning;
-      const aiBox = document.getElementById('aiReviewBox');
-      aiBox.style.display    = 'block';
-      aiBox.style.background = existingAI.severity === 'Likely False Positive' ? '#f0fbf0' : '#fff8f0';
-      aiBox.style.border     = `1px solid ${existingAI.severity === 'Likely False Positive' ? '#c3e6c3' : '#f5d5a0'}`;
-      aiBtn.textContent = 'Re-run AI Review';
-    }
-
-    document.getElementById('flagModal').style.display = 'flex';
+    el('queuePlateRight').textContent = S.sel ? 'OPEN FILE ' + codeOf(S.sel) : (all.length ? 'NO FILE OPEN' : 'EMPTY');
   }
 
-  function closeFlagModal() {
-    document.getElementById('flagModal').style.display = 'none';
+  function lastRunSentence() {
+    const last = S.pipeline && S.pipeline.lastRun;
+    if (!last) return '';
+    return '. The last run was ' + fmtWhen(last.completedAt || last.startedAt).toLowerCase() + (S.pipeline.nextRun ? ', the next is ' + String(S.pipeline.nextRun).toLowerCase() : '');
   }
 
-  function revealStudent() {
-    document.getElementById('modalStudentRevealed').style.display = 'inline';
-    document.getElementById('modalStudentMasked').style.display   = 'none';
-    document.getElementById('modalRevealBtn').style.display       = 'none';
+  function emptyState(title, text, actions) {
+    return '<div class="empty"><svg width="56" height="56" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="11.5" stroke="var(--accent)" stroke-width="1.4"/><circle cx="14" cy="14" r="4" stroke="var(--accent)" stroke-width="1.4"/><path d="M14 2.5v3M14 22.5v3M2.5 14h3M22.5 14h3M5.9 5.9 8 8M20 20l2.1 2.1M22.1 5.9 20 8M8 20l-2.1 2.1" stroke="var(--accent)" stroke-width="1.2"/><circle cx="14" cy="14" r="1.3" fill="var(--crit)"/></svg>' +
+      '<h2>' + esc(title) + '</h2><p>' + esc(text) + '</p><div class="actions">' + (actions || '') + '</div></div>';
   }
 
-  function renderRunLog(runs) {
-    const tbody = document.getElementById('runLogBody');
-    if (!runs || runs.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No runs yet.</td></tr>';
+  el('rows').addEventListener('click', e => {
+    const b = e.target.closest('[data-id]');
+    if (b) pickFlag(b.dataset.id);
+  });
+
+  function pickFlag(id) {
+    S.sel = id;
+    renderList(); renderDetail();
+    if (window.innerWidth <= 900) {
+      el('queue').classList.add('show-detail');
+      el('queue').scrollIntoView({ block: 'start' });
+    }
+  }
+
+  function backToList() { el('queue').classList.remove('show-detail'); }
+
+  function sevCls(s) { return String(s || 'low').toLowerCase(); }
+  function stChip(st) { return '<span class="st st-' + st + '"><span class="d"></span>' + STATUS_LABEL[st] + '</span>'; }
+
+  function highlight(text, kw) {
+    const t = String(text || '');
+    if (!kw) return esc(t);
+    const re = new RegExp('(' + String(kw).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    return t.split(re).map((part, i) => i % 2 === 1 ? '<mark>' + esc(part) + '</mark>' : esc(part)).join('');
+  }
+
+  function renderDetail() {
+    const d = el('detail');
+    const f = S.flags.find(x => x.flagId === S.sel);
+    if (!f) {
+      d.innerHTML = S.flags.length ? emptyState('Pick a flag', 'Select a flag on the left to read the prompt, the AI assessment and its timeline.') : '';
       return;
     }
-    const dot = ok => `<span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${ok?'#2d7a2d':'#ad2122'};margin-right:6px;vertical-align:middle;"></span>`;
-    tbody.innerHTML = runs.map(r => `
-      <tr>
-        <td style="color:#555;">${escHtml(String(r.startedAt).substring(0,19).replace('T',' '))}</td>
-        <td class="run-status-${r.status.toLowerCase()}">${dot(r.status==='SUCCESS')}${escHtml(r.status)}</td>
-        <td style="font-weight:600;">${r.imported}</td>
-        <td style="font-weight:600;color:${r.flagged>0?'#c13435':'#555'};">${r.flagged}</td>
-        <td>${r.alerted}</td>
-        <td style="color:#ad2122;font-size:12px;">${escHtml(r.error || '')}</td>
-      </tr>`).join('');
+    const st = statusOf(f);
+    const reviewed = isReviewed(f) && st === 'reviewed';
+    const revealed = !!S.revealed[f.flagId];
+    const existingAI = parseAINotes(f.notes);
+    const preview = S.aiPreview[f.flagId];
+    const ai = preview || existingAI;
+    const aiStamp = preview ? '· Gemini · just now' : existingAI ? '· Gemini' : '';
+    const humanNotes = isReviewed(f) && !parseAINotes(f.notes) ? f.notes : '';
+
+    const tl = [
+      { t: 'Prompt sent to Gemini', m: fmtWhen(f.timestamp), k: 'done' },
+      { t: 'Flagged', m: 'rule “' + f.matchedKeyword + '” · ' + f.category, k: 'done' },
+      f.alertSent === 'TRUE'
+        ? { t: 'Alert emailed', m: fmtWhen(f.alertSentAt) + ' · alert recipients', k: 'done' }
+        : { t: 'Alert email pending', m: 'Goes out with the next pipeline run', k: 'pending' },
+      ai ? { t: 'AI verdict: ' + ai.severity, m: preview ? 'Just now' : 'During import', k: 'done' } : { t: 'AI verdict', m: 'Not run yet', k: 'pending' },
+      st === 'reviewed' ? { t: 'Reviewed by ' + (f.reviewedBy || 'a person'), m: humanNotes ? 'With notes' : 'No notes', k: 'done' }
+        : st === 'cleared' ? { t: 'Auto-cleared by AI', m: 'Likely false positive · can be reopened by marking reviewed', k: 'done' }
+        : { t: 'Awaiting review', m: 'Open in the queue', k: 'pending' },
+    ];
+
+    d.innerHTML =
+      '<div class="dhead">' +
+        '<div>' +
+          '<div class="chips-row">' +
+            '<button type="button" class="btn btn-2 back" style="min-height:36px;padding:0 10px;" onclick="backToList()">← Flags</button>' +
+            '<span class="sev sev-' + sevCls(f.severity) + '">' + esc(f.severity) + '</span>' + stChip(st) +
+            '<span class="mono" style="font-size:12px;color:var(--text2)">' + codeOf(f.flagId) + '</span>' +
+          '</div>' +
+          '<h2>' + esc(f.category) + ' · matched “' + esc(f.matchedKeyword) + '”</h2>' +
+        '</div>' +
+        '<div class="actions">' +
+          '<button type="button" class="btn btn-ai" id="aiBtn" onclick="aiReview()" ' + (S.aiBusy ? 'disabled' : '') + '>' + (S.aiBusy ? SPINNER + 'Asking Gemini…' : AI_ICON + (ai ? 'Review again with AI' : 'Review with AI')) + '</button>' +
+          '<button type="button" class="btn btn-2" onclick="toggleReveal()">' + EYE + (revealed ? 'Hide student' : 'Reveal student') + '</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="dbody">' +
+        '<div class="dmain">' +
+          '<dl class="dl">' +
+            '<div><dt>Student</dt><dd class="mono">' + esc(revealed ? f.userEmail : maskEmail(f.userEmail)) + '</dd>' + (revealed ? '<dd class="meta">Revealed by you</dd>' : '') + '</div>' +
+            '<div><dt>Grade</dt><dd>' + esc(f.ouPath || '—') + '</dd></div>' +
+            '<div><dt>Prompt sent</dt><dd>' + esc(fmtWhen(f.timestamp)) + '</dd></div>' +
+            '<div><dt>Alert email</dt><dd>' + (f.alertSent === 'TRUE' ? 'Sent ' + esc(fmtWhen(f.alertSentAt).toLowerCase()) : 'Not sent yet') + '</dd></div>' +
+          '</dl>' +
+          '<div class="sec"><h3 class="label">Prompt</h3><p class="prompt">' + highlight(f.queryText, f.matchedKeyword) + '</p></div>' +
+          '<div class="sec">' +
+            '<h3 class="label ai-head">' + AI_ICON + 'AI assessment<span class="stamp">' + esc(aiStamp) + '</span></h3>' +
+            (ai
+              ? '<p class="verdict ' + (VERDICT_CLS[ai.severity] || '') + '">' + esc(ai.severity) + '</p><p class="assess">' + esc(ai.assessment) + '</p><p class="reason">' + esc(ai.reasoning) + '</p>'
+              : '<p class="reason">No AI verdict yet. Use Review with AI to get one, or review it yourself below.</p>') +
+          '</div>' +
+          '<div class="sec">' +
+            (reviewed
+              ? '<h3 class="label">Review notes</h3><p style="margin:0">' + esc(humanNotes || 'No notes') + '</p><p class="meta" style="margin:0">' + esc(f.reviewedBy) + '</p>'
+              : '<label class="label" for="notes">Review notes</label>' +
+                '<textarea class="ctl" id="notes" rows="3" placeholder="What you did, who you contacted, any follow-up"></textarea>' +
+                '<div class="actions" style="align-items:center;gap:12px;">' +
+                  '<button type="button" class="btn btn-1 btn-lg" id="markBtn" onclick="markReviewed()" ' + (S.saving ? 'disabled' : '') + '>' + (S.saving ? SPINNER + 'Saving…' : CHECK + (st === 'cleared' ? 'Mark reviewed by me' : 'Mark reviewed')) + '</button>' +
+                  '<span class="meta">Saved with your name.</span>' +
+                '</div>') +
+          '</div>' +
+        '</div>' +
+        '<aside class="tl-aside" aria-label="Timeline"><h3 class="label">Timeline</h3><ol class="tl">' +
+          tl.map(x => '<li><span class="rail"><span class="dot ' + (x.k === 'done' ? 'done' : x.k === 'skip' ? 'skip' : '') + '"></span><span class="line"></span></span><span class="body"><span class="t">' + esc(x.t) + '</span><span class="m">' + esc(x.m) + '</span></span></li>').join('') +
+        '</ol></aside>' +
+      '</div>';
   }
 
-  // ── Bulk AI Review Wizard ──────────────────────────────────
-  let _wQueue = [], _wIndex = 0, _wCleared = 0, _wFlagged = 0, _wErrors = 0, _wStopped = false;
-  const _wSeverityColors = { Critical:'#ad2122', High:'#d44c00', Medium:'#b07d00', Low:'#2d3f89' };
-  const _wAIColors = { 'Genuine Concern':'#ad2122', 'Likely False Positive':'#2d7a2d', 'Needs Review':'#b07d00' };
+  function toggleReveal() { if (S.sel) { S.revealed[S.sel] = !S.revealed[S.sel]; renderDetail(); } }
+
+  function aiReview() {
+    const f = S.flags.find(x => x.flagId === S.sel);
+    if (!f || S.aiBusy) return;
+    S.aiBusy = true; renderDetail();
+    rpc()
+      .withSuccessHandler(res => { S.aiBusy = false; S.aiPreview[f.flagId] = res; renderDetail(); })
+      .withFailureHandler(err => { S.aiBusy = false; renderDetail(); toast('AI review failed: ' + err.message, 'bad'); })
+      .reviewFlagWithAI(f.flagId, f.queryText, f.matchedKeyword, f.category);
+  }
+
+  function markReviewed() {
+    const f = S.flags.find(x => x.flagId === S.sel);
+    if (!f || S.saving) return;
+    const typed = (el('notes') && el('notes').value || '').trim();
+    const notes = typed || (parseAINotes(f.notes) ? f.notes : '');   // keep the AI note when nothing is typed
+    S.saving = true; renderDetail();
+    rpc()
+      .withSuccessHandler(res => {
+        S.saving = false;
+        if (!res || !res.success) { renderDetail(); toast('Could not save: ' + (res && res.error || 'unknown error'), 'bad'); return; }
+        f.reviewed = 'TRUE'; f.reviewedBy = SIGNED_IN_USER; f.notes = notes;
+        S.totals.unreviewed = Math.max(0, S.totals.unreviewed - 1);
+        toast('Marked reviewed.');
+        renderDashboard();
+        loadDashboard({ quiet: true });
+      })
+      .withFailureHandler(err => { S.saving = false; renderDetail(); toast('Failed to save: ' + err.message, 'bad'); })
+      .markReviewed(f.flagId, notes);
+  }
+
+  // Keyboard: arrows move through the list, Escape leaves phone detail or closes the modal.
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeCriteria(); backToList(); return; }
+    if (S.page !== 'dashboard' || /input|textarea|select/i.test(e.target.tagName)) return;
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const vis = visibleFlags(); if (!vis.length) return;
+    const i = vis.findIndex(f => f.flagId === S.sel);
+    const next = vis[Math.min(vis.length - 1, Math.max(0, i + (e.key === 'ArrowDown' ? 1 : -1)))];
+    if (next && next.flagId !== S.sel) { e.preventDefault(); S.sel = next.flagId; renderList(); renderDetail(); const r = el('rows').querySelector('[aria-current="true"]'); if (r) r.scrollIntoView({ block: 'nearest' }); }
+  });
+
+  // ── Export polling and Run now ─────────────────────────────
+
+  let exportPollInterval = null;
+
+  function startExportPolling() {
+    if (exportPollInterval) clearInterval(exportPollInterval);
+    exportPollInterval = setInterval(checkExportStatus, S.demo ? 3000 : 30000);
+  }
+
+  function checkExportStatus() {
+    rpc()
+      .withSuccessHandler(status => {
+        const was = S.pending;
+        S.pending = status && status.count || 0;
+        if (S.pending !== was) {
+          renderReadout();
+          if (S.pending === 0 && was > 0) { toast('Vault export finished. Refreshing.'); loadDashboard({ quiet: true }); }
+        }
+        if (S.pending === 0 && exportPollInterval) { clearInterval(exportPollInterval); exportPollInterval = null; }
+      })
+      .getPendingExportStatus();
+  }
+
+  function runNow() {
+    const btns = ['runNowBtn', 'dashRunBtn'].map(id => el(id)).filter(Boolean);
+    const status = el('runNowStatus');
+    btns.forEach(b => { b.disabled = true; b.innerHTML = SPINNER + 'Running…'; });
+    if (status) { status.style.display = 'inline'; status.className = 'status-line'; status.textContent = 'Pipeline running. This may take a minute.'; }
+    const restore = () => btns.forEach(b => { b.disabled = false; b.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Run import now'; });
+    rpc()
+      .withSuccessHandler(() => {
+        restore();
+        if (status) { status.className = 'status-line ok'; status.textContent = 'Export jobs queued. Processing in the background.'; setTimeout(() => { status.style.display = 'none'; }, 5000); }
+        toast('Export jobs queued. Records appear when the exports finish.');
+        checkExportStatus();
+        startExportPolling();
+      })
+      .withFailureHandler(err => {
+        restore();
+        if (status) { status.className = 'status-line bad'; status.textContent = 'Error: ' + err.message; }
+        toast('Run failed: ' + err.message, 'bad');
+      })
+      .runPipelineNow();
+  }
+
+  function renderRunLog() {
+    const tbody = el('runLogBody');
+    if (!S.runLog.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-row">No runs yet.</td></tr>'; return; }
+    tbody.innerHTML = S.runLog.map(r => '<tr>' +
+      '<td class="mono">' + esc(fmtWhen(r.startedAt)) + '</td>' +
+      '<td class="' + (r.status === 'SUCCESS' ? 'run-ok' : 'run-bad') + '">' + esc(r.status) + '</td>' +
+      '<td class="mono">' + esc(r.imported) + '</td><td class="mono">' + esc(r.flagged) + '</td><td class="mono">' + esc(r.alerted) + '</td>' +
+      '<td class="muted">' + esc(r.error || '') + '</td></tr>').join('');
+    const p = S.pipeline || {};
+    el('settingsPlateRight').textContent = p.nextRun ? 'NEXT RUN ' + String(p.nextRun).toUpperCase() : '';
+  }
+
+  // ── Bulk review ────────────────────────────────────────────
 
   function startBulkReview() {
-    _wStopped = false; _wIndex = 0; _wCleared = 0; _wFlagged = 0; _wErrors = 0;
-    wizardSetStatus('Loading unreviewed items…', true);
-    document.getElementById('wizardItem').style.display    = 'none';
-    document.getElementById('wizardActions').style.display = 'none';
-    document.getElementById('wizardModal').style.display   = 'flex';
-
-    google.script.run
-      .withSuccessHandler(flags => {
-        _wQueue = flags;
-        if (!flags.length) { wizardDone(); return; }
-        wizardNext();
+    S.bulk = { active: true, loading: true, queue: [], idx: 0, results: {}, ai: null, aiStamp: '', fetching: false, autoClearing: false, aiError: false, busy: false, done: false, error: '' };
+    S.page = 'bulk';
+    document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-bulk'));
+    document.querySelectorAll('.nav-btn').forEach(b => { if (b.dataset.page === 'bulk') b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+    window.scrollTo({ top: 0 });
+    renderBulk();
+    rpc()
+      .withSuccessHandler(items => {
+        const b = S.bulk; if (!b.active) return;
+        b.queue = (items || []).slice().sort((x, y) => (SEV_ORDER[x.severity] ?? 9) - (SEV_ORDER[y.severity] ?? 9) || String(x.timestamp).localeCompare(String(y.timestamp)));
+        b.loading = false;
+        bulkNext();
       })
-      .withFailureHandler(err => wizardSetStatus('Error: ' + err.message, false))
+      .withFailureHandler(err => { S.bulk.loading = false; S.bulk.error = err.message; renderBulk(); })
       .getUnreviewedFlags();
   }
 
-  function wizardNext() {
-    if (_wStopped || _wIndex >= _wQueue.length) { wizardDone(); return; }
-    const item  = _wQueue[_wIndex];
-    const total = _wQueue.length;
-    const pct   = Math.round((_wIndex / total) * 100);
-    document.getElementById('wizardProgress').textContent       = `${_wIndex + 1} of ${total}`;
-    document.getElementById('wizardProgressFill').style.width   = pct + '%';
-    document.getElementById('wizardItem').style.display         = 'none';
-    document.getElementById('wizardActions').style.display      = 'none';
-    document.getElementById('wizardNotes').style.display        = 'none';
-    document.getElementById('wizardAIBox').style.display        = 'none';
-    wizardSetStatus(`Analyzing item ${_wIndex + 1} of ${total} with AI…`, true);
+  function bulkExit() {
+    S.bulk.active = false;
+    switchPage('dashboard');
+    if (S.dashLoaded) loadDashboard({ quiet: true });
+  }
 
-    google.script.run
-      .withSuccessHandler(res => {
-        if (_wStopped) { wizardDone(); return; }
-        wizardShowItem(item, res);
-      })
-      .withFailureHandler(() => { _wErrors++; _wIndex++; wizardNext(); })
+  function bulkItem() { return S.bulk.queue[S.bulk.idx]; }
+
+  function bulkNext() {
+    const b = S.bulk;
+    b.ai = null; b.aiStamp = ''; b.busy = false; b.fetching = false; b.autoClearing = false; b.aiError = false;
+    if (b.idx >= b.queue.length) { b.done = true; renderBulk(); loadDashboard({ quiet: true }); return; }
+    const item = bulkItem();
+    const existing = parseAINotes(item.notes);
+    if (existing) { b.ai = existing; b.aiStamp = '· Gemini · during import'; afterVerdict(); return; }
+    b.fetching = true; renderBulk();
+    rpc()
+      .withSuccessHandler(res => { if (!b.active || bulkItem() !== item) return; b.fetching = false; b.ai = res; b.aiStamp = '· Gemini · just now'; afterVerdict(); })
+      .withFailureHandler(() => { if (!b.active || bulkItem() !== item) return; b.fetching = false; b.aiError = true; renderBulk(); })
       .reviewFlagWithAI(item.flagId, item.promptText, item.matchedKeyword, item.category);
   }
 
-  function wizardShowItem(item, aiResult) {
-    // Populate item
-    const sc = _wSeverityColors;
-    const badge = document.getElementById('wizardSeverity');
-    // We don't have severity on the flag object here, use AI severity color if genuine concern
-    badge.textContent   = item.category;
-    badge.style.background = '#2d3f89';
-    document.getElementById('wizardCategory').textContent = item.matchedKeyword ? `Keyword: "${item.matchedKeyword}"` : '';
-    document.getElementById('wizardTime').textContent     = '';
-    document.getElementById('wizardUser').textContent     = maskEmail(item.promptText ? '' : '');
+  function afterVerdict() {
+    const b = S.bulk, item = bulkItem();
+    if (b.ai && b.ai.severity === 'Likely False Positive') {
+      b.autoClearing = true; renderBulk();
+      rpc()
+        .withSuccessHandler(() => { bulkRecord('Auto-cleared'); setTimeout(() => { if (!b.active) return; b.idx++; bulkNext(); }, 1200); })
+        .withFailureHandler(() => { bulkRecord('Error'); b.idx++; bulkNext(); })
+        .applyAIReview(item.flagId, b.ai.severity, b.ai.assessment, b.ai.reasoning);
+      return;
+    }
+    renderBulk();
+  }
 
-    // Highlight keyword in prompt
-    const promptEl = document.getElementById('wizardPrompt');
-    if (item.matchedKeyword) {
-      const kw = item.matchedKeyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const re = new RegExp(`(${kw})`, 'gi');
-      promptEl.innerHTML = item.promptText.split(re).map((p, i) =>
-        i % 2 === 1 ? `<mark style="background:#fff3b0;border-radius:3px;padding:0 2px;font-weight:600;">${escHtml(p)}</mark>` : escHtml(p)
-      ).join('');
+  function bulkRecord(result) { S.bulk.results[bulkItem().flagId] = result; }
+
+  function bulkConfirm() {
+    const b = S.bulk, item = bulkItem();
+    if (b.busy) return;
+    const typed = (el('bulkNotes') && el('bulkNotes').value || '').trim();
+    const notes = typed || (b.ai ? aiNoteString(b.ai) : '');
+    b.busy = true; renderBulk();
+    const finish = () => rpc()
+      .withSuccessHandler(() => { bulkRecord('Confirmed'); b.idx++; bulkNext(); })
+      .withFailureHandler(err => { b.busy = false; renderBulk(); toast('Could not save: ' + err.message, 'bad'); })
+      .markReviewed(item.flagId, notes);
+    if (b.ai) rpc().withSuccessHandler(finish).withFailureHandler(finish).applyAIReview(item.flagId, b.ai.severity, b.ai.assessment, b.ai.reasoning);
+    else finish();
+  }
+
+  function bulkDismiss() {
+    const b = S.bulk, item = bulkItem();
+    if (b.busy) return;
+    const typed = (el('bulkNotes') && el('bulkNotes').value || '').trim();
+    b.busy = true; renderBulk();
+    const finish = () => rpc()
+      .withSuccessHandler(() => { bulkRecord('Dismissed'); b.idx++; bulkNext(); })
+      .withFailureHandler(err => { b.busy = false; renderBulk(); toast('Could not save: ' + err.message, 'bad'); })
+      .markReviewed(item.flagId, typed || 'Dismissed as not a concern');
+    rpc().withSuccessHandler(finish).withFailureHandler(finish)
+      .applyAIReview(item.flagId, 'Likely False Positive', 'Manually dismissed', 'Reviewed and dismissed by ' + (SIGNED_IN_USER || 'a reviewer'));
+  }
+
+  function bulkSkip() { const b = S.bulk; if (b.busy) return; bulkRecord('Skipped'); b.idx++; bulkNext(); }
+
+  function renderBulk() {
+    const b = S.bulk, n = b.queue.length;
+    const counts = { Confirmed: 0, Dismissed: 0, Skipped: 0, 'Auto-cleared': 0, Error: 0 };
+    Object.values(b.results).forEach(r => { counts[r] = (counts[r] || 0) + 1; });
+    const shownIdx = Math.min(b.idx + 1, n);
+    el('bulkPos').textContent = n ? pad2(shownIdx) + ' / ' + pad2(n) : '';
+    const prog = el('bulkProg');
+    prog.style.gridTemplateColumns = 'repeat(' + Math.max(1, n) + ', minmax(0, 1fr))';
+    prog.setAttribute('aria-valuemin', '0'); prog.setAttribute('aria-valuemax', String(n)); prog.setAttribute('aria-valuenow', String(Math.min(b.idx, n)));
+    prog.innerHTML = b.queue.map((q, i) => '<span class="' + (b.results[q.flagId] ? 'done' : i === b.idx && !b.done ? 'now' : '') + '"></span>').join('') || '<span></span>';
+    el('bulkCounts').innerHTML = n
+      ? '<span><b>' + counts.Confirmed + '</b> confirmed</span><span><b>' + counts.Dismissed + '</b> dismissed</span><span><b>' + counts['Auto-cleared'] + '</b> auto-cleared</span><span><b>' + counts.Skipped + '</b> skipped</span>' + (counts.Error ? '<span><b>' + counts.Error + '</b> errors</span>' : '')
+      : '';
+
+    const card = el('bulkCase');
+    if (b.loading) {
+      card.innerHTML = '<div class="empty"><div class="thinking">' + SPINNER + 'Loading unreviewed flags…</div></div>';
+    } else if (b.error) {
+      card.innerHTML = emptyState('Could not load the queue', b.error, '<button class="btn btn-1" onclick="startBulkReview()">Try again</button>');
+    } else if (!n) {
+      card.innerHTML = emptyState('No unreviewed flags', 'Everything has been reviewed by a person or cleared by AI.', '<button class="btn btn-1" onclick="bulkExit()">Back to dashboard</button>');
+    } else if (b.done) {
+      card.innerHTML = emptyState('Session complete', counts.Confirmed + ' confirmed, ' + counts.Dismissed + ' dismissed, ' + counts['Auto-cleared'] + ' auto-cleared, ' + counts.Skipped + ' skipped.', '<button class="btn btn-1" onclick="bulkExit()">Back to dashboard</button>');
     } else {
-      promptEl.textContent = item.promptText;
+      const item = bulkItem();
+      const st = b.ai ? (b.ai.severity === 'Genuine Concern' ? 'concern' : b.ai.severity === 'Likely False Positive' ? 'cleared' : 'needs') : 'unrev';
+      let aiBlock;
+      if (b.fetching) aiBlock = '<div class="thinking">' + SPINNER + 'Asking Gemini…</div>';
+      else if (b.ai) aiBlock = '<p class="verdict ' + (VERDICT_CLS[b.ai.severity] || '') + '">' + esc(b.ai.severity) + '</p><p class="assess">' + esc(b.ai.assessment) + '</p><p class="reason">' + esc(b.ai.reasoning) + '</p>';
+      else aiBlock = '<p class="reason">' + (b.aiError ? 'The AI verdict is unavailable right now. Decide yourself or skip.' : 'No AI verdict.') + '</p>';
+      let actions;
+      if (b.autoClearing) actions = '<div class="thinking">' + CHECK + 'AI cleared this as a likely false positive. Moving on…</div>';
+      else if (b.fetching) actions = '';
+      else actions =
+        '<label class="field" for="bulkNotes">Note (optional)<textarea class="ctl" id="bulkNotes" rows="2" placeholder="Saved with your decision"></textarea></label>' +
+        '<div class="case-actions">' +
+          '<button type="button" class="btn btn-1 btn-lg" onclick="bulkConfirm()" ' + (b.busy ? 'disabled' : '') + '>' + (b.busy ? SPINNER + 'Saving…' : CHECK + 'Confirm, follow up') + '</button>' +
+          '<button type="button" class="btn btn-2 btn-lg" onclick="bulkDismiss()" ' + (b.busy ? 'disabled' : '') + '>' + CROSS + 'Dismiss, not a concern</button>' +
+          '<button type="button" class="btn btn-link btn-lg" onclick="bulkSkip()" ' + (b.busy ? 'disabled' : '') + '>Skip</button>' +
+        '</div>' +
+        '<p class="help">Confirm marks it reviewed by you and keeps your note. Dismiss marks it reviewed as a false positive. Skip leaves it unreviewed.</p>';
+      card.innerHTML =
+        '<h2 class="plate"><span class="rivet"></span><b>CASE FILE ' + codeOf(item.flagId) + '</b><span class="sp">' + pad2(shownIdx) + ' / ' + pad2(n) + '</span><span class="rivet"></span></h2>' +
+        '<div class="case-head"><span class="sev sev-' + sevCls(item.severity) + '">' + esc(item.severity || '—') + '</span><span style="font-weight:600">' + esc(item.category) + '</span>' +
+          '<span class="who">' + esc(maskEmail(item.userEmail)) + ' · ' + esc(item.ouPath || '—') + ' · ' + esc(fmtWhen(item.timestamp)) + '</span>' + stChip(st) + '</div>' +
+        '<div class="case-sec"><h3 class="label">Prompt · matched “' + esc(item.matchedKeyword) + '”</h3><p class="prompt">' + highlight(item.promptText, item.matchedKeyword) + '</p></div>' +
+        '<div class="case-sec"><h3 class="label ai-head">' + AI_ICON + 'AI verdict<span class="stamp">' + esc(b.aiStamp) + '</span></h3>' + aiBlock + '</div>' +
+        '<div class="case-sec" style="gap:16px">' + actions + '</div>';
     }
 
-    // AI result
-    const aiBox   = document.getElementById('wizardAIBox');
-    const aiBadge = document.getElementById('wizardAIBadge');
-    aiBadge.textContent      = aiResult.severity;
-    aiBadge.style.background = _wAIColors[aiResult.severity] || '#666';
-    document.getElementById('wizardAIAssessment').textContent = aiResult.assessment;
-    document.getElementById('wizardAIReasoning').textContent  = aiResult.reasoning;
-    aiBox.style.background = aiResult.severity === 'Likely False Positive' ? '#f0fbf0' : '#fff8f0';
-    aiBox.style.border     = `1px solid ${aiResult.severity === 'Likely False Positive' ? '#c3e6c3' : '#f5d5a0'}`;
-    aiBox.style.display    = 'block';
-
-    document.getElementById('wizardItem').style.display = 'flex';
-
-    if (aiResult.severity === 'Likely False Positive') {
-      wizardSetStatus('✓ AI assessed as likely false positive — auto-clearing…', false, '#2d7a2d', '#f0fbf0');
-      // Auto-apply and advance after brief pause
-      google.script.run
-        .withSuccessHandler(() => { _wCleared++; _wIndex++; setTimeout(wizardNext, 1200); })
-        .withFailureHandler(() => { _wErrors++; _wIndex++; setTimeout(wizardNext, 800); })
-        .applyAIReview(item.flagId, aiResult.severity, aiResult.assessment, aiResult.reasoning);
-    } else {
-      wizardSetStatus(`⚠ AI flagged as "${aiResult.severity}" — your review needed`, false, '#7a4800', '#fff8f0');
-      document.getElementById('wizardNotes').style.display   = 'block';
-      document.getElementById('wizardNotes').value           = '';
-      document.getElementById('wizardActions').style.display = 'flex';
-      // Store for action handlers
-      document.getElementById('wizardActions').dataset.flagId    = item.flagId;
-      document.getElementById('wizardActions').dataset.severity  = aiResult.severity;
-      document.getElementById('wizardActions').dataset.assessment = aiResult.assessment;
-      document.getElementById('wizardActions').dataset.reasoning = aiResult.reasoning;
-      _wFlagged++;
-    }
+    el('bulkLogCount').textContent = n ? n + ' FILES' : '';
+    el('bulkLog').innerHTML = b.queue.map((q, i) => {
+      const r = b.results[q.flagId];
+      const now = i === b.idx && !b.done && !r;
+      const existing = parseAINotes(q.notes);
+      const res = r ? '<span class="res ' + (r === 'Confirmed' || r === 'Auto-cleared' ? 'strong' : '') + '">' + esc(r) + '</span>'
+        : now ? '<span class="res now">Now</span>'
+        : '<span class="res">' + (existing ? 'AI ' + esc(existing.severity) : 'Unreviewed') + '</span>';
+      return '<li ' + (now ? 'aria-current="step"' : '') + '><span class="i">' + (i + 1) + '</span><span class="sev sev-' + sevCls(q.severity) + '" style="justify-self:start">' + esc(q.severity || '—') + '</span><span class="desc">' + esc(q.category) + ' · ' + esc(maskEmail(q.userEmail).split('@')[0]) + ' · ' + esc(q.ouPath || '—') + '</span>' + res + '</li>';
+    }).join('') || '<li><span class="i"></span><span></span><span class="desc muted">Nothing queued.</span><span></span></li>';
   }
 
-  function wizardMarkReviewed() {
-    const d     = document.getElementById('wizardActions').dataset;
-    const notes = document.getElementById('wizardNotes').value || '';
-    document.getElementById('wizardActions').style.display = 'none';
-    wizardSetStatus('Saving…', true);
-    google.script.run
-      .withSuccessHandler(() => {
-        google.script.run
-          .withSuccessHandler(() => { _wIndex++; wizardNext(); })
-          .markReviewed(d.flagId, notes);
+  // ── AI filtered log ────────────────────────────────────────
+
+  function loadFilteredLog() {
+    el('filteredLoading').style.display = 'block'; el('filteredBox').style.display = 'none';
+    rpc()
+      .withSuccessHandler(rows => {
+        S.loaded.filtered = true;
+        renderFilteredLog(rows || []);
+        el('filteredLoading').style.display = 'none';
+        el('filteredBox').style.display = 'block';
       })
-      .applyAIReview(d.flagId, d.severity, d.assessment, d.reasoning);
+      .withFailureHandler(err => { el('filteredLoading').textContent = 'Error: ' + err.message; })
+      .getFilteredLog();
   }
 
-  function wizardSkip() { _wIndex++; wizardNext(); }
-  function wizardStop() { _wStopped = true; wizardDone(); }
-
-  function wizardDismiss() {
-    const d = document.getElementById('wizardActions').dataset;
-    document.getElementById('wizardActions').style.display = 'none';
-    wizardSetStatus('Dismissing…', true);
-    google.script.run
-      .withSuccessHandler(() => {
-        google.script.run
-          .withSuccessHandler(() => { _wCleared++; _wIndex++; wizardNext(); })
-          .markReviewed(d.flagId, 'Manually dismissed after AI review');
-      })
-      .applyAIReview(d.flagId, 'Likely False Positive', 'Manually dismissed', 'Reviewed and dismissed by user');
+  function renderFilteredLog(rows) {
+    el('filteredCount').textContent = rows.length + ' ENTR' + (rows.length === 1 ? 'Y' : 'IES');
+    const tbody = el('filteredBody');
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-row">Nothing filtered yet. Entries appear here after an import where AI dismissed a keyword match.</td></tr>'; return; }
+    tbody.innerHTML = rows.map(r => '<tr>' +
+      '<td class="mono muted" style="white-space:nowrap">' + esc(fmtWhen(r.filteredAt)) + '</td>' +
+      '<td class="mono">' + esc(maskEmail(r.userEmail)) + '</td>' +
+      '<td class="muted">' + esc(r.ouPath || '—') + '</td>' +
+      '<td>' + esc(r.category) + '</td>' +
+      '<td><span class="kw">' + esc(r.keyword) + '</span></td>' +
+      '<td style="max-width:280px"><span class="v-clear" style="font-weight:600">' + esc(r.assessment) + '</span><br><span class="muted" style="font-size:12px">' + esc(r.reasoning) + '</span></td>' +
+      '<td style="max-width:260px" class="muted">' + esc((r.promptText || '').substring(0, 120)) + ((r.promptText || '').length > 120 ? '…' : '') + '</td></tr>').join('');
   }
 
-  function wizardDone() {
-    document.getElementById('wizardProgressFill').style.width = '100%';
-    document.getElementById('wizardProgress').textContent     = `${_wIndex} of ${_wQueue.length}`;
-    document.getElementById('wizardItem').style.display       = 'none';
-    document.getElementById('wizardActions').style.display    = 'none';
-    document.getElementById('wizardStopBtn').textContent      = 'Close';
-    document.getElementById('wizardStopBtn').onclick          = wizardClose;
-    wizardSetStatus(
-      `Done — ✓ ${_wCleared} auto-cleared, ⚠ ${_wFlagged} reviewed by you${_wErrors ? `, ✗ ${_wErrors} errors` : ''}`,
-      false, '#2d3f89', '#eef1fb'
-    );
-    google.script.run.withSuccessHandler(data => renderDashboard(data)).getDashboardData();
+  function clearFilteredLog() {
+    if (!confirm('Clear all AI-filtered log entries? This cannot be undone.')) return;
+    rpc()
+      .withSuccessHandler(() => { renderFilteredLog([]); toast('Filtered log cleared.'); })
+      .withFailureHandler(err => toast('Error: ' + err.message, 'bad'))
+      .clearFilteredLog();
   }
 
-  function wizardClose() {
-    document.getElementById('wizardModal').style.display = 'none';
-    document.getElementById('wizardStopBtn').textContent = 'Stop';
-    document.getElementById('wizardStopBtn').onclick     = wizardStop;
-  }
-
-  function wizardSetStatus(msg, spinning, color, bg) {
-    document.getElementById('wizardStatusText').textContent       = msg;
-    document.getElementById('wizardStatusText').style.color       = color || '#2d3f89';
-    document.getElementById('wizardStatus').style.background      = bg || '#f0f2fb';
-    document.getElementById('wizardSpinner').style.display        = spinning ? 'block' : 'none';
-  }
-
-  function clearAllFlagged() {
-    if (!confirm('Clear all flagged prompts? This cannot be undone.')) return;
-    google.script.run
-      .withSuccessHandler(() => {
-        google.script.run.withSuccessHandler(data => renderDashboard(data)).getDashboardData();
-      })
-      .clearAllFlagged();
-  }
-
-  let _currentFlag = null;
-
-  function runAIReview() {
-    if (!_currentFlag) return;
-    const btn = document.getElementById('modalAIBtn');
-    btn.disabled = true;
-    btn.textContent = 'Reviewing…';
-    document.getElementById('aiReviewBox').style.display = 'none';
-    google.script.run
-      .withSuccessHandler(res => {
-        btn.disabled = false;
-        btn.textContent = 'Review with AI';
-        const colors = { 'Genuine Concern': '#ad2122', 'Likely False Positive': '#2d7a2d', 'Needs Review': '#b07d00' };
-        const badge = document.getElementById('aiSeverityBadge');
-        badge.textContent      = res.severity;
-        badge.style.background = colors[res.severity] || '#666';
-        badge.style.color      = '#fff';
-        document.getElementById('aiAssessment').textContent = res.assessment;
-        document.getElementById('aiReasoning').textContent  = res.reasoning;
-        document.getElementById('aiReviewBox').style.display = 'block';
-      })
-      .withFailureHandler(err => {
-        btn.disabled = false;
-        btn.textContent = 'Review with AI';
-        alert('AI review failed: ' + err.message);
-      })
-      .reviewFlagWithAI(_currentFlag.flagId, _currentFlag.queryText, _currentFlag.matchedKeyword, _currentFlag.category);
-  }
-
-  function markReviewed(flagId) {
-    const notes = document.getElementById('modalNotes').value || '';
-    const btn   = document.getElementById('modalMarkReviewedBtn');
-    btn.disabled = true;
-    btn.textContent = 'Saving…';
-    google.script.run
-      .withSuccessHandler(res => {
-        if (res.success) {
-          closeFlagModal();
-          google.script.run.withSuccessHandler(data => renderDashboard(data)).getDashboardData();
-        } else {
-          alert('Error: ' + res.error);
-          btn.disabled = false;
-          btn.textContent = 'Mark Reviewed';
-        }
-      })
-      .withFailureHandler(err => {
-        alert('Failed to save: ' + err.message);
-        btn.disabled = false;
-        btn.textContent = 'Mark Reviewed';
-      })
-      .markReviewed(flagId, notes);
-  }
-
-  // ── Access Management ──────────────────────────────────────
-
-  let _accessData = [];
+  // ── Access ─────────────────────────────────────────────────
 
   function loadAccessList() {
-    document.getElementById('accessLoadingState').style.display = 'block';
-    document.getElementById('accessContent').style.display = 'none';
-    google.script.run
-      .withSuccessHandler(data => {
-        accessLoaded = true;
-        _accessData = data || [];
-        renderAccessList(_accessData);
-        document.getElementById('accessLoadingState').style.display = 'none';
-        const el = document.getElementById('accessContent');
-        el.style.display = 'block';
-        el.classList.add('fade-in');
+    el('accessLoading').style.display = 'block'; el('accessContent').style.display = 'none';
+    rpc()
+      .withSuccessHandler(users => {
+        S.loaded.access = true;
+        renderAccessList(users || []);
+        el('accessLoading').style.display = 'none';
+        el('accessContent').style.display = 'block';
       })
-      .withFailureHandler(err => {
-        document.getElementById('accessLoadingState').textContent = 'Error: ' + err.message;
-      })
+      .withFailureHandler(err => { el('accessLoading').textContent = 'Error: ' + err.message; })
       .getAccessList();
   }
 
   function renderAccessList(users) {
-    const tbody = document.getElementById('accessBody');
-    if (!users || users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No users added yet. Add an email above to grant dashboard access.</td></tr>';
-      return;
-    }
-    tbody.innerHTML = users.map(u => {
-      const roleColor = u.role === 'Admin' ? '#2d3f89' : '#555';
-      const roleBg    = u.role === 'Admin' ? '#eef1fb' : '#f3f3f3';
-      return `
-        <tr>
-          <td style="font-weight:600;">${escHtml(u.email)}</td>
-          <td>
-            <select onchange="updateAccessRole('${escHtml(u.email)}', this.value)"
-              style="font-size:12px;padding:3px 8px;border:1px solid #dde0ee;border-radius:5px;font-family:'Lexend',sans-serif;background:#fff;cursor:pointer;">
-              <option value="Viewer" ${u.role === 'Viewer' ? 'selected' : ''}>Viewer</option>
-              <option value="Admin" ${u.role === 'Admin' ? 'selected' : ''}>Admin</option>
-            </select>
-          </td>
-          <td style="font-size:12px;color:#888;">${escHtml(u.addedBy)}</td>
-          <td style="font-size:12px;color:#888;">${escHtml(u.addedAt)}</td>
-          <td>
-            <button onclick="removeAccessUser('${escHtml(u.email)}')"
-              style="font-size:11px;padding:4px 10px;border:1px solid #e0a0a0;border-radius:5px;background:#fff;color:#ad2122;cursor:pointer;font-family:'Lexend',sans-serif;">Remove</button>
-          </td>
-        </tr>`;
-    }).join('');
+    el('accessCount').textContent = users.length + ' USER' + (users.length === 1 ? '' : 'S');
+    const tbody = el('accessBody');
+    if (!users.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-row">No users yet. Add an email above to grant dashboard access.</td></tr>'; return; }
+    tbody.innerHTML = users.map(u => '<tr>' +
+      '<td style="font-weight:600">' + esc(u.email) + '</td>' +
+      '<td><select class="ctl" style="min-height:32px;padding:2px 8px;width:auto" onchange="updateAccessRole(\'' + esc(u.email) + '\', this.value)"><option value="Viewer" ' + (u.role === 'Viewer' ? 'selected' : '') + '>Viewer</option><option value="Admin" ' + (u.role === 'Admin' ? 'selected' : '') + '>Admin</option></select></td>' +
+      '<td class="muted">' + esc(u.addedBy) + '</td><td class="mono muted">' + esc(fmtWhen(u.addedAt)) + '</td>' +
+      '<td><button class="btn btn-danger" style="min-height:32px;padding:0 10px;font-size:12px" onclick="removeAccessUser(\'' + esc(u.email) + '\')">Remove</button></td></tr>').join('');
   }
 
   function addAccessUser() {
-    const emailInput = document.getElementById('accessNewEmail');
-    const roleSelect = document.getElementById('accessNewRole');
-    const email = emailInput.value.trim();
-    const role  = roleSelect.value;
-    const status = document.getElementById('accessAddStatus');
-
-    if (!email || !email.includes('@')) {
-      status.style.display = 'block';
-      status.style.color = '#ad2122';
-      status.textContent = 'Please enter a valid email address.';
-      return;
-    }
-
-    status.style.display = 'block';
-    status.style.color = '#666';
-    status.textContent = 'Adding…';
-
-    google.script.run
+    const email = el('accessNewEmail').value.trim(), role = el('accessNewRole').value;
+    const status = el('accessAddStatus');
+    const show = (cls, msg) => { status.style.display = 'block'; status.className = 'status-line ' + cls; status.textContent = msg; };
+    if (!email || !email.includes('@')) { show('bad', 'Enter a valid email address.'); return; }
+    show('', 'Adding…');
+    rpc()
       .withSuccessHandler(res => {
-        if (res.success) {
-          emailInput.value = '';
-          status.style.color = '#2d7a2d';
-          status.textContent = email + ' added successfully.';
-          setTimeout(() => { status.style.display = 'none'; }, 3000);
-          accessLoaded = false;
-          loadAccessList();
-        } else {
-          status.style.color = '#ad2122';
-          status.textContent = res.error || 'Failed to add user.';
-        }
+        if (res.success) { el('accessNewEmail').value = ''; show('ok', email + ' added.'); setTimeout(() => { status.style.display = 'none'; }, 3000); loadAccessList(); }
+        else show('bad', res.error || 'Failed to add user.');
       })
-      .withFailureHandler(err => {
-        status.style.color = '#ad2122';
-        status.textContent = 'Error: ' + err.message;
-      })
+      .withFailureHandler(err => show('bad', 'Error: ' + err.message))
       .addAccessUser(email, role);
   }
 
   function removeAccessUser(email) {
     if (!confirm('Remove access for ' + email + '?')) return;
-    google.script.run
-      .withSuccessHandler(res => {
-        if (res.success) {
-          accessLoaded = false;
-          loadAccessList();
-        } else {
-          alert(res.error || 'Failed to remove user.');
-        }
-      })
-      .withFailureHandler(err => alert('Error: ' + err.message))
+    rpc()
+      .withSuccessHandler(res => { if (res.success) { toast('Removed ' + email + '.'); loadAccessList(); } else toast(res.error || 'Failed to remove user.', 'bad'); })
+      .withFailureHandler(err => toast('Error: ' + err.message, 'bad'))
       .removeAccessUser(email);
   }
 
   function updateAccessRole(email, newRole) {
-    google.script.run
-      .withFailureHandler(err => {
-        alert('Error updating role: ' + err.message);
-        accessLoaded = false;
-        loadAccessList();
-      })
+    rpc()
+      .withSuccessHandler(() => toast(email + ' is now ' + newRole + '.'))
+      .withFailureHandler(err => { toast('Error updating role: ' + err.message, 'bad'); loadAccessList(); })
       .updateAccessRole(email, newRole);
   }
 
   // ── Settings ───────────────────────────────────────────────
 
-  let settingsLoaded = false;
-  let allOUs = [];
-  let selectedOUs = [];
+  let allOUs = [], selectedOUs = [];
 
   function loadSettings() {
-    document.getElementById('settingsLoadingState').style.display = 'block';
-    document.getElementById('settingsContent').style.display = 'none';
-
-    google.script.run
+    el('settingsLoading').style.display = 'block'; el('settingsContent').style.display = 'none';
+    rpc()
       .withSuccessHandler(data => renderSettings(data))
-      .withFailureHandler(err => {
-        document.getElementById('settingsLoadingState').textContent = 'Error: ' + err.message;
-      })
+      .withFailureHandler(err => { el('settingsLoading').textContent = 'Error: ' + err.message; })
       .getSettingsData();
   }
 
   function renderSettings(data) {
-    settingsLoaded = true;
-    allOUs      = data.ous || [];
-    selectedOUs = data.selectedOUs || [];
-
-    // OU list
-    const ouList = document.getElementById('ouList');
-    if (allOUs.length === 0) {
-      ouList.innerHTML = '<div class="empty-state">No OUs found. Check that Admin Email is set and the service account has Admin SDK access.</div>';
-    } else {
-      ouList.innerHTML = allOUs.map(ou => {
-        const path  = typeof ou === 'object' ? ou.path : ou;
-        const name  = typeof ou === 'object' ? ou.name : ou;
-        const depth = typeof ou === 'object' ? (ou.depth || 0) : 0;
-        return `
-        <label class="ou-item" style="padding-left:${12 + depth * 20}px;">
-          <input type="checkbox" value="${escHtml(path)}"
-            ${selectedOUs.includes(path) ? 'checked' : ''}
-            onchange="toggleOU(this)" />
-          <span class="ou-path">${escHtml(name)}</span>
-        </label>`;
-      }).join('');
-    }
-
-    // Import settings
-    setVal('settingDateRange',   data.dateRange);
-    setVal('settingFrequency',   data.frequency);
-    setVal('settingImportTime',  data.importTime);
-    setVal('settingImportDay',   data.importDay);
-    setVal('settingStatus',      data.status);
+    S.loaded.settings = true;
+    allOUs = data.ous || []; selectedOUs = (data.selectedOUs || []).slice();
+    const ouList = el('ouList');
+    ouList.innerHTML = allOUs.length
+      ? allOUs.map(ou => {
+          const path = typeof ou === 'object' ? ou.path : ou, name = typeof ou === 'object' ? ou.name : ou, depth = typeof ou === 'object' ? (ou.depth || 0) : 0;
+          return '<label class="ou-item" style="padding-left:' + (12 + depth * 20) + 'px"><input type="checkbox" value="' + esc(path) + '" ' + (selectedOUs.includes(path) ? 'checked' : '') + ' onchange="toggleOU(this)"><span class="ou-path">' + esc(name) + '</span></label>';
+        }).join('')
+      : '<div class="loading" style="padding:16px">No OUs found. Check that Admin Email is set and the service account has Admin SDK access.</div>';
+    setVal('settingDateRange', data.dateRange); setVal('settingFrequency', data.frequency); setVal('settingImportTime', data.importTime);
+    setVal('settingImportDay', data.importDay); setVal('settingStatus', data.status);
     toggleScheduleFields();
-
-    // App config
-    setVal('settingAdminEmail',       data.adminEmail);
-    setVal('settingAlertRecipients',  data.alertRecipients);
-    // Dashboard access is now managed in the Access tab
-    setVal('settingFromName',         data.fromName);
-    setVal('settingReplyTo',          data.replyTo);
-    setVal('settingAlertCooldown',    data.alertCooldown);
-
-    document.getElementById('settingsLoadingState').style.display = 'none';
-    document.getElementById('settingsContent').style.display = 'block';
+    setVal('settingAdminEmail', data.adminEmail); setVal('settingAlertRecipients', data.alertRecipients);
+    setVal('settingFromName', data.fromName); setVal('settingReplyTo', data.replyTo); setVal('settingAlertCooldown', data.alertCooldown);
+    renderRunLog();
+    el('settingsLoading').style.display = 'none'; el('settingsContent').style.display = 'block';
   }
 
-  function toggleOU(checkbox) {
-    if (checkbox.checked) {
-      if (!selectedOUs.includes(checkbox.value)) selectedOUs.push(checkbox.value);
-    } else {
-      selectedOUs = selectedOUs.filter(ou => ou !== checkbox.value);
-    }
+  function toggleOU(cb) {
+    if (cb.checked) { if (!selectedOUs.includes(cb.value)) selectedOUs.push(cb.value); }
+    else selectedOUs = selectedOUs.filter(o => o !== cb.value);
   }
 
   function toggleScheduleFields() {
-    const freq = document.getElementById('settingFrequency').value;
-    document.getElementById('fieldImportTime').style.display = freq === 'hourly' ? 'none' : 'block';
-    document.getElementById('fieldImportDay').style.display  = freq === 'weekly'  ? 'block' : 'none';
+    const freq = el('settingFrequency').value;
+    el('fieldImportTime').style.display = freq === 'hourly' ? 'none' : 'flex';
+    el('fieldImportDay').style.display  = freq === 'weekly' ? 'flex' : 'none';
   }
 
   function saveSettings() {
-    const btn = document.querySelector('.settings-actions .btn-primary');
-    btn.textContent = 'Saving…';
-    btn.disabled = true;
-
+    const btn = el('saveSettingsBtn');
+    btn.disabled = true; btn.innerHTML = SPINNER + 'Saving…';
     const data = {
-      selectedOUs:     selectedOUs,
-      dateRange:       getVal('settingDateRange'),
-      frequency:       getVal('settingFrequency'),
-      importTime:      getVal('settingImportTime'),
-      importDay:       getVal('settingImportDay'),
-      status:          getVal('settingStatus'),
-      adminEmail:      getVal('settingAdminEmail'),
-      alertRecipients: getVal('settingAlertRecipients'),
-      dashboardAccess: '',  // now managed in Access tab
-      fromName:        getVal('settingFromName'),
-      replyTo:         getVal('settingReplyTo'),
-      alertCooldown:   getVal('settingAlertCooldown'),
+      selectedOUs, dateRange: getVal('settingDateRange'), frequency: getVal('settingFrequency'), importTime: getVal('settingImportTime'),
+      importDay: getVal('settingImportDay'), status: getVal('settingStatus'), adminEmail: getVal('settingAdminEmail'),
+      alertRecipients: getVal('settingAlertRecipients'), dashboardAccess: '', fromName: getVal('settingFromName'),
+      replyTo: getVal('settingReplyTo'), alertCooldown: getVal('settingAlertCooldown'),
     };
-
-    google.script.run
-      .withSuccessHandler(() => {
-        btn.textContent = 'Save Settings';
-        btn.disabled = false;
-        const status = document.getElementById('saveStatus');
-        status.style.display = 'inline';
-        setTimeout(() => { status.style.display = 'none'; }, 3000);
-      })
-      .withFailureHandler(err => {
-        btn.textContent = 'Save Settings';
-        btn.disabled = false;
-        alert('Save failed: ' + err.message);
-      })
+    const done = () => { btn.disabled = false; btn.textContent = 'Save settings'; };
+    rpc()
+      .withSuccessHandler(() => { done(); const s = el('saveStatus'); s.style.display = 'inline'; setTimeout(() => { s.style.display = 'none'; }, 3000); toast('Settings saved.'); loadDashboard({ quiet: true }); })
+      .withFailureHandler(err => { done(); toast('Save failed: ' + err.message, 'bad'); })
       .saveSettings(data);
-  }
-
-  // ── Run Now ───────────────────────────────────────────────
-
-  function runNow() {
-    const btns     = ['runNowBtn', 'dashRunBtn'].map(id => document.getElementById(id)).filter(Boolean);
-    const statuses = ['runNowStatus', 'dashRunStatus'].map(id => document.getElementById(id)).filter(Boolean);
-
-    btns.forEach(b => { b.disabled = true; b.textContent = 'Running…'; });
-    statuses.forEach(s => { s.style.display = 'inline'; s.style.color = '#666'; s.textContent = 'Pipeline running — this may take a minute…'; });
-
-    google.script.run
-      .withSuccessHandler(() => {
-        btns.forEach(b => { b.disabled = false; b.textContent = 'Run Import Now'; });
-        statuses.forEach(s => { s.style.color = '#2d3f89'; s.textContent = 'Export jobs queued — processing in background.'; });
-        setTimeout(() => { statuses.forEach(s => { s.style.display = 'none'; }); }, 5000);
-        // Start polling for export completion
-        checkExportStatus();
-        if (!exportPollInterval) exportPollInterval = setInterval(checkExportStatus, 30000);
-      })
-      .withFailureHandler(err => {
-        btns.forEach(b => { b.disabled = false; b.textContent = 'Run Import Now'; });
-        statuses.forEach(s => { s.style.color = '#ad2122'; s.textContent = 'Error: ' + err.message; });
-      })
-      .runPipelineNow();
   }
 
   function clearVaultDataRows() {
     if (!confirm('Clear all rows from the Vault_Data sheet? This removes legacy pre-scan records and cannot be undone.')) return;
-    google.script.run
-      .withSuccessHandler(() => alert('Vault_Data sheet cleared.'))
-      .withFailureHandler(err => alert('Error: ' + err.message))
+    rpc()
+      .withSuccessHandler(() => toast('Vault_Data sheet cleared.'))
+      .withFailureHandler(err => toast('Error: ' + err.message, 'bad'))
       .clearVaultData();
   }
 
-  // ── Suggest Criteria ──────────────────────────────────────
+  // ── Suggest criteria ───────────────────────────────────────
 
   let _criteriaData = [];
 
   function suggestCriteria() {
-    const modal = document.getElementById('criteriaModal');
-    modal.style.display = 'flex';
-    document.getElementById('criteriaLoading').style.display = 'flex';
-    document.getElementById('criteriaResults').style.display = 'none';
-    document.getElementById('criteriaApplyBtn').style.display = 'none';
-
-    google.script.run
-      .withSuccessHandler(data => {
-        _criteriaData = data || [];
-        renderCriteriaSuggestions(_criteriaData);
-      })
-      .withFailureHandler(err => {
-        document.getElementById('criteriaLoadingText').textContent = 'Error: ' + err.message;
-        document.getElementById('criteriaSpinner').style.display = 'none';
-      })
+    el('criteriaModal').classList.add('open');
+    el('criteriaLoading').style.display = 'flex'; el('criteriaResults').style.display = 'none'; el('criteriaApplyBtn').style.display = 'none';
+    el('criteriaLoadingText').textContent = 'Generating suggestions with AI…';
+    rpc()
+      .withSuccessHandler(data => { _criteriaData = data || []; renderCriteriaSuggestions(_criteriaData); })
+      .withFailureHandler(err => { el('criteriaLoadingText').textContent = 'Error: ' + err.message; })
       .suggestAlertCriteria();
   }
 
+  function closeCriteria() { el('criteriaModal').classList.remove('open'); }
+
   function renderCriteriaSuggestions(data) {
-    const sc = { Critical: '#ad2122', High: '#d44c00', Medium: '#b07d00', Low: '#2d3f89' };
-    document.getElementById('criteriaResults').innerHTML = data.map((c, i) => `
-      <div style="border:1px solid #e0e3f0;border-radius:8px;padding:14px;margin-bottom:10px;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
-          <input type="checkbox" id="crit_${i}" checked style="width:16px;height:16px;cursor:pointer;" />
-          <label for="crit_${i}" style="font-weight:700;font-size:14px;cursor:pointer;flex:1;">${escHtml(c.category)}</label>
-          <span style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;color:#fff;background:${sc[c.severity]||'#666'};">${escHtml(c.severity)}</span>
-          <span style="font-size:11px;color:#888;background:#f3f3f3;padding:2px 8px;border-radius:10px;">${escHtml(c.action||'Email')}</span>
-        </div>
-        <div style="font-size:12px;color:#555;line-height:1.6;padding-left:26px;">${escHtml(c.keywords)}</div>
-      </div>`).join('');
-    document.getElementById('criteriaLoading').style.display  = 'none';
-    document.getElementById('criteriaResults').style.display  = 'block';
-    document.getElementById('criteriaApplyBtn').style.display = 'inline-block';
+    el('criteriaResults').innerHTML = data.map((c, i) =>
+      '<div class="crit-item"><div class="top"><input type="checkbox" id="crit_' + i + '" checked style="width:16px;height:16px;accent-color:var(--accent)"><label for="crit_' + i + '">' + esc(c.category) + '</label>' +
+      '<span class="sev sev-' + sevCls(c.severity) + '">' + esc(c.severity) + '</span><span class="kw">' + esc(c.action || 'Email') + '</span></div>' +
+      '<div class="kws">' + esc(c.keywords) + '</div></div>').join('') || '<p class="help">No suggestions came back.</p>';
+    el('criteriaLoading').style.display = 'none'; el('criteriaResults').style.display = 'block'; el('criteriaApplyBtn').style.display = 'inline-flex';
   }
 
   function applyCriteriaSuggestions() {
-    const selected = _criteriaData.filter((_, i) => {
-      const cb = document.getElementById('crit_' + i);
-      return cb && cb.checked;
-    });
-    if (!selected.length) { alert('No categories selected.'); return; }
-    const btn = document.getElementById('criteriaApplyBtn');
-    btn.disabled = true;
-    btn.textContent = 'Applying…';
-    google.script.run
-      .withSuccessHandler(res => {
-        btn.disabled = false;
-        btn.textContent = 'Apply Selected';
-        document.getElementById('criteriaModal').style.display = 'none';
-        alert(`✓ ${res.added} categor${res.added === 1 ? 'y' : 'ies'} added to your Alerts_Config sheet.`);
-      })
-      .withFailureHandler(err => {
-        btn.disabled = false;
-        btn.textContent = 'Apply Selected';
-        alert('Error applying criteria: ' + err.message);
-      })
+    const selected = _criteriaData.filter((_, i) => { const cb = el('crit_' + i); return cb && cb.checked; });
+    if (!selected.length) { toast('No categories selected.', 'bad'); return; }
+    const btn = el('criteriaApplyBtn');
+    btn.disabled = true; btn.innerHTML = SPINNER + 'Applying…';
+    rpc()
+      .withSuccessHandler(res => { btn.disabled = false; btn.textContent = 'Apply selected'; closeCriteria(); toast(res.added + ' categor' + (res.added === 1 ? 'y' : 'ies') + ' added to Alerts_Config.'); loadDashboard({ quiet: true }); })
+      .withFailureHandler(err => { btn.disabled = false; btn.textContent = 'Apply selected'; toast('Error applying criteria: ' + err.message, 'bad'); })
       .applyAlertCriteria(selected);
   }
 
   // ── Helpers ────────────────────────────────────────────────
 
-  function setVal(id, val) {
-    const el = document.getElementById(id);
-    if (el) el.value = val || '';
+  function el(id) { return document.getElementById(id); }
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function setVal(id, v) { const e = el(id); if (e) e.value = v == null ? '' : v; }
+  function getVal(id) { const e = el(id); return e ? e.value : ''; }
+  function esc(str) { return String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function toast(msg, kind) {
+    const t = document.createElement('div');
+    t.className = 'toast' + (kind === 'bad' ? ' bad' : '');
+    t.textContent = msg;
+    el('toasts').appendChild(t);
+    setTimeout(() => t.remove(), kind === 'bad' ? 6000 : 3500);
   }
-  function getVal(id) {
-    const el = document.getElementById(id);
-    return el ? el.value : '';
-  }
-  function escHtml(str) {
-    return String(str || '')
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-  }
+
+  initApp();
 </script>
-
-<!-- Bulk AI Review wizard -->
-<div id="wizardModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1100;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#fff;border-radius:12px;max-width:660px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.25);overflow:hidden;">
-
-    <!-- Header -->
-    <div style="background:#2d3f89;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;">
-      <span style="color:#fff;font-weight:700;font-size:15px;">Bulk AI Review</span>
-      <span id="wizardProgress" style="color:rgba(255,255,255,.8);font-size:13px;"></span>
-    </div>
-
-    <!-- Progress bar -->
-    <div style="height:4px;background:#eaecf5;">
-      <div id="wizardProgressFill" style="height:100%;background:#5b72c9;width:0%;transition:width .4s;"></div>
-    </div>
-
-    <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
-
-      <!-- AI status banner -->
-      <div id="wizardStatus" style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;font-size:13px;background:#f0f2fb;">
-        <svg id="wizardSpinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2d3f89" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;animation:spin 1.2s linear infinite;display:none;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-        <span id="wizardStatusText" style="font-weight:600;color:#2d3f89;">Loading…</span>
-      </div>
-
-      <!-- Item details (hidden while loading) -->
-      <div id="wizardItem" style="display:none;flex-direction:column;gap:10px;">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
-          <span id="wizardSeverity" style="font-size:12px;font-weight:700;padding:2px 10px;border-radius:12px;color:#fff;"></span>
-          <span id="wizardCategory" style="font-size:13px;font-weight:600;"></span>
-          <span style="color:#999;font-size:12px;">•</span>
-          <span id="wizardUser" style="font-size:12px;color:#555;"></span>
-          <span style="color:#999;font-size:12px;">•</span>
-          <span id="wizardTime" style="font-size:12px;color:#555;"></span>
-        </div>
-        <div id="wizardPrompt" style="background:#f6f7fb;border:1px solid #e0e3f0;border-radius:6px;padding:12px;font-size:13px;line-height:1.6;white-space:pre-wrap;max-height:180px;overflow-y:auto;"></div>
-        <div id="wizardAIBox" style="display:none;padding:10px 14px;border-radius:8px;font-size:13px;line-height:1.6;">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-            <span id="wizardAIBadge" style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;color:#fff;"></span>
-            <span id="wizardAIAssessment" style="font-weight:600;"></span>
-          </div>
-          <div id="wizardAIReasoning" style="color:#555;"></div>
-        </div>
-        <textarea id="wizardNotes" rows="2" placeholder="Notes (optional)…" style="width:100%;border:1px solid #dde0ee;border-radius:6px;padding:8px;font-family:'Lexend',sans-serif;font-size:13px;resize:vertical;display:none;"></textarea>
-      </div>
-
-      <!-- Actions -->
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-        <button id="wizardStopBtn" onclick="wizardStop()" style="padding:8px 16px;border:1px solid #dde0ee;border-radius:6px;background:#fff;font-family:'Lexend',sans-serif;font-size:13px;cursor:pointer;color:#666;">Stop</button>
-        <div id="wizardActions" style="display:none;gap:8px;flex-wrap:wrap;">
-          <button onclick="wizardSkip()" style="padding:8px 16px;border:1px solid #dde0ee;border-radius:6px;background:#fff;font-family:'Lexend',sans-serif;font-size:13px;cursor:pointer;" title="Leave unreviewed and come back later">Come Back Later</button>
-          <button onclick="wizardDismiss()" style="padding:8px 16px;border:1px solid #2d7a2d;border-radius:6px;background:#fff;font-family:'Lexend',sans-serif;font-size:13px;cursor:pointer;color:#2d7a2d;" title="Not a real concern — clear it">Dismiss</button>
-          <button onclick="wizardMarkReviewed()" class="btn btn-primary" title="Real concern — mark as reviewed and handled">Mark Reviewed</button>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- Suggest Criteria modal -->
-<div id="criteriaModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1200;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#fff;border-radius:12px;max-width:680px;width:100%;max-height:90vh;box-shadow:0 8px 40px rgba(0,0,0,.25);overflow:hidden;display:flex;flex-direction:column;">
-    <div style="background:#2d3f89;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;">
-      <span style="color:#fff;font-weight:700;font-size:15px;">✦ AI-Suggested Alert Criteria</span>
-      <button onclick="document.getElementById('criteriaModal').style.display='none'" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1;">&#10005;</button>
-    </div>
-    <div style="padding:16px 20px;font-size:13px;color:#555;background:#f6f7fb;flex-shrink:0;">
-      Gemini has suggested the following K-12 safety categories. Check the ones you want to add to your <strong>Alerts_Config</strong> sheet, then click <strong>Apply Selected</strong>.
-    </div>
-    <div style="overflow-y:auto;padding:16px 20px;flex:1;">
-      <div id="criteriaLoading" style="display:flex;align-items:center;gap:12px;padding:20px 0;">
-        <svg id="criteriaSpinner" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2d3f89" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="animation:spin 1.2s linear infinite;flex-shrink:0;"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-        <span id="criteriaLoadingText" style="font-weight:600;color:#2d3f89;">Generating suggestions with AI…</span>
-      </div>
-      <div id="criteriaResults" style="display:none;"></div>
-    </div>
-    <div style="padding:14px 20px;border-top:1px solid #eaecf5;display:flex;justify-content:flex-end;gap:10px;flex-shrink:0;">
-      <button onclick="document.getElementById('criteriaModal').style.display='none'" style="padding:8px 18px;border:1px solid #dde0ee;border-radius:6px;background:#fff;font-family:'Lexend',sans-serif;font-size:13px;cursor:pointer;">Cancel</button>
-      <button id="criteriaApplyBtn" onclick="applyCriteriaSuggestions()" class="btn btn-primary" style="display:none;">Apply Selected</button>
-    </div>
-  </div>
-</div>
-
-<!-- Flag detail modal -->
-<div id="flagModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;align-items:center;justify-content:center;padding:16px;">
-  <div style="background:#fff;border-radius:12px;max-width:640px;width:100%;box-shadow:0 8px 40px rgba(0,0,0,.2);overflow:hidden;">
-    <div style="background:#2d3f89;padding:16px 20px;display:flex;align-items:center;justify-content:space-between;">
-      <div style="display:flex;align-items:center;gap:12px;">
-        <span id="modalSeverity" style="font-weight:700;font-size:15px;color:#fff;"></span>
-        <span id="modalCategory" style="font-size:13px;color:rgba(255,255,255,.8);"></span>
-      </div>
-      <button onclick="closeFlagModal()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;line-height:1;">&#10005;</button>
-    </div>
-    <div style="padding:20px;display:flex;flex-direction:column;gap:16px;">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;font-size:13px;">
-        <div>
-          <div style="color:#888;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;">Student</div>
-          <span id="modalStudentMasked" style="font-weight:600;"></span>
-          <span id="modalStudentRevealed" style="font-weight:600;color:#ad2122;"></span>
-          <button id="modalRevealBtn" onclick="revealStudent()" style="margin-left:8px;font-size:11px;padding:2px 8px;border:1px solid #2d3f89;border-radius:4px;background:none;color:#2d3f89;cursor:pointer;">Reveal</button>
-        </div>
-        <div>
-          <div style="color:#888;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;">OU</div>
-          <span id="modalOU" style="font-weight:600;"></span>
-        </div>
-        <div>
-          <div style="color:#888;margin-bottom:4px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;">Time</div>
-          <span id="modalTime"></span>
-        </div>
-      </div>
-      <div>
-        <div style="color:#888;margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;">Prompt</div>
-        <div id="modalPrompt" style="background:#f6f7fb;border:1px solid #e0e3f0;border-radius:6px;padding:12px;font-size:13px;line-height:1.6;white-space:pre-wrap;max-height:220px;overflow-y:auto;"></div>
-      </div>
-      <div>
-        <div style="color:#888;margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:.5px;">Review Notes</div>
-        <textarea id="modalNotes" rows="2" placeholder="Optional notes…" style="width:100%;border:1px solid #dde0ee;border-radius:6px;padding:8px;font-family:'Lexend',sans-serif;font-size:13px;resize:vertical;"></textarea>
-      </div>
-      <div id="aiReviewBox" style="display:none;background:#f6f7fb;border:1px solid #e0e3f0;border-radius:6px;padding:12px;font-size:13px;line-height:1.6;">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
-          <span id="aiSeverityBadge" style="font-weight:700;font-size:12px;padding:2px 8px;border-radius:12px;"></span>
-          <span id="aiAssessment" style="font-weight:600;"></span>
-        </div>
-        <div id="aiReasoning" style="color:#555;"></div>
-      </div>
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
-        <span id="modalReviewedStatus"></span>
-        <div style="display:flex;gap:8px;">
-          <button onclick="closeFlagModal()" style="padding:8px 18px;border:1px solid #dde0ee;border-radius:6px;background:#fff;font-family:'Lexend',sans-serif;font-size:13px;cursor:pointer;">Close</button>
-          <button id="modalAIBtn" class="btn" style="border:1px solid #2d3f89;color:#2d3f89;background:#fff;" onclick="runAIReview()">Review with AI</button>
-          <button id="modalMarkReviewedBtn" class="btn btn-primary">Mark Reviewed</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 </body>
 </html>

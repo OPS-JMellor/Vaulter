@@ -1,0 +1,420 @@
+<script>
+  // ============================================================
+  // Demo.html — Sample data and a stand-in for google.script.run.
+  //
+  // Included by index.html. When demo mode is on, rpc() in index.html
+  // returns demoRunner() instead of google.script.run, so every call the
+  // dashboard makes is answered from the in-memory store below after a
+  // short delay. Nothing here reads or writes the sheets, calls Vault,
+  // calls Gemini or sends email. All people in this file are fictional.
+  // ============================================================
+
+  const DEMO_DOMAIN = 'demo.orono.k12.mn.us';
+  let demoDB = null;
+
+  // ── Helpers ────────────────────────────────────────────────
+
+  function demoPad(n) { return String(n).padStart(2, '0'); }
+
+  // Local-time stamp in the same shape the sheet rows use: YYYY-MM-DDTHH:MM:SS
+  function demoStamp(d) {
+    return `${d.getFullYear()}-${demoPad(d.getMonth() + 1)}-${demoPad(d.getDate())}` +
+           `T${demoPad(d.getHours())}:${demoPad(d.getMinutes())}:${demoPad(d.getSeconds())}`;
+  }
+
+  function demoAgo(days, hour, minute) {
+    const d = new Date();
+    d.setDate(d.getDate() - days);
+    d.setHours(hour, minute, Math.floor(Math.random() * 60), 0);
+    return d;
+  }
+
+  function demoEmail(name) { return `${name}@${DEMO_DOMAIN}`; }
+
+  function demoWho() { return SIGNED_IN_USER || demoEmail('you'); }
+
+  // ── Sample flagged prompts ─────────────────────────────────
+  // ai        = what the AI reviewer says about this prompt (used by Review with AI and the wizard)
+  // aiShown   = the AI note is already on the row, as if inline review ran during import
+  // reviewedBy/notes = a person already reviewed it
+  // Rows whose ai verdict is "Likely False Positive" and aiShown are auto-cleared, like the real pipeline.
+
+  const DEMO_FLAG_SAMPLES = [
+    // Self-Harm
+    { user: 'nolan.pederson28', grade: 'Grade 10', days: 0, h: 22, m: 14, category: 'Self-Harm', keyword: 'i want to die', severity: 'Critical',
+      text: 'i want to die. nothing is getting better and i dont know who to even talk to about it anymore',
+      ai: { severity: 'Genuine Concern', assessment: 'First-person statement of hopelessness with no academic framing.', reasoning: 'The student describes ongoing distress and isolation. Follow the district self-harm protocol today.' }, aiShown: true },
+    { user: 'maya.thao27', grade: 'Grade 11', days: 1, h: 15, m: 42, category: 'Self-Harm', keyword: 'end my life', severity: 'Critical',
+      text: 'how many sleeping pills does it take to end my life',
+      ai: { severity: 'Genuine Concern', assessment: 'Asks for a lethal dose in the first person.', reasoning: 'Specific method-seeking language. Treat as an immediate safety concern.' },
+      reviewedBy: demoEmail('m.hartley'), notes: 'Met with student and parent the same day. Safety plan in place, follow-up Friday.' },
+    { user: 'sofia.nguyen27', grade: 'Grade 11', days: 4, h: 10, m: 18, category: 'Self-Harm', keyword: 'i want to die', severity: 'Critical',
+      text: 'i want to die my hair purple for homecoming, is that against the dress code',
+      ai: { severity: 'Likely False Positive', assessment: 'Dress-code question. The match is "die" as in hair dye.', reasoning: 'Nothing in the prompt relates to self-harm.' }, aiShown: true },
+
+    // Violence
+    { user: 'liam.okonkwo28', grade: 'Grade 10', days: 1, h: 20, m: 47, category: 'Violence', keyword: 'kill my teacher', severity: 'High',
+      text: 'im so mad i could kill my teacher for giving me a zero on a test i actually studied for',
+      ai: { severity: 'Needs Review', assessment: 'Reads as venting, but names a specific staff member.', reasoning: 'Likely hyperbole about a grade. A low-key check-in is reasonable given the explicit phrasing.' }, aiShown: true },
+    { user: 'grace.mueller28', grade: 'Grade 10', days: 0, h: 13, m: 55, category: 'Violence', keyword: 'bring a gun', severity: 'High',
+      text: 'write a short story where a kid tells everyone he will bring a gun to the homecoming dance and what happens after',
+      ai: { severity: 'Needs Review', assessment: 'Fiction request, but the scenario mirrors a real threat pattern.', reasoning: 'Could be a creative assignment. Confirm the context with the student\'s English teacher.' } },
+    { user: 'ethan.carlson29', grade: 'Grade 8', days: 1, h: 11, m: 26, category: 'Violence', keyword: 'how to shoot', severity: 'High',
+      text: 'how to shoot a free throw so it goes in every time',
+      ai: { severity: 'Likely False Positive', assessment: 'Basketball technique question.', reasoning: 'No weapons context at all.' } },
+
+    // Sexual Content
+    { user: 'zoe.anderson28', grade: 'Grade 10', days: 1, h: 23, m: 8, category: 'Sexual Content', keyword: 'nude photos', severity: 'High',
+      text: 'someone from another school is threatening to post nude photos of me if i dont send more. what do i do',
+      ai: { severity: 'Genuine Concern', assessment: 'Student appears to be the target of sextortion.', reasoning: 'Describes a current threat and asks for help. Involve the counselor and SRO per policy.' }, aiShown: true },
+
+    // Drugs
+    { user: 'mason.hendricks29', grade: 'Grade 8', days: 2, h: 21, m: 19, category: 'Drugs', keyword: 'how to get high on', severity: 'Medium',
+      text: 'how to get high on nutmeg and is it actually dangerous',
+      ai: { severity: 'Needs Review', assessment: 'Asks for a method, then whether it is dangerous.', reasoning: 'Method-seeking phrasing from a middle schooler. Recommend a conversation.' }, aiShown: true },
+
+    // Harassment
+    { user: 'ava.larson29', grade: 'Grade 7', days: 0, h: 16, m: 33, category: 'Harassment', keyword: 'kill yourself', severity: 'Medium',
+      text: "someone in my class dm'd me kill yourself on snapchat and i screenshotted it. what should i do",
+      ai: { severity: 'Genuine Concern', assessment: 'Student reports being targeted by a peer.', reasoning: 'The student is the recipient, not the sender. Follow the bullying reporting procedure.' }, aiShown: true },
+
+    // Cheating
+    { user: 'chloe.bergstrom27', grade: 'Grade 11', days: 1, h: 21, m: 40, category: 'Cheating', keyword: 'write my essay for me', severity: 'Low',
+      text: 'write my essay for me about the causes of the civil war, 5 paragraphs, make it sound like a 9th grader so it doesnt look ai',
+      ai: { severity: 'Genuine Concern', assessment: 'Explicit request to produce a submitted assignment and disguise it.', reasoning: 'Academic integrity issue rather than a safety one. Route to the teacher.' }, aiShown: true },
+  ];
+
+  // Flags that "arrive" when Run Import Now completes in demo mode.
+  const DEMO_NEW_FLAG_SAMPLES = [
+    { user: 'riley.sandoval28', grade: 'Grade 9', category: 'Self-Harm', keyword: 'i want to die', severity: 'Critical',
+      text: 'i want to die lol this math test is impossible',
+      ai: { severity: 'Needs Review', assessment: 'Casual phrasing, but the words are the words.', reasoning: 'Most likely exasperation about a test. A quick check-in costs little.' } },
+    { user: 'tyler.brooks27', grade: 'Grade 11', category: 'Cheating', keyword: 'give me the answers to', severity: 'Low',
+      text: 'give me the answers to the ap us history unit 4 test, the questions are in this photo',
+      ai: { severity: 'Needs Review', assessment: 'Asks for answers to a live assessment.', reasoning: 'Mentions a photographed test. Route to the teacher.' } },
+  ];
+
+  const DEMO_FILTERED_SAMPLES = [
+    { days: 0, h: 6, m: 3, user: 'jordan.ellis28',    grade: 'Grade 10', category: 'Violence',   keyword: 'how to shoot',          text: 'how to shoot a video for my youtube channel on a phone so it doesnt look shaky',                 assessment: 'Video production question.',                        reasoning: 'No weapons context.' },
+    { days: 0, h: 6, m: 3, user: 'parker.olsen29',    grade: 'Grade 7',  category: 'Drugs',      keyword: 'how to get high on',    text: 'tips on how to get high on the leaderboard in mario kart 8 deluxe time trials',                 assessment: 'Video game leaderboard question.',                  reasoning: 'The keyword match is a figure of speech.' },
+    { days: 1, h: 6, m: 2, user: 'quinn.abara28',     grade: 'Grade 8',  category: 'Violence',   keyword: 'make a weapon',         text: 'how do i make a weapon in minecraft with a crafting table and what are the best enchantments', assessment: 'Minecraft crafting question.',                      reasoning: 'In-game items only.' },
+    { days: 1, h: 6, m: 2, user: 'tessa.marin27',     grade: 'Grade 11', category: 'Self-Harm',  keyword: 'suicide note',          text: 'summarize act 5 of romeo and juliet, especially the part with the suicide note and the friar', assessment: 'Literature summary request.',                       reasoning: 'Refers to the plot of an assigned play.' },
+    { days: 2, h: 6, m: 4, user: 'bennett.cho29',     grade: 'Grade 9',  category: 'Self-Harm',  keyword: 'self harm',             text: 'self harm statistics among teens for my health class presentation, cite sources',              assessment: 'Research request for a health class presentation.', reasoning: 'Statistical framing, third person throughout.' },
+    { days: 2, h: 6, m: 4, user: 'nina.volkov28',     grade: 'Grade 10', category: 'Violence',   keyword: 'pipe bomb',             text: 'what is a pipe bomb in the context of the oklahoma city bombing for my history essay',          assessment: 'History essay question about a past event.',        reasoning: 'Definition request with academic context.' },
+    { days: 3, h: 6, m: 1, user: 'sam.whitaker27',    grade: 'Grade 12', category: 'Cheating',   keyword: 'write a test for me',   text: 'write a test for me to practice spanish vocab from chapter 4 so i can quiz myself',             assessment: 'Self-study practice request.',                      reasoning: 'The student is making a practice quiz, not avoiding work.' },
+    { days: 3, h: 6, m: 1, user: 'reese.gallagher29', grade: 'Grade 8',  category: 'Drugs',      keyword: 'how to get weed',       text: 'how to get weed smell out of a used car my dad bought',                                           assessment: 'Odor removal question.',                            reasoning: 'Nothing about acquiring or using.' },
+    { days: 5, h: 6, m: 2, user: 'kai.nakamura28',    grade: 'Grade 10', category: 'Violence',   keyword: 'school shooting',       text: "explain how the school shooting in the book Hate List affects the main character's relationships", assessment: 'Analysis of an assigned YA novel.',            reasoning: 'Literary question, no personal intent.' },
+    { days: 6, h: 6, m: 3, user: 'morgan.reyes27',    grade: 'Grade 11', category: 'Harassment', keyword: 'you should die',        text: 'if you should die in fortnite zero build does your loot drop for the other team',                assessment: 'Game mechanics question.',                          reasoning: 'The phrase is part of a conditional about a video game.' },
+    { days: 7, h: 6, m: 2, user: 'dylan.ferris29',    grade: 'Grade 9',  category: 'Drugs',      keyword: 'drug dealer',           text: 'drug dealer character tropes in film for my media studies project',                              assessment: 'Media studies project research.',                   reasoning: 'Analytical, third-person framing.' },
+    { days: 8, h: 6, m: 4, user: 'hazel.brink28',     grade: 'Grade 7',  category: 'Cheating',   keyword: 'do my homework for me', text: 'dont do my homework for me, just check if i did 3x+5=20 right. i got x=5',                        assessment: 'Asks for a check on completed work.',               reasoning: 'Explicitly declines to have the work done.' },
+  ];
+
+  const DEMO_OUS = [
+    { path: '/',                             name: '/ (All Users)',       depth: 0 },
+    { path: '/Students',                     name: 'Students',            depth: 0 },
+    { path: '/Students/High School',         name: 'High School',         depth: 1 },
+    { path: '/Students/Middle School',       name: 'Middle School',       depth: 1 },
+    { path: '/Students/Intermediate School', name: 'Intermediate School', depth: 1 },
+    { path: '/Students/Schumann Elementary', name: 'Schumann Elementary', depth: 1 },
+    { path: '/Staff',                        name: 'Staff',               depth: 0 },
+    { path: '/Staff/Teachers',               name: 'Teachers',            depth: 1 },
+    { path: '/Staff/Administration',         name: 'Administration',      depth: 1 },
+  ];
+
+  const DEMO_CRITERIA = [
+    { category: 'Self-Harm & Suicide',           severity: 'Critical', action: 'Both',  keywords: 'how to kill myself,want to end it all,painless way to die,how many pills to overdose,no reason to live,goodbye letter to my family,hurting myself on purpose' },
+    { category: 'Violence & Threats',            severity: 'High',     action: 'Both',  keywords: 'going to hurt someone at school,bring a knife to school,make them pay tomorrow,list of people i hate,how to hurt someone without getting caught,shoot up the school' },
+    { category: 'Weapons',                       severity: 'High',     action: 'Both',  keywords: 'how to get a gun without,3d printed gun,buy a ghost gun,how to make a homemade weapon,sneak a weapon past,where to buy a switchblade' },
+    { category: 'Sexual Content & Exploitation', severity: 'High',     action: 'Both',  keywords: 'send me nudes,pictures without clothes,someone is sharing my photos,older guy online wants to meet,how to hide messages from my parents,explicit roleplay' },
+    { category: 'Substance Use',                 severity: 'Medium',   action: 'Email', keywords: 'how to hide vaping from,where to buy a vape underage,how to get drunk fast,how much xanax to take,how to pass a drug test,mixing pills with alcohol' },
+    { category: 'Bullying & Harassment',         severity: 'Medium',   action: 'Email', keywords: 'everyone hates you,make her life miserable,spread a rumor about,post their address online,fake account to mess with,nobody would miss you' },
+    { category: 'Academic Dishonesty',           severity: 'Low',      action: 'Sheet', keywords: 'rewrite this so it does not look like ai,answers to the test tomorrow,make it undetectable by turnitin,write my lab report for me,finish my essay for me' },
+    { category: 'Radicalization & Extremism',    severity: 'High',     action: 'Both',  keywords: 'how to join a militia,manifesto template,great replacement,praise for the shooter,accelerationist,how to find a cell near me' },
+  ];
+
+  // ── Store ──────────────────────────────────────────────────
+
+  function demoBuildFlag(s, index, when) {
+    const at      = when || demoAgo(s.days, s.h, s.m);
+    const stamp   = demoStamp(at);
+    const dateKey = stamp.substring(0, 10).replace(/-/g, '');
+    const autoCleared = !!(s.aiShown && s.ai && s.ai.severity === 'Likely False Positive');
+    const reviewedBy  = s.reviewedBy || (autoCleared ? 'AI Auto-Review' : '');
+    let notes = '';
+    if (s.reviewedBy)   notes = s.notes || '';
+    else if (s.aiShown) notes = `AI (${s.ai.severity}): ${s.ai.assessment} — ${s.ai.reasoning}`;
+    const alertSent = s.severity === 'Critical' || s.severity === 'High';
+    return {
+      flagId:         `FLAG-${dateKey}-${demoPad(index + 1)}`,
+      exportId:       `EXP-${dateKey}-${demoPad(index + 1)}`,
+      userEmail:      demoEmail(s.user),
+      ouPath:         s.grade,
+      timestamp:      stamp,
+      queryText:      s.text,
+      category:       s.category,
+      matchedKeyword: s.keyword,
+      severity:       s.severity,
+      alertSent:      alertSent ? 'TRUE' : 'FALSE',
+      alertSentAt:    alertSent ? demoStamp(new Date(at.getTime() + 21 * 60000)) : '',
+      reviewed:       reviewedBy ? 'TRUE' : 'FALSE',
+      reviewedBy:     reviewedBy,
+      notes:          notes,
+      _ai:            s.ai,
+    };
+  }
+
+  function demoBuildRuns() {
+    const runs = [];
+    for (let days = 9; days >= 0; days--) {
+      const start = demoAgo(days, 6, 0);
+      const end   = new Date(start.getTime() + (3 + Math.floor(Math.random() * 4)) * 60000);
+      const key   = demoStamp(start).substring(0, 10).replace(/-/g, '');
+      const failed  = days === 4;
+      const catchUp = days === 3;
+      const imported = failed ? 0 : (catchUp ? 2610 : 1100 + Math.floor(Math.random() * 800));
+      const flagged  = failed ? 0 : (catchUp ? 5 : Math.floor(Math.random() * 4));
+      const alerted  = Math.floor(flagged * 0.6);
+      runs.push({
+        runId:       `RUN-${key}-0600`,
+        startedAt:   demoStamp(start),
+        completedAt: demoStamp(end),
+        status:      failed ? 'FAILED' : 'SUCCESS',
+        imported, flagged, alerted,
+        error:       failed ? 'Vault export EXPORT-3f9a1c did not finish within the polling window; collected on the next run' : '',
+      });
+    }
+    return runs; // oldest first, like the sheet
+  }
+
+  function resetDemoData() {
+    demoDB = {
+      flags:    DEMO_FLAG_SAMPLES.map((s, i) => demoBuildFlag(s, i)),
+      runs:     demoBuildRuns(),
+      filtered: DEMO_FILTERED_SAMPLES.map(s => ({
+        filteredAt: demoStamp(demoAgo(s.days, s.h, s.m)).replace('T', ' '),
+        userEmail:  demoEmail(s.user),
+        ouPath:     s.grade,
+        category:   s.category,
+        keyword:    s.keyword,
+        verdict:    'Likely False Positive',
+        assessment: s.assessment,
+        reasoning:  s.reasoning,
+        promptText: s.text,
+      })),
+      access: [
+        { email: demoWho(),                role: 'Admin',  addedBy: 'setup',   addedAt: '2026-03-26 14:10:00' },
+        { email: demoEmail('m.hartley'),   role: 'Viewer', addedBy: demoWho(), addedAt: '2026-04-02 09:15:00' },
+        { email: demoEmail('d.okafor'),    role: 'Viewer', addedBy: demoWho(), addedAt: '2026-04-02 09:16:00' },
+        { email: demoEmail('s.lindqvist'), role: 'Admin',  addedBy: demoWho(), addedAt: '2026-04-08 11:42:00' },
+      ],
+      settings: {
+        selectedOUs:     ['/Students/High School', '/Students/Middle School'],
+        dateRange:       'day',
+        frequency:       'daily',
+        importTime:      '06:00',
+        importDay:       'Monday',
+        status:          'Active',
+        adminEmail:      demoEmail('vault-admin'),
+        alertRecipients: `${demoEmail('counselors')}, ${demoEmail('hs-principal')}`,
+        dashboardAccess: '',
+        fromName:        'Vaulter Alerts',
+        replyTo:         demoEmail('technology'),
+        alertCooldown:   '1',
+      },
+      pendingUntil: 0,   // when > 0, Run Import Now is "processing" until this time
+      runCount:     0,
+    };
+  }
+
+  // ── Fake server ────────────────────────────────────────────
+
+  const DEMO_SEVERITY_ORDER = { Critical: 0, High: 1, Medium: 2, Low: 3 };
+
+  function demoIsUnreviewed(f) { return f.reviewed !== 'TRUE' && f.reviewed !== true; }
+
+  function demoFindFlag(flagId) { return demoDB.flags.find(f => f.flagId === flagId); }
+
+  function demoPublicFlag(f) { const { _ai, ...rest } = f; return rest; }
+
+  function demoCompletePendingRun() {
+    const now   = new Date();
+    const key   = demoStamp(now).substring(0, 10).replace(/-/g, '');
+    const start = new Date(now.getTime() - 9000);
+    demoDB.runCount++;
+    const fresh = DEMO_NEW_FLAG_SAMPLES.map((s, i) =>
+      demoBuildFlag(s, demoDB.flags.length + i, new Date(now.getTime() - (i + 1) * 47 * 60000)));
+    // Ids that cannot collide with earlier runs.
+    fresh.forEach((f, i) => { f.flagId = `FLAG-${key}-R${demoDB.runCount}${demoPad(i + 1)}`; });
+    demoDB.flags.push(...fresh);
+    demoDB.runs.push({
+      runId:       `RUN-${key}-${demoPad(now.getHours())}${demoPad(now.getMinutes())}`,
+      startedAt:   demoStamp(start),
+      completedAt: demoStamp(now),
+      status:      'SUCCESS',
+      imported:    180 + Math.floor(Math.random() * 80),
+      flagged:     fresh.length,
+      alerted:     fresh.filter(f => f.alertSent === 'TRUE').length,
+      error:       '',
+    });
+    demoDB.pendingUntil = 0;
+  }
+
+  function demoNextRun() {
+    const s = demoDB.settings;
+    if (s.status === 'Paused') return 'Paused';
+    if (s.frequency === 'hourly') return 'Within the hour';
+    const now = new Date();
+    const nowHM = `${demoPad(now.getHours())}:${demoPad(now.getMinutes())}`;
+    if (s.frequency === 'weekly') return `${s.importDay} ${s.importTime}`;
+    return (nowHM < s.importTime ? 'Today ' : 'Tomorrow ') + s.importTime;
+  }
+
+  const DEMO_API = {
+    getDashboardData() {
+      const runs  = demoDB.runs;
+      const flags = demoDB.flags.slice()
+        .sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)));
+      return {
+        totals: {
+          all:        flags.length,
+          unreviewed: flags.filter(demoIsUnreviewed).length,
+        },
+        flags:  flags.slice(0, 300).map(demoPublicFlag),
+        runLog: runs.slice(-10).reverse(),
+        pipeline: {
+          status:         demoDB.settings.status,
+          frequency:      demoDB.settings.frequency,
+          importTime:     demoDB.settings.importTime,
+          importDay:      demoDB.settings.importDay,
+          nextRun:        demoNextRun(),
+          lastRun:        runs.length ? runs[runs.length - 1] : null,
+          ruleCount:      6,
+          pendingExports: demoDB.pendingUntil ? 2 : 0,
+        },
+      };
+    },
+
+    getPendingExportStatus() {
+      if (demoDB.pendingUntil && Date.now() >= demoDB.pendingUntil) demoCompletePendingRun();
+      return { count: demoDB.pendingUntil ? 2 : 0 };
+    },
+
+    runPipelineNow() {
+      demoDB.pendingUntil = Date.now() + 8000;
+      return { success: true };
+    },
+
+    getFilteredLog()   { return demoDB.filtered.slice(); },
+    clearFilteredLog() { demoDB.filtered = []; return { success: true }; },
+    clearAllFlagged()  { demoDB.flags = []; return { success: true }; },
+    clearVaultData()   { return { success: true }; },
+
+    markReviewed(flagId, notes) {
+      const f = demoFindFlag(flagId);
+      if (!f) return { success: false, error: 'Flag ID not found' };
+      f.reviewed   = 'TRUE';
+      f.reviewedBy = demoWho();
+      f.notes      = notes || '';
+      return { success: true };
+    },
+
+    getUnreviewedFlags() {
+      return demoDB.flags.filter(demoIsUnreviewed).map(f => ({
+        flagId: f.flagId, userEmail: f.userEmail, ouPath: f.ouPath, timestamp: f.timestamp,
+        promptText: f.queryText, matchedKeyword: f.matchedKeyword, category: f.category, severity: f.severity,
+        alertSent: f.alertSent, alertSentAt: f.alertSentAt, notes: f.notes,
+      }));
+    },
+
+    applyAIReview(flagId, severity, assessment, reasoning) {
+      const f = demoFindFlag(flagId);
+      if (!f) return { success: false };
+      if (severity === 'Likely False Positive') {
+        f.reviewed   = 'TRUE';
+        f.reviewedBy = 'AI Auto-Review';
+      }
+      f.notes = `AI (${severity}): ${assessment} — ${reasoning}`;
+      return { success: true };
+    },
+
+    reviewFlagWithAI(flagId) {
+      const f  = demoFindFlag(flagId);
+      const ai = (f && f._ai) || {
+        severity: 'Needs Review', assessment: 'Not enough context to decide.', reasoning: 'Review manually.',
+      };
+      return { flagId, ...ai };
+    },
+
+    suggestAlertCriteria() { return DEMO_CRITERIA.map(c => ({ ...c })); },
+    applyAlertCriteria(categories) { return { success: true, added: (categories || []).length }; },
+
+    getSettingsData() {
+      return { ...demoDB.settings, selectedOUs: demoDB.settings.selectedOUs.slice(), ous: DEMO_OUS };
+    },
+    saveSettings(data) {
+      if (!data) throw new Error('No settings data received. Please try again.');
+      Object.assign(demoDB.settings, data, { selectedOUs: (data.selectedOUs || []).slice() });
+      return { success: true };
+    },
+
+    getAccessList() { return demoDB.access.map(u => ({ ...u })); },
+    addAccessUser(email, role) {
+      if (!email || !email.includes('@')) throw new Error('Invalid email address');
+      const lc = email.trim().toLowerCase();
+      if (demoDB.access.some(u => u.email.toLowerCase() === lc)) return { success: false, error: 'User already has access' };
+      demoDB.access.push({ email: email.trim(), role: role || 'Viewer', addedBy: demoWho(), addedAt: demoStamp(new Date()).replace('T', ' ') });
+      return { success: true };
+    },
+    removeAccessUser(email) {
+      const lc = String(email).trim().toLowerCase();
+      const i  = demoDB.access.findIndex(u => u.email.toLowerCase() === lc);
+      if (i < 0) return { success: false, error: 'User not found' };
+      demoDB.access.splice(i, 1);
+      return { success: true };
+    },
+    updateAccessRole(email, newRole) {
+      const u = demoDB.access.find(x => x.email.toLowerCase() === String(email).trim().toLowerCase());
+      if (!u) return { success: false, error: 'User not found' };
+      u.role = newRole;
+      return { success: true };
+    },
+  };
+
+  // How long each fake call takes, so the UI's spinners and states still show.
+  function demoLatency(name) {
+    switch (name) {
+      case 'getPendingExportStatus': return 120;
+      case 'reviewFlagWithAI':       return 1400;
+      case 'suggestAlertCriteria':   return 1800;
+      case 'runPipelineNow':         return 1600;
+      default:                       return 300 + Math.floor(Math.random() * 300);
+    }
+  }
+
+  // Mimics google.script.run: withSuccessHandler / withFailureHandler, then a call.
+  function demoRunner() {
+    if (!demoDB) resetDemoData();
+    let onOk   = () => {};
+    let onFail = err => console.error('Demo mode:', err);
+    const chain = {
+      withSuccessHandler(fn) { onOk = fn;   return proxy; },
+      withFailureHandler(fn) { onFail = fn; return proxy; },
+      withUserObject()       { return proxy; },
+    };
+    const proxy = new Proxy(chain, {
+      get(target, name) {
+        if (name in target) return target[name];
+        return (...args) => {
+          setTimeout(() => {
+            const impl = DEMO_API[name];
+            if (!impl) { onFail(new Error(`Demo mode has no sample for ${String(name)}.`)); return; }
+            let result;
+            try { result = impl(...args); } catch (e) { onFail(e); return; }
+            onOk(result);
+          }, demoLatency(name));
+        };
+      },
+    });
+    return proxy;
+  }
+</script>

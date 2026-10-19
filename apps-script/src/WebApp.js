@@ -3,7 +3,7 @@
 // Serves the dashboard and handles API requests from the frontend.
 // ============================================================
 
-function doGet(_e) {
+function doGet(e) {
   const userEmail = Session.getActiveUser().getEmail();
   if (!isAuthorized_(userEmail)) {
     return HtmlService.createHtmlOutput(
@@ -12,7 +12,13 @@ function doGet(_e) {
     ).setTitle('Vaulter — Access Denied');
   }
 
-  return HtmlService.createTemplateFromFile('index')
+  const tpl = HtmlService.createTemplateFromFile('index');
+  tpl.userEmail = userEmail;
+  tpl.userRole  = getUserRole_(userEmail);
+  // ?demo=1 opens the dashboard in demo mode (sample data, see Demo.html); ?demo=0 forces live.
+  tpl.demoParam = String((e && e.parameter && e.parameter.demo) || '');
+
+  return tpl
     .evaluate()
     .setTitle('Vaulter Dashboard')
     .addMetaTag('viewport', 'width=device-width, initial-scale=1')
@@ -43,6 +49,20 @@ function isAuthorized_(email) {
   return allowed.includes(lc);
 }
 
+/** Role from the Access_List sheet ('Admin' | 'Viewer'), or '' if only the legacy list allowed them. */
+function getUserRole_(email) {
+  try {
+    const sheet = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEETS.ACCESS_LIST);
+    if (!sheet || sheet.getLastRow() <= 1) return '';
+    const lc  = String(email || '').trim().toLowerCase();
+    const row = sheet.getRange(2, 1, sheet.getLastRow() - 1, 2).getValues()
+      .find(r => String(r[0]).trim().toLowerCase() === lc);
+    return row ? String(row[1] || 'Viewer') : '';
+  } catch (e) {
+    return '';
+  }
+}
+
 // ── Client-callable API functions ────────────────────────────
 // These are called via google.script.run from the frontend.
 
@@ -55,37 +75,98 @@ function getPendingExportStatus() {
   return { count: pending.length };
 }
 
+/**
+ * Everything the dashboard needs in one call: the newest flags, totals over
+ * every row, the recent run log and the pipeline readout. Cached for 60 s;
+ * writes call invalidateDashCache_().
+ */
 function getDashboardData() {
   const cache  = CacheService.getScriptCache();
   const cached = cache.get('VAULTER_DASH');
   if (cached) return JSON.parse(cached);
 
-  const ss   = SpreadsheetApp.openById(SPREADSHEET_ID);
-  const data = {
-    summary: getSummaryStats_(ss),
-    flagged: getRecentFlagged_(ss),
-    runLog:  getRecentRuns_(ss),
+  const ss    = SpreadsheetApp.openById(SPREADSHEET_ID);
+  const flags = readFlags_(ss);
+  const data  = {
+    totals: {
+      all:        flags.length,
+      unreviewed: flags.filter(f => f.reviewed !== 'TRUE').length,
+    },
+    flags:    flags.slice(0, 300),
+    runLog:   getRecentRuns_(ss),
+    pipeline: getPipelineStatus_(ss),
   };
   try { cache.put('VAULTER_DASH', JSON.stringify(data), 60); } catch (e) {}
   return data;
 }
 
-function getSummaryStats_(ss) {
-  const flaggedSheet = ss.getSheetByName(SHEETS.FLAGGED);
-  const runSheet     = ss.getSheetByName(SHEETS.RUN_LOG);
+/** Every Flagged row as an object, newest first. */
+function readFlags_(ss) {
+  const sheet = ss.getSheetByName(SHEETS.FLAGGED);
+  if (!sheet || sheet.getLastRow() <= 1) return [];
+  return sheet.getRange(2, 1, sheet.getLastRow() - 1, 14).getValues()
+    .filter(r => r[0])
+    .map(r => ({
+      flagId:         r[0],
+      exportId:       r[1],
+      userEmail:      r[2],
+      ouPath:         r[3], // stores grade (e.g. "Grade 09")
+      timestamp:      cellString_(r[4]),
+      queryText:      r[5],
+      category:       r[6],
+      matchedKeyword: r[7],
+      severity:       r[8],
+      alertSent:      isTrue_(r[9]) ? 'TRUE' : 'FALSE',
+      alertSentAt:    cellString_(r[10]),
+      reviewed:       isTrue_(r[11]) ? 'TRUE' : 'FALSE',
+      reviewedBy:     r[12] || '',
+      notes:          r[13] || '',
+    }))
+    .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+}
 
-  const totalFlagged = Math.max(0, flaggedSheet.getLastRow() - 1);
+function isTrue_(v) { return v === true || v === 'TRUE'; }
 
-  const unreviewedCount = totalFlagged > 0
-    ? flaggedSheet.getRange(2, 12, totalFlagged, 1).getValues()
-        .filter(r => r[0] === 'FALSE' || r[0] === false).length
+/** Sheet cells may come back as Date objects; the client wants strings. */
+function cellString_(v) {
+  if (v instanceof Date) return v.toISOString();
+  return v == null ? '' : String(v);
+}
+
+/** Readout strip: schedule, last run, rule count, exports in flight. */
+function getPipelineStatus_(ss) {
+  const setup = getSetupConfig_();
+  const rules = ss.getSheetByName(SHEETS.ALERTS_CONFIG);
+  const ruleCount = rules && rules.getLastRow() > 1
+    ? rules.getRange(2, 1, rules.getLastRow() - 1, 4).getValues().filter(r => r[0] && isTrue_(r[3])).length
     : 0;
+  const runs = getRecentRuns_(ss);
+  let pending = 0;
+  try { pending = JSON.parse(PropertiesService.getScriptProperties().getProperty('PENDING_EXPORTS') || '[]').length; } catch (e) {}
+  return {
+    status:         setup.status || 'Active',
+    frequency:      setup.frequency || 'daily',
+    importTime:     normalizeTime_(setup.importTime || '06:00'),
+    importDay:      setup.importDay || 'Monday',
+    nextRun:        describeNextRun_(setup, new Date(), Session.getScriptTimeZone()),
+    lastRun:        runs[0] || null,
+    ruleCount,
+    pendingExports: pending,
+  };
+}
 
-  const lastRun = runSheet.getLastRow() > 1
-    ? runSheet.getRange(runSheet.getLastRow(), 2).getValue()
-    : 'Never';
-
-  return { totalFlagged, unreviewedCount, lastRun };
+function describeNextRun_(setup, now, tz) {
+  if ((setup.status || '') === 'Paused') return 'Paused';
+  const freq = (setup.frequency || 'daily').toLowerCase();
+  if (freq === 'hourly') return 'Within the hour';
+  const time  = normalizeTime_(setup.importTime || '06:00');
+  const nowHM = Utilities.formatDate(now, tz, 'HH:mm');
+  if (freq === 'weekly') {
+    const today = Utilities.formatDate(now, tz, 'EEEE');
+    const day   = setup.importDay || 'Monday';
+    return (today === day && nowHM < time) ? `Today ${time}` : `${day} ${time}`;
+  }
+  return (nowHM < time ? 'Today ' : 'Tomorrow ') + time;
 }
 
 function getTrendData_() {
@@ -129,36 +210,6 @@ function getTrendData_() {
   return { byDay, byOU, byUser };
 }
 
-function getRecentFlagged_(ss) {
-  ss = ss || SpreadsheetApp.openById(SPREADSHEET_ID);
-  const sheet = ss.getSheetByName(SHEETS.FLAGGED);
-  if (sheet.getLastRow() <= 1) return [];
-
-  const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, 14).getValues();
-  return rows
-    .filter(r => r[0])
-    .sort((a, b) => {
-      const so = { Critical: 0, High: 1, Medium: 2, Low: 3 };
-      return (so[a[8]] ?? 9) - (so[b[8]] ?? 9);
-    })
-    .slice(0, 50)
-    .map(r => ({
-      flagId:          r[0],
-      exportId:        r[1],
-      userEmail:       r[2],
-      ouPath:          r[3], // now stores grade (e.g. "Grade 09")
-      timestamp:       r[4],
-      queryText:       r[5],
-      category:        r[6],
-      matchedKeyword:  r[7],
-      severity:        r[8],
-      alertSent:       r[9],
-      reviewed:        r[11],
-      reviewedBy:      r[12],
-      notes:           r[13],
-    }));
-}
-
 function getRecentRuns_(ss) {
   ss = ss || SpreadsheetApp.openById(SPREADSHEET_ID);
   const sheet = ss.getSheetByName(SHEETS.RUN_LOG);
@@ -170,8 +221,8 @@ function getRecentRuns_(ss) {
     .reverse()
     .map(r => ({
       runId:      r[0],
-      startedAt:  r[1],
-      completedAt:r[2],
+      startedAt:  cellString_(r[1]),
+      completedAt:cellString_(r[2]),
       status:     r[3],
       imported:   r[4],
       flagged:    r[5],
@@ -248,8 +299,20 @@ function getUnreviewedFlags() {
   const sheet = ss.getSheetByName(SHEETS.FLAGGED);
   if (sheet.getLastRow() <= 1) return [];
   return sheet.getRange(2, 1, sheet.getLastRow() - 1, 14).getValues()
-    .filter(r => r[0] && r[11] !== 'TRUE' && r[11] !== true)
-    .map(r => ({ flagId: r[0], promptText: r[5], matchedKeyword: r[7], category: r[6] }));
+    .filter(r => r[0] && !isTrue_(r[11]))
+    .map(r => ({
+      flagId:         r[0],
+      userEmail:      r[2],
+      ouPath:         r[3],
+      timestamp:      cellString_(r[4]),
+      promptText:     r[5],
+      category:       r[6],
+      matchedKeyword: r[7],
+      severity:       r[8],
+      alertSent:      isTrue_(r[9]) ? 'TRUE' : 'FALSE',
+      alertSentAt:    cellString_(r[10]),
+      notes:          r[13] || '',
+    }));
 }
 
 /** Applies an AI review result to a single flagged row. */
@@ -267,6 +330,7 @@ function applyAIReview(flagId, severity, assessment, reasoning) {
       sheet.getRange(i + 1, 13).setValue('AI Auto-Review');
     }
     sheet.getRange(i + 1, 14).setValue(note);
+    invalidateDashCache_();
     return { success: true };
   }
   return { success: false };
@@ -460,6 +524,7 @@ function saveSettings(data) {
 
   // Reinstall trigger if schedule changed
   installTrigger();
+  invalidateDashCache_();
 
   return { success: true };
 }
