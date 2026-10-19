@@ -175,13 +175,18 @@
     mark { background: none; color: var(--mark); font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
 
     /* ── Filters and controls ─────────────────────────────── */
-    .chip { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 12px; border-radius: 4px; font-size: 13px; font-weight: 500; background: var(--panel); color: var(--head); border: 1px solid var(--ctrl); }
+    .chip { display: inline-flex; align-items: center; gap: 5px; min-height: 30px; padding: 0 9px; border-radius: 4px; font-size: 12px; font-weight: 500; background: var(--panel); color: var(--head); border: 1px solid var(--ctrl); white-space: nowrap; }
+    .chip:hover { background: var(--sel); }
     .chip[aria-pressed="true"] { background: var(--chip-act-bg); color: var(--chip-act-fg); border-color: var(--chip-act-bg); }
-    .chip .n { font-family: var(--mono); font-size: 12px; font-weight: 600; padding: 0 6px; border-radius: 999px; background: var(--count-bg); color: var(--count-fg); }
-    .chip[aria-pressed="true"] .n { background: var(--count-act-bg); color: var(--count-act-fg); }
-    .chip .sw { width: 10px; height: 10px; border-radius: 2px; }
-    .chip[aria-pressed="true"] .sw { outline: 1px solid var(--chip-act-fg); }
+    .chip .n { font-size: 11px; font-weight: 600; opacity: .7; font-variant-numeric: tabular-nums; }
+    .chip .sw { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+    .chip[aria-pressed="true"] .sw { box-shadow: 0 0 0 1.5px var(--chip-act-fg); }
     .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chips.seg { gap: 0; }
+    .chips.seg .chip { border-radius: 0; margin-left: -1px; }
+    .chips.seg .chip:first-child { border-radius: 4px 0 0 4px; margin-left: 0; }
+    .chips.seg .chip:last-child { border-radius: 0 4px 4px 0; }
+    .chips.seg .chip[aria-pressed="true"] { position: relative; z-index: 1; }
     .field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--head); }
     .ctl { width: 100%; min-height: 40px; padding: 8px 10px; border: 1px solid var(--ctrl); border-radius: 4px; background: var(--input-bg); color: var(--text); font-size: 14px; font-weight: 400; line-height: 1.5; }
     textarea.ctl { resize: vertical; }
@@ -195,7 +200,8 @@
     /* ── Flag queue ───────────────────────────────────────── */
     .queue { display: flex; flex-wrap: wrap; align-items: stretch; overflow: hidden; }
     .qlist { flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
-    .qfilters { padding: 16px; display: flex; flex-direction: column; gap: 12px; border-bottom: 1px solid var(--border); }
+    .qfilters { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid var(--border); }
+    .qfilters .chip-rows { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
     .qfilters .two { display: flex; flex-wrap: wrap; gap: 8px; }
     .qfilters .two .field:first-child { flex: 1 1 140px; } .qfilters .two .field:last-child { flex: 2 1 200px; }
     .showing { margin: 0; padding: 10px 16px; font-size: 12px; color: var(--text2); border-bottom: 1px solid var(--divider); }
@@ -424,8 +430,10 @@
         <div class="queue" id="queue">
           <div class="qlist">
             <div class="qfilters">
-              <div class="chips" role="group" aria-label="Status filter" id="statusChips"></div>
-              <div class="chips" role="group" aria-label="Severity filter" id="sevChips"></div>
+              <div class="chip-rows">
+                <div class="chips seg" role="group" aria-label="Status filter" id="statusChips"></div>
+                <div class="chips" role="group" aria-label="Severity filter" id="sevChips"></div>
+              </div>
               <div class="two">
                 <label class="field">Category
                   <select class="ctl" id="catFilter" onchange="setCat(this.value)"><option value="">All categories</option></select>
