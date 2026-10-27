@@ -55,7 +55,7 @@
 
     /* ── Header ───────────────────────────────────────────── */
     .hdr { background: var(--hdr); color: #fff; }
-    .hdr-in { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; min-height: 64px; }
+    .hdr-in { display: flex; flex-wrap: wrap; align-items: center; gap: 0 24px; min-height: 64px; }
     .brand { display: flex; align-items: center; gap: 12px; }
     .brand-name { font-size: 20px; font-weight: 600; letter-spacing: .01em; }
     .brand-rule { width: 1px; height: 20px; background: var(--hdr-rule); }
@@ -64,22 +64,24 @@
     .nav-btn { background: none; border: 0; color: var(--hdr-sub); padding: 20px 12px 18px; border-bottom: 3px solid transparent; font-size: 14px; }
     .nav-btn:hover { color: #fff; }
     .nav-btn[aria-current="page"] { color: #fff; border-bottom-color: #fff; font-weight: 500; }
-    .hdr-right { display: flex; align-items: center; gap: 12px; }
+    .hdr-right { display: flex; align-items: center; gap: 10px; margin-left: auto; }
     .icon-btn { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; background: transparent; color: #fff; border: 1px solid var(--hdr-rule); border-radius: 4px; }
     .icon-btn:hover { background: rgba(255,255,255,.08); }
     .icon-btn svg { display: none; }
     :root[data-theme="light"] .icon-btn .ico-moon, :root[data-theme="dark"] .icon-btn .ico-sun { display: block; }
-    .user { display: flex; align-items: center; gap: 10px; }
-    .user-text { text-align: right; line-height: 1.3; }
-    .user-name { display: block; font-size: 13px; font-weight: 500; }
-    .user-sub { display: block; font-size: 12px; color: var(--hdr-sub); }
-    .avatar { width: 36px; height: 36px; border-radius: 50%; background: #2d3f89; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+    .user { display: flex; align-items: center; gap: 10px; padding-left: 10px; border-left: 1px solid var(--hdr-rule); }
+    .user-text { line-height: 1.3; }
+    .user-name { display: block; font-size: 13px; font-weight: 500; white-space: nowrap; }
+    .user-sub { display: none; }
+    .avatar { width: 32px; height: 32px; border-radius: 50%; background: #2d3f89; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; }
     .pill { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .3px; color: #fff; background: rgba(255,255,255,.1); border: 1px solid var(--hdr-rule); border-radius: 4px; padding: 0 11px 0 8px; height: 40px; }
     .pill:hover { background: rgba(255,255,255,.18); }
     .pill-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.4); }
     body.demo .pill { background: var(--demo); border-color: var(--demo); color: var(--demo-fg); }
     body.demo .pill-dot { background: var(--demo-fg); }
-    @media (max-width: 900px) { .nav-btn { padding: 14px 10px 12px; } .user-text { display: none; } .brand-sub, .brand-rule { display: none; } }
+    /* Below 1100px the nav takes its own row under the brand and controls, instead of the right cluster wrapping piecemeal. */
+    @media (max-width: 1100px) { .nav { order: 3; flex-basis: 100%; border-top: 1px solid var(--hdr-rule); } .nav-btn { padding: 12px 12px 10px; } .hdr-in { padding-top: 10px; } }
+    @media (max-width: 700px) { .user-text { display: none; } .brand-sub, .brand-rule { display: none; } .nav { overflow-x: auto; flex-wrap: nowrap; } }
 
     /* ── Readout strip ────────────────────────────────────── */
     .readout { background: var(--readout); color: #fff; font-size: 12px; font-weight: 500; letter-spacing: .03em; }
@@ -347,7 +349,7 @@
       <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="11.5" stroke="#fff" stroke-width="2"/><circle cx="14" cy="14" r="4" stroke="#fff" stroke-width="2"/><path d="M14 2.5v3M14 22.5v3M2.5 14h3M22.5 14h3M5.9 5.9 8 8M20 20l2.1 2.1M22.1 5.9 20 8M8 20l-2.1 2.1" stroke="#fff" stroke-width="1.6"/><circle cx="14" cy="14" r="1.5" fill="#ff8a8b"/></svg>
       <span class="brand-name">Vaulter</span>
       <span class="brand-rule"></span>
-      <span class="brand-sub">Orono Public Schools</span>
+      <span class="brand-sub">Sample District</span>
     </div>
     <nav class="nav" aria-label="Main">
       <button class="nav-btn" data-page="dashboard" aria-current="page" onclick="switchPage('dashboard')">Dashboard</button>
@@ -635,7 +637,7 @@
   // calls Gemini or sends email. All people in this file are fictional.
   // ============================================================
 
-  const DEMO_DOMAIN = 'demo.orono.k12.mn.us';
+  const DEMO_DOMAIN = 'sampledistrict.org';
   let demoDB = null;
 
   // ── Helpers ────────────────────────────────────────────────
@@ -1053,7 +1055,7 @@
   // Demo.html when demo mode is on.
   // ════════════════════════════════════════════════════════════
 
-  const SIGNED_IN_USER = 'you@yourdistrict.org';
+  const SIGNED_IN_USER = 'demo.reviewer@sampledistrict.org';
   const USER_ROLE      = 'Admin';
   const DEMO_PARAM     = '1';
   const DEMO_KEY  = 'vaulter.demo';
@@ -1137,8 +1139,9 @@
     const local = (SIGNED_IN_USER || '').split('@')[0];
     const words = local.split(/[._-]+/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1));
     el('userName').textContent   = words.join(' ') || SIGNED_IN_USER || 'Signed in';
-    el('userSub').textContent    = USER_ROLE ? USER_ROLE + ' · Orono Public Schools' : 'Orono Public Schools';
+    el('userSub').textContent    = USER_ROLE || '';
     el('userAvatar').textContent = (words.map(w => w[0]).join('').slice(0, 2) || '?').toUpperCase();
+    document.querySelector('.user').title = SIGNED_IN_USER + (USER_ROLE ? ' · ' + USER_ROLE : '');
   }
 
   // ── Pages ──────────────────────────────────────────────────

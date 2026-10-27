@@ -13,10 +13,13 @@ const demo = fs.readFileSync(path.join(src, 'Demo.html'), 'utf8');
 
 html = html
   .replace("<?!= include_('Demo') ?>", demo)
-  .replace('<?= userEmail ?>', 'you@yourdistrict.org')
+  .replace('<?= userEmail ?>', 'demo.reviewer@sampledistrict.org')
   .replace('<?= userRole ?>', 'Admin')
   .replace('<?= demoParam ?>', '1')
-  .replace('<title>Vaulter</title>', '<title>Vaulter · live demo</title>');
+  .replace('<title>Vaulter</title>', '<title>Vaulter · live demo</title>')
+  .replace(/Orono Public Schools/g, 'Sample District');
+
+if (/orono/i.test(html)) throw new Error('The demo build still mentions the district.');
 
 if (/<\?!?=/.test(html)) throw new Error('An Apps Script scriptlet was left unreplaced.');
 

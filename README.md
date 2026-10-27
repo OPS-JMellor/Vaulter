@@ -6,7 +6,7 @@ whether a match is a real concern, emails the flagged ones, and gives reviewers 
 work the queue. Built by Orono Public Schools (MN) technology in Google Apps Script on top of a
 Google Sheet, with no servers to run.
 
-**Site and live demo:** https://ops-jmellor.github.io/Vaulter · **Setup guide:** [docs/setup.html](https://ops-jmellor.github.io/Vaulter/setup.html)
+**Site and live demo:** https://orono-public-schools.github.io/Vaulter · **Setup guide:** [docs/setup.html](https://orono-public-schools.github.io/Vaulter/setup.html)
 
 **Pipeline:** Vault export → parse → keyword rules → Gemini triage → email digest → dashboard review
 
@@ -53,7 +53,7 @@ clasp open      # open in the Apps Script editor
 
 ### Setup from scratch
 
-The full walkthrough with troubleshooting is at [docs/setup.html](https://ops-jmellor.github.io/Vaulter/setup.html). The short version:
+The full walkthrough with troubleshooting is at [docs/setup.html](https://orono-public-schools.github.io/Vaulter/setup.html). The short version:
 
 1. **Prerequisites.** Google Workspace for Education with Gemini on for students and Vault licenses
    for them. A super-admin with Vault privileges; the whole thing runs as that account. Optionally a
