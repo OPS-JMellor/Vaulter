@@ -373,13 +373,13 @@
 
               <div class="field">
                 <label>Admin Email</label>
-                <input type="email" id="settingAdminEmail" placeholder="superadmin@orono.k12.mn.us" />
+                <input type="email" id="settingAdminEmail" placeholder="superadmin@yourdistrict.org" />
                 <div class="hint">Super-admin the service account impersonates. Must have Vault + Admin SDK access.</div>
               </div>
 
               <div class="field">
                 <label>Dashboard Access</label>
-                <textarea id="settingDashboardAccess" rows="3" placeholder="admin@orono.k12.mn.us, staff@orono.k12.mn.us"></textarea>
+                <textarea id="settingDashboardAccess" rows="3" placeholder="admin@yourdistrict.org, staff@yourdistrict.org"></textarea>
                 <div class="hint">Comma-separated emails allowed to view this dashboard</div>
               </div>
             </div>
@@ -389,7 +389,7 @@
 
               <div class="field">
                 <label>Alert Recipients</label>
-                <textarea id="settingAlertRecipients" rows="3" placeholder="admin@orono.k12.mn.us"></textarea>
+                <textarea id="settingAlertRecipients" rows="3" placeholder="admin@yourdistrict.org"></textarea>
                 <div class="hint">Comma-separated emails that receive flagged content alerts</div>
               </div>
 
@@ -400,7 +400,7 @@
 
               <div class="field">
                 <label>Reply-To</label>
-                <input type="email" id="settingReplyTo" placeholder="admin@orono.k12.mn.us" />
+                <input type="email" id="settingReplyTo" placeholder="admin@yourdistrict.org" />
               </div>
 
               <div class="field">
@@ -428,12 +428,12 @@
   // ── Firebase init ──────────────────────────────────────────
   // Replace with your project's config from Firebase Console → Project Settings.
   const firebaseConfig = {
-    apiKey:            "AIzaSyCYHoIZE13_JRk5-EnHS_5eIIfSwHHyGz8",
-    authDomain:        "vaulter-491416.firebaseapp.com",
-    projectId:         "vaulter-491416",
-    storageBucket:     "vaulter-491416.firebasestorage.app",
-    messagingSenderId: "127491848900",
-    appId:             "1:127491848900:web:c7bf0494e16f7d8a486791",
+    apiKey:            "YOUR_FIREBASE_WEB_API_KEY",
+    authDomain:        "your-firebase-project.firebaseapp.com",
+    projectId:         "your-firebase-project",
+    storageBucket:     "your-firebase-project.firebasestorage.app",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId:             "YOUR_APP_ID",
   };
 
   firebase.initializeApp(firebaseConfig);
@@ -455,7 +455,7 @@
 
   function signIn() {
     const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ hd: 'orono.k12.mn.us' });
+    provider.setCustomParameters({ hd: 'yourdistrict.org' });
     auth.signInWithPopup(provider).catch(err => {
       const el = document.getElementById('signInError');
       el.textContent = err.message;

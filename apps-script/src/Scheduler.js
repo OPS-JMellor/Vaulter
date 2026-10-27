@@ -19,7 +19,8 @@ function onOpen() {
 }
 
 function openDashboard_() {
-  const url  = 'https://script.google.com/a/macros/orono.k12.mn.us/s/AKfycbxaCRFkpPoycya--futcU-eZEQhUNACLgtxQmlUUFLy5uJPxSUAtCSR5CzJvKLgjyNKhA/exec';
+  // Set the DASHBOARD_URL script property to the deployed web app URL; otherwise the current deployment's URL is used.
+  const url  = PropertiesService.getScriptProperties().getProperty('DASHBOARD_URL') || ScriptApp.getService().getUrl();
   const html = HtmlService.createHtmlOutput(
     `<p style="font-family:sans-serif;margin:12px 0;">Opening Vaulter Dashboard…</p>
      <a href="${url}" target="_blank" style="font-family:sans-serif;">Click here if it didn't open automatically</a>

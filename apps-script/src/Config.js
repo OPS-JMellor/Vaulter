@@ -1,8 +1,17 @@
 // ============================================================
-// Config.js — Central constants. Update ADMIN_EMAIL before first run.
+// Config.js — Central constants.
+//
+// Nothing district-specific lives here. The Sheet is the one this
+// script is bound to, the Workspace customer is whoever runs it, and
+// per-install values (Gemini key, optional overrides) are Script
+// Properties: Project Settings → Script properties.
+//   GEMINI_API_KEY   optional, enables AI triage
+//   SPREADSHEET_ID   optional, use a Sheet other than the bound one
+//   DASHBOARD_URL    optional, the deployed web app URL for the Sheet menu
 // ============================================================
 
-const SPREADSHEET_ID = '1xUea7zwKsn4HsLq02irfQE2d6-RsvXGZ5aJSWhXvfgQ';
+const SPREADSHEET_ID = PropertiesService.getScriptProperties().getProperty('SPREADSHEET_ID')
+  || (SpreadsheetApp.getActiveSpreadsheet() && SpreadsheetApp.getActiveSpreadsheet().getId());
 
 const SHEETS = {
   VAULT_DATA:    'Vault_Data',
@@ -15,18 +24,11 @@ const SHEETS = {
   ACCESS_LIST:   'Access_List',
 };
 
-const SERVICE_ACCOUNT_EMAIL = 'gemini-vault@gemini-vault-491818.iam.gserviceaccount.com';
-
-const CUSTOMER_ID = 'C027lkte3';
+// Admin SDK alias for "the customer of the signed-in admin".
+const CUSTOMER_ID = 'my_customer';
 
 const VAULT_API  = 'https://vault.googleapis.com/v1';
 const ADMIN_API  = 'https://admin.googleapis.com/admin/directory/v1';
-const TOKEN_URL  = 'https://oauth2.googleapis.com/token';
-
-const VAULT_SCOPES = [
-  'https://www.googleapis.com/auth/ediscovery.readonly',
-  'https://www.googleapis.com/auth/admin.directory.orgunit.readonly',
-];
 
 // Vault corpus for Gemini for Google Workspace activity.
 // Verify against: https://developers.google.com/vault/reference/rest/v1/matters.exports#CorpusQuery

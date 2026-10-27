@@ -505,7 +505,7 @@
     <div class="titlebar">
       <div>
         <h1>Access</h1>
-        <p>Who can open this dashboard. Only @orono.k12.mn.us Google accounts can sign in.</p>
+        <p>Who can open this dashboard. Only Google accounts in your Workspace domain can sign in.</p>
       </div>
     </div>
     <div id="accessLoading" class="loading">Loading access list…</div>
@@ -514,7 +514,7 @@
         <h2 class="plate"><span class="rivet"></span><b>ADD USER</b><span class="rivet" style="margin-left:auto;"></span></h2>
         <div class="box-body">
           <div class="inline-form">
-            <label class="field">Email address<input type="email" class="ctl" id="accessNewEmail" placeholder="user@orono.k12.mn.us"></label>
+            <label class="field">Email address<input type="email" class="ctl" id="accessNewEmail" placeholder="user@yourdistrict.org"></label>
             <label class="field narrow">Role<select class="ctl" id="accessNewRole"><option value="Viewer">Viewer</option><option value="Admin">Admin</option></select></label>
             <button class="btn btn-1" onclick="addAccessUser()">Add user</button>
           </div>
@@ -583,16 +583,16 @@
           <section class="box">
             <h2 class="plate"><span class="rivet"></span><b>ALERTS</b><span class="rivet" style="margin-left:auto;"></span></h2>
             <div class="box-body">
-              <label class="field">Alert recipients<textarea class="ctl" id="settingAlertRecipients" rows="3" placeholder="counselor@orono.k12.mn.us, principal@orono.k12.mn.us"></textarea><span class="hint">Comma-separated. Every new flag goes to these addresses on the next run.</span></label>
+              <label class="field">Alert recipients<textarea class="ctl" id="settingAlertRecipients" rows="3" placeholder="counselor@yourdistrict.org, principal@yourdistrict.org"></textarea><span class="hint">Comma-separated. Every new flag goes to these addresses on the next run.</span></label>
               <label class="field">From name<input type="text" class="ctl" id="settingFromName" placeholder="Vaulter Alerts"></label>
-              <label class="field">Reply-to<input type="email" class="ctl" id="settingReplyTo" placeholder="technology@orono.k12.mn.us"></label>
+              <label class="field">Reply-to<input type="email" class="ctl" id="settingReplyTo" placeholder="technology@yourdistrict.org"></label>
               <label class="field">Alert cooldown, hours<input type="number" class="ctl" id="settingAlertCooldown" min="0" step="1" placeholder="1"><span class="hint">Minimum hours between repeat alerts for the same student</span></label>
             </div>
           </section>
           <section class="box">
             <h2 class="plate"><span class="rivet"></span><b>ADMIN</b><span class="rivet" style="margin-left:auto;"></span></h2>
             <div class="box-body">
-              <label class="field">Admin email<input type="email" class="ctl" id="settingAdminEmail" placeholder="superadmin@orono.k12.mn.us"><span class="hint">Super-admin the service account impersonates. Needs Vault and Admin SDK access.</span></label>
+              <label class="field">Admin email<input type="email" class="ctl" id="settingAdminEmail" placeholder="superadmin@yourdistrict.org"><span class="hint">The admin account this script runs as. Needs Vault and Admin SDK access.</span></label>
               <p class="help">Dashboard access is managed on the <a href="#" onclick="switchPage('access');return false;">Access</a> page.</p>
             </div>
           </section>

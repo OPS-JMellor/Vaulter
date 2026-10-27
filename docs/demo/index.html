@@ -1,0 +1,1998 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vaulter · live demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ── Tokens ───────────────────────────────────────────── */
+    :root {
+      --page: #d5dae3; --panel: #ffffff; --plate: #e8ebf0; --border: #9ea6b8; --divider: #e3e6ee; --divider-2: #eceef4;
+      --text: #1a2033; --text2: #4a5368; --head: #1d2a5d; --accent: #2d3f89; --ctrl: #8a92a6; --rivet: #8a92a6;
+      --sel: #eef1fa; --sel-bar: #2d3f89; --count-bg: #eceef4; --count-fg: #1d2a5d; --count-act-bg: #2d3f89; --count-act-fg: #ffffff;
+      --chip-act-bg: #1d2a5d; --chip-act-fg: #ffffff; --btn-bg: #1d2a5d; --btn-fg: #ffffff; --btn2-bg: #ffffff; --btn2-fg: #1d2a5d; --ai: #2d3f89;
+      --bar-cur: #2d3f89; --bar-prev: #9aa5cf; --bar-zero: #c5cad6; --track: #eceef4; --crit: #ad2122;
+      --hdr: #1d2a5d; --hdr-sub: #d3d8ec; --hdr-rule: #46538a; --readout: #2d3f89; --mark: #ad2122; --input-bg: #ffffff;
+      --tl-line: #c5cad6; --tl-done: #2d3f89; --tl-skip: #8a92a6;
+      --st-unrev: #1d2a5d; --st-needs: #7a5200; --st-concern: #ad2122; --st-cleared: #1d5e40; --st-rev-bg: #1d2a5d; --st-rev-fg: #ffffff;
+      --v-concern: #ad2122; --v-needs: #7a5200; --v-clear: #1d5e40; --ok: #1d5e40; --ok-dot: #8ee6b4;
+      --sev-critical: #ad2122; --sev-high: #b4410c; --sev-medium: #8a6400; --sev-low: #4a5368;
+      --warn-bg: #fff6d6; --warn-bd: #f0d78a; --warn-fg: #6b4f00; --demo: #f5b400; --demo-fg: #1d2a5d;
+      --overlay: rgba(15,20,36,.5); --toast-bg: #1d2a5d; --toast-fg: #ffffff; --skel-a: #e6e8f2; --skel-b: #f0f2f9;
+      --mono: 'Lexend', sans-serif;   /* codes, plates and numbers use the body face; Joel asked for no mono */
+    }
+    :root[data-theme="dark"] {
+      --page: #0f1424; --panel: #182036; --plate: #1f2942; --border: #34405e; --divider: #26304a; --divider-2: #26304a;
+      --text: #e8ecf5; --text2: #a9b2c8; --head: #c9d3f2; --accent: #8fa2e8; --ctrl: #6b7799; --rivet: #6b7799;
+      --sel: #22305a; --sel-bar: #8fa2e8; --count-bg: #26304a; --count-fg: #c9d3f2; --count-act-bg: #0f1424; --count-act-fg: #c9d3f2;
+      --chip-act-bg: #c9d3f2; --chip-act-fg: #0f1424; --btn-bg: #c9d3f2; --btn-fg: #0f1424; --btn2-bg: #182036; --btn2-fg: #c9d3f2; --ai: #8fa2e8;
+      --bar-cur: #8fa2e8; --bar-prev: #44527d; --bar-zero: #34405e; --track: #26304a; --crit: #ff8a8b;
+      --hdr: #0a0f1d; --hdr-sub: #a9b2c8; --hdr-rule: #26304a; --readout: #16204a; --mark: #ff8a8b; --input-bg: #0f1424;
+      --tl-line: #34405e; --tl-done: #8fa2e8; --tl-skip: #6b7799;
+      --st-unrev: #e8ecf5; --st-needs: #f0c060; --st-concern: #ff8a8b; --st-cleared: #6fd3a0; --st-rev-bg: #c9d3f2; --st-rev-fg: #0f1424;
+      --v-concern: #ff8a8b; --v-needs: #f0c060; --v-clear: #6fd3a0; --ok: #6fd3a0;
+      --warn-bg: #2b2300; --warn-bd: #6b5200; --warn-fg: #f0c060; --demo: #f0c060; --demo-fg: #0f1424;
+      --overlay: rgba(0,0,0,.6); --toast-bg: #c9d3f2; --toast-fg: #0f1424; --skel-a: #1f2942; --skel-b: #26304a;
+    }
+
+    /* ── Base ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body { background: var(--page); color: var(--text); font: 14px/1.5 'Lexend', sans-serif; min-height: 100vh; }
+    button, input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+    button { cursor: pointer; }
+    a { color: var(--accent); }
+    :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+    .stat .v, .plate, .readout, .bulk-pos { font-variant-numeric: tabular-nums; }
+    .wrap { max-width: 1360px; margin: 0 auto; padding: 0 32px; }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+    @media (max-width: 700px) { .wrap { padding: 0 16px; } }
+
+    /* ── Header ───────────────────────────────────────────── */
+    .hdr { background: var(--hdr); color: #fff; }
+    .hdr-in { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 28px; min-height: 64px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-name { font-size: 20px; font-weight: 600; letter-spacing: .01em; }
+    .brand-rule { width: 1px; height: 20px; background: var(--hdr-rule); }
+    .brand-sub { font-size: 13px; color: var(--hdr-sub); }
+    .nav { display: flex; flex-wrap: wrap; gap: 4px; flex: 1 1 auto; }
+    .nav-btn { background: none; border: 0; color: var(--hdr-sub); padding: 20px 12px 18px; border-bottom: 3px solid transparent; font-size: 14px; }
+    .nav-btn:hover { color: #fff; }
+    .nav-btn[aria-current="page"] { color: #fff; border-bottom-color: #fff; font-weight: 500; }
+    .hdr-right { display: flex; align-items: center; gap: 12px; }
+    .icon-btn { width: 40px; height: 40px; display: inline-flex; align-items: center; justify-content: center; background: transparent; color: #fff; border: 1px solid var(--hdr-rule); border-radius: 4px; }
+    .icon-btn:hover { background: rgba(255,255,255,.08); }
+    .icon-btn svg { display: none; }
+    :root[data-theme="light"] .icon-btn .ico-moon, :root[data-theme="dark"] .icon-btn .ico-sun { display: block; }
+    .user { display: flex; align-items: center; gap: 10px; }
+    .user-text { text-align: right; line-height: 1.3; }
+    .user-name { display: block; font-size: 13px; font-weight: 500; }
+    .user-sub { display: block; font-size: 12px; color: var(--hdr-sub); }
+    .avatar { width: 36px; height: 36px; border-radius: 50%; background: #2d3f89; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; }
+    .pill { display: inline-flex; align-items: center; gap: 7px; font-size: 11px; font-weight: 600; letter-spacing: .3px; color: #fff; background: rgba(255,255,255,.1); border: 1px solid var(--hdr-rule); border-radius: 4px; padding: 0 11px 0 8px; height: 40px; }
+    .pill:hover { background: rgba(255,255,255,.18); }
+    .pill-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,.4); }
+    body.demo .pill { background: var(--demo); border-color: var(--demo); color: var(--demo-fg); }
+    body.demo .pill-dot { background: var(--demo-fg); }
+    @media (max-width: 900px) { .nav-btn { padding: 14px 10px 12px; } .user-text { display: none; } .brand-sub, .brand-rule { display: none; } }
+
+    /* ── Readout strip ────────────────────────────────────── */
+    .readout { background: var(--readout); color: #fff; font-size: 12px; font-weight: 500; letter-spacing: .03em; }
+    .readout-in { display: flex; flex-wrap: wrap; gap: 4px 24px; align-items: center; padding-top: 8px; padding-bottom: 8px; }
+    .ro-item { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
+    .ro-item.strong { font-weight: 600; }
+    .ro-item.right { margin-left: auto; }
+    .ro-dot { width: 8px; height: 8px; background: var(--ok-dot); }
+    .ro-dot.off { background: #c5cad6; }
+    @media (max-width: 700px) { .readout { font-size: 11px; } .ro-item.right { margin-left: 0; } }
+
+    /* ── Demo banner ──────────────────────────────────────── */
+    .demo-banner { display: none; background: var(--warn-bg); border-bottom: 1px solid var(--warn-bd); color: var(--warn-fg); font-size: 12.5px; }
+    body.demo .demo-banner { display: block; }
+    .demo-banner .wrap { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding-top: 9px; padding-bottom: 9px; }
+    .demo-banner .sp { flex: 1; }
+    .demo-banner button { font-size: 11px; font-weight: 600; padding: 5px 11px; border-radius: 4px; border: 1px solid var(--warn-bd); background: var(--panel); color: var(--warn-fg); }
+
+    /* ── Pages ────────────────────────────────────────────── */
+    .page { display: none; }
+    .page.active { display: block; }
+    .page-in { padding-top: 24px; padding-bottom: 48px; display: flex; flex-direction: column; gap: 24px; }
+    .titlebar { display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px; }
+    .titlebar h1, .display { margin: 0; font-size: 28px; line-height: 1.2; font-weight: 600; color: var(--head); }
+    .titlebar p { margin: 6px 0 0; color: var(--text2); }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+    /* ── Buttons ──────────────────────────────────────────── */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 40px; padding: 0 16px; border-radius: 4px; font-size: 14px; font-weight: 500; border: 1px solid transparent; text-decoration: none; white-space: nowrap; }
+    .btn:disabled { opacity: .55; cursor: default; }
+    .btn-1 { background: var(--btn-bg); color: var(--btn-fg); border-color: var(--btn-bg); }
+    .btn-2 { background: var(--btn2-bg); color: var(--btn2-fg); border-color: var(--ctrl); }
+    .btn-ai { background: var(--btn2-bg); color: var(--ai); border-color: var(--ai); }
+    .btn-danger { background: var(--btn2-bg); color: var(--crit); border-color: var(--crit); }
+    .btn-link { background: none; border: 0; color: var(--accent); text-decoration: underline; text-underline-offset: 3px; padding: 0 8px; }
+    .btn-lg { min-height: 48px; padding: 0 18px; font-size: 15px; }
+    .btn svg { flex: none; }
+    .spin { animation: spin 1.1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Boxes and plates ─────────────────────────────────── */
+    .box { background: var(--panel); border: 1px solid var(--border); border-radius: 3px; }
+    .plate { display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--plate); border-bottom: 1px solid var(--border); font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--head); margin: 0; font-weight: 400; }
+    .plate b { font-weight: 600; }
+    .plate .sp { margin-left: auto; }
+    .plate .rivet { width: 6px; height: 6px; border-radius: 50%; background: var(--rivet); flex: none; }
+    .box-body { padding: 20px 24px; }
+    .box h2.sec-title, h2.sec-title { margin: 0; font-size: 16px; font-weight: 600; color: var(--head); }
+    h3.label, .label { margin: 0; font-size: 13px; font-weight: 600; color: var(--head); }
+    .meta { font-size: 13px; color: var(--text2); }
+    .help { margin: 0; font-size: 13px; color: var(--text2); }
+    @media (max-width: 700px) { .box-body { padding: 16px; } .plate { padding: 6px 12px; font-size: 11px; } }
+
+    /* ── Stats ────────────────────────────────────────────── */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--divider); }
+    .stat { background: var(--panel); padding: 20px 24px; display: flex; flex-direction: column; gap: 4px; }
+    .stat .v { font-family: var(--mono); font-size: 34px; font-weight: 500; line-height: 1.2; color: var(--head); }
+    .stat.crit .v { color: var(--crit); }
+    @media (max-width: 700px) { .stats { grid-template-columns: repeat(2, 1fr); } .stat { padding: 12px 14px; } .stat .v { font-size: 26px; } }
+
+    /* ── Trend ────────────────────────────────────────────── */
+    .trend { display: flex; flex-wrap: wrap; }
+    .chart { flex: 2 1 520px; min-width: 0; padding: 20px 24px 16px; display: flex; flex-direction: column; gap: 16px; }
+    .chart-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline; }
+    .legend { display: flex; gap: 16px; font-size: 12px; color: var(--text2); }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .legend i { width: 10px; height: 10px; display: inline-block; }
+    .bars { position: relative; height: 128px; display: flex; align-items: flex-end; gap: 8px; border-bottom: 1px solid var(--border); }
+    .bars .grid { position: absolute; left: 0; right: 0; border-top: 1px dashed var(--divider); }
+    .bar-col { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; position: relative; min-width: 0; }
+    .bar-col .n { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+    .bar-col .bar { display: block; width: 100%; max-width: 36px; background: var(--bar-prev); }
+    .bar-col .bar.cur { background: var(--bar-cur); }
+    .bar-col .bar.zero { background: var(--bar-zero); }
+    .bar-labels { display: flex; gap: 8px; }
+    .bar-labels span { flex: 1 1 0; text-align: center; font-family: var(--mono); font-size: 11px; color: var(--text2); white-space: nowrap; min-width: 0; overflow: hidden; }
+    .cats { flex: 1 1 300px; padding: 20px 24px; border-left: 1px solid var(--divider); display: flex; flex-direction: column; gap: 14px; }
+    .cat { display: grid; grid-template-columns: 112px 1fr 24px; align-items: center; gap: 12px; font-size: 13px; }
+    .cat .track { height: 8px; background: var(--track); }
+    .cat .fill { display: block; height: 8px; background: var(--bar-cur); }
+    .cat .n { text-align: right; font-family: var(--mono); font-weight: 600; color: var(--head); }
+    @media (max-width: 900px) { .cats { border-left: 0; border-top: 1px solid var(--divider); } .bar-labels span:nth-child(even) { visibility: hidden; } }
+
+    /* ── Chips ────────────────────────────────────────────── */
+    .sev { display: inline-block; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; line-height: 1.5; color: #fff; background: var(--sev-low); white-space: nowrap; }
+    .sev-critical { background: var(--sev-critical); } .sev-high { background: var(--sev-high); } .sev-medium { background: var(--sev-medium); } .sev-low { background: var(--sev-low); }
+    .st { display: inline-flex; align-items: center; gap: 6px; padding: 1px 10px 1px 8px; border-radius: 999px; font-size: 12px; font-weight: 600; line-height: 1.6; white-space: nowrap; background: var(--panel); border: 1.5px solid currentColor; }
+    .st .d { width: 8px; height: 8px; border-radius: 50%; background: currentColor; flex: none; }
+    .st-unrev { color: var(--st-unrev); } .st-unrev .d { background: transparent; border: 2px solid currentColor; }
+    .st-needs { color: var(--st-needs); } .st-concern { color: var(--st-concern); } .st-cleared { color: var(--st-cleared); }
+    .st-reviewed { color: var(--st-rev-fg); background: var(--st-rev-bg); border-color: var(--st-rev-bg); }
+    .v-concern { color: var(--v-concern); } .v-needs { color: var(--v-needs); } .v-clear { color: var(--v-clear); }
+    mark { background: none; color: var(--mark); font-weight: 600; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+
+    /* ── Filters and controls ─────────────────────────────── */
+    .chip { display: inline-flex; align-items: center; gap: 5px; min-height: 30px; padding: 0 9px; border-radius: 4px; font-size: 12px; font-weight: 500; background: var(--panel); color: var(--head); border: 1px solid var(--ctrl); white-space: nowrap; }
+    .chip:hover { background: var(--sel); }
+    .chip[aria-pressed="true"] { background: var(--chip-act-bg); color: var(--chip-act-fg); border-color: var(--chip-act-bg); }
+    .chip .n { font-size: 11px; font-weight: 600; opacity: .7; font-variant-numeric: tabular-nums; }
+    .chip .sw { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+    .chip[aria-pressed="true"] .sw { box-shadow: 0 0 0 1.5px var(--chip-act-fg); }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chips.seg { gap: 0; }
+    .chips.seg .chip { border-radius: 0; margin-left: -1px; }
+    .chips.seg .chip:first-child { border-radius: 4px 0 0 4px; margin-left: 0; }
+    .chips.seg .chip:last-child { border-radius: 0 4px 4px 0; }
+    .chips.seg .chip[aria-pressed="true"] { position: relative; z-index: 1; }
+    .field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; color: var(--head); }
+    .ctl { width: 100%; min-height: 40px; padding: 8px 10px; border: 1px solid var(--ctrl); border-radius: 4px; background: var(--input-bg); color: var(--text); font-size: 14px; font-weight: 400; line-height: 1.5; }
+    textarea.ctl { resize: vertical; }
+    select.ctl { padding-top: 0; padding-bottom: 0; }
+    .ctl:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45,63,137,.18); }
+    .search { position: relative; }
+    .search svg { position: absolute; left: 10px; top: 12px; }
+    .search .ctl { padding-left: 34px; }
+    .hint { font-size: 12px; color: var(--text2); font-weight: 400; }
+
+    /* ── Flag queue ───────────────────────────────────────── */
+    .queue { display: flex; flex-wrap: wrap; align-items: stretch; overflow: hidden; }
+    .qlist { flex: 1 1 420px; min-width: 0; display: flex; flex-direction: column; border-right: 1px solid var(--border); }
+    .qfilters { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; border-bottom: 1px solid var(--border); }
+    .qfilters .chip-rows { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center; }
+    .qfilters .two { display: flex; flex-wrap: wrap; gap: 8px; }
+    .qfilters .two .field:first-child { flex: 1 1 140px; } .qfilters .two .field:last-child { flex: 2 1 200px; }
+    .showing { margin: 0; padding: 10px 16px; font-size: 12px; color: var(--text2); border-bottom: 1px solid var(--divider); }
+    .rows { display: flex; flex-direction: column; max-height: 1100px; overflow-y: auto; }
+    .row { display: block; width: 100%; text-align: left; color: var(--text); padding: 14px 16px; border: 0; border-bottom: 1px solid var(--divider); background: var(--panel); }
+    .row:hover { background: var(--sel); }
+    .row[aria-current="true"] { background: var(--sel); box-shadow: inset -3px 0 0 var(--sel-bar); }
+    .row .top { display: flex; align-items: center; gap: 8px; }
+    .row .cat { font-size: 13px; font-weight: 600; }
+    .row .rel { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--text2); }
+    .row .who { display: block; margin-top: 4px; font-family: var(--mono); font-size: 12px; color: var(--text2); }
+    .row .txt { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; margin-top: 6px; font-size: 14px; line-height: 1.45; }
+    .row .foot { display: block; margin-top: 8px; }
+    .qdetail { flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; }
+    .back { display: none; }
+    .dhead { padding: 20px 28px; display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--divider); }
+    .dhead .chips-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+    .dhead h2 { margin: 10px 0 0; font-size: 20px; line-height: 1.3; font-weight: 600; color: var(--head); }
+    .dbody { display: flex; flex-wrap: wrap; flex: 1 1 auto; }
+    .dmain { flex: 999 1 420px; min-width: 0; padding: 24px 28px; display: flex; flex-direction: column; gap: 24px; }
+    .dl { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px 24px; }
+    .dl div { display: flex; flex-direction: column; gap: 2px; }
+    .dl dt { font-size: 13px; font-weight: 600; color: var(--head); }
+    .dl dd { margin: 0; font-size: 14px; }
+    .dl dd.mono { font-size: 13px; word-break: break-all; }
+    .sec { display: flex; flex-direction: column; gap: 8px; border-top: 1px solid var(--divider); padding-top: 20px; }
+    .prompt { margin: 0; font-size: 16px; line-height: 1.65; white-space: pre-wrap; word-break: break-word; }
+    .verdict { margin: 0; font-size: 16px; font-weight: 600; }
+    .assess { margin: 0; font-size: 14px; font-weight: 500; }
+    .reason { margin: 0; font-size: 14px; color: var(--text2); }
+    .ai-head { display: flex; align-items: center; gap: 8px; }
+    .ai-head .stamp { font-family: var(--mono); font-size: 12px; font-weight: 400; color: var(--text2); }
+    .tl-aside { flex: 1 1 240px; padding: 24px; border-left: 1px solid var(--divider); display: flex; flex-direction: column; gap: 12px; }
+    .tl { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+    .tl li { display: flex; gap: 12px; }
+    .tl .rail { display: flex; flex-direction: column; align-items: center; width: 12px; flex: none; }
+    .tl .dot { width: 12px; height: 12px; border-radius: 2px; margin-top: 4px; flex: none; border: 2px solid var(--tl-done); background: transparent; }
+    .tl .dot.done { background: var(--tl-done); }
+    .tl .dot.skip { border-color: var(--tl-skip); }
+    .tl .line { flex: 1 1 auto; width: 2px; background: var(--tl-line); margin: 2px 0; }
+    .tl li:last-child .line { display: none; }
+    .tl .body { display: flex; flex-direction: column; gap: 2px; padding-bottom: 18px; }
+    .tl .t { font-size: 14px; font-weight: 500; }
+    .tl .m { font-size: 13px; color: var(--text2); }
+    .empty { flex: 1 1 auto; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 40px; text-align: center; }
+    .empty h2 { margin: 0; font-size: 20px; font-weight: 600; color: var(--head); }
+    .empty p { margin: 0; max-width: 420px; color: var(--text2); }
+    .empty .actions { justify-content: center; align-items: center; gap: 16px; margin-top: 8px; }
+    @media (max-width: 900px) {
+      .qlist { border-right: 0; flex-basis: 100%; }
+      .qdetail { display: none; flex-basis: 100%; }
+      .queue.show-detail .qlist { display: none; }
+      .queue.show-detail .qdetail { display: flex; }
+      .back { display: inline-flex; }
+      .dhead, .dmain { padding: 16px; }
+      .tl-aside { border-left: 0; border-top: 1px solid var(--divider); padding: 16px; }
+      .rows { max-height: none; }
+    }
+
+    /* ── Bulk review ──────────────────────────────────────── */
+    .bulk-in { max-width: 880px; margin: 0 auto; gap: 20px; }
+    .bulk-top { display: flex; flex-direction: column; gap: 12px; }
+    .bulk-title { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+    .bulk-pos { font-family: var(--mono); font-size: 14px; font-weight: 500; color: var(--head); }
+    .prog { display: grid; gap: 4px; }
+    .prog span { height: 6px; background: var(--bar-zero); }
+    .prog span.done { background: var(--accent); }
+    .prog span.now { background: var(--panel); border: 2px solid var(--accent); }
+    .counts { margin: 0; display: flex; flex-wrap: wrap; gap: 4px 20px; font-size: 13px; color: var(--text2); }
+    .counts b { color: var(--text); font-weight: 600; }
+    .case-head { padding: 20px 28px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; border-bottom: 1px solid var(--divider); }
+    .case-head .who { font-family: var(--mono); font-size: 12px; color: var(--text2); }
+    .case-head .st { margin-left: auto; }
+    .case-sec { padding: 24px 28px; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(--divider); }
+    .case-sec:last-child { border-bottom: 0; }
+    .case-sec .prompt { font-size: 18px; line-height: 1.6; }
+    .case-sec .verdict { font-size: 20px; }
+    .case-sec .assess { font-size: 15px; }
+    .case-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .case-actions .btn { flex: 1 1 200px; }
+    .case-actions .btn-link { flex: 0 1 120px; }
+    .thinking { display: flex; align-items: center; gap: 10px; color: var(--text2); }
+    .log { list-style: none; margin: 0; padding: 0; }
+    .log li { display: grid; grid-template-columns: 28px 88px 1fr auto; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--divider); font-size: 13px; }
+    .log li:last-child { border-bottom: 0; }
+    .log li[aria-current="step"] { background: var(--sel); font-weight: 500; }
+    .log .i { color: var(--text2); } .log li[aria-current="step"] .i { color: var(--head); font-weight: 600; }
+    .log .desc { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .log .res { color: var(--text2); } .log .res.strong { color: var(--accent); font-weight: 500; } .log .res.now { color: var(--head); font-weight: 600; }
+    @media (max-width: 700px) { .case-head, .case-sec { padding: 16px; } .log li { grid-template-columns: 24px 72px 1fr auto; padding: 10px 12px; gap: 8px; } }
+
+    /* ── Tables ───────────────────────────────────────────── */
+    .table-wrap { overflow-x: auto; }
+    .tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .tbl th { padding: 10px 14px; text-align: left; font-family: var(--mono); font-weight: 600; font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--head); border-bottom: 1px solid var(--border); white-space: nowrap; }
+    .tbl td { padding: 11px 14px; border-bottom: 1px solid var(--divider); vertical-align: top; }
+    .tbl tr:last-child td { border-bottom: 0; }
+    .tbl .mono { font-size: 12px; }
+    .tbl .muted { color: var(--text2); }
+    .tbl .empty-row { text-align: center; padding: 32px; color: var(--text2); }
+    .run-ok { color: var(--ok); font-weight: 600; } .run-bad { color: var(--crit); font-weight: 600; }
+    .kw { font-family: var(--mono); font-size: 12px; background: var(--count-bg); color: var(--head); padding: 1px 6px; border-radius: 3px; }
+
+    /* ── Settings / access forms ──────────────────────────── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    .form-grid .box-body, .form-col { display: flex; flex-direction: column; gap: 16px; }
+    .ou-list { border: 1px solid var(--ctrl); border-radius: 4px; max-height: 260px; overflow-y: auto; padding: 6px 0; background: var(--input-bg); }
+    .ou-item { display: flex; align-items: center; gap: 10px; padding: 7px 12px; cursor: pointer; font-size: 13px; font-weight: 400; }
+    .ou-item:hover { background: var(--sel); }
+    .ou-item input { width: 16px; height: 16px; accent-color: var(--accent); flex: none; }
+    .ou-path { font-family: var(--mono); font-size: 12px; }
+    .inline-form { display: flex; align-items: flex-end; gap: 12px; flex-wrap: wrap; }
+    .inline-form .field { flex: 1 1 240px; } .inline-form .field.narrow { flex: 0 1 160px; }
+    .status-line { font-size: 13px; }
+    .status-line.ok { color: var(--ok); } .status-line.bad { color: var(--crit); }
+    @media (max-width: 800px) { .form-grid { grid-template-columns: 1fr; } }
+
+    /* ── Modal, toasts, skeleton ──────────────────────────── */
+    .modal { display: none; position: fixed; inset: 0; background: var(--overlay); z-index: 1000; align-items: center; justify-content: center; padding: 16px; }
+    .modal.open { display: flex; }
+    .modal .box { width: 100%; max-width: 680px; max-height: 90vh; display: flex; flex-direction: column; overflow: hidden; }
+    .modal .scroll { overflow-y: auto; flex: 1 1 auto; }
+    .modal-foot { padding: 14px 20px; border-top: 1px solid var(--divider); display: flex; justify-content: flex-end; gap: 10px; }
+    .crit-item { border-bottom: 1px solid var(--divider); padding: 14px 0; display: flex; flex-direction: column; gap: 6px; }
+    .crit-item .top { display: flex; align-items: center; gap: 10px; }
+    .crit-item .top label { font-weight: 600; flex: 1; cursor: pointer; }
+    .crit-item .kws { font-size: 12px; color: var(--text2); padding-left: 26px; line-height: 1.6; }
+    .toasts { position: fixed; right: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 8px; z-index: 2000; }
+    .toast { background: var(--toast-bg); color: var(--toast-fg); padding: 10px 14px; border-radius: 4px; font-size: 13px; max-width: 360px; box-shadow: 0 6px 24px rgba(0,0,0,.25); animation: fadeIn .2s ease-out; }
+    .toast.bad { background: var(--crit); color: #fff; }
+    .skel { border-radius: 3px; background: linear-gradient(90deg, var(--skel-a) 25%, var(--skel-b) 50%, var(--skel-a) 75%); background-size: 400% 100%; animation: shimmer 1.6s ease-in-out infinite; }
+    @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: -100% 0; } }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+    .fade-in { animation: fadeIn .25s ease-out; }
+    .loading { text-align: center; padding: 48px; color: var(--text2); }
+  </style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="wrap hdr-in">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="11.5" stroke="#fff" stroke-width="2"/><circle cx="14" cy="14" r="4" stroke="#fff" stroke-width="2"/><path d="M14 2.5v3M14 22.5v3M2.5 14h3M22.5 14h3M5.9 5.9 8 8M20 20l2.1 2.1M22.1 5.9 20 8M8 20l-2.1 2.1" stroke="#fff" stroke-width="1.6"/><circle cx="14" cy="14" r="1.5" fill="#ff8a8b"/></svg>
+      <span class="brand-name">Vaulter</span>
+      <span class="brand-rule"></span>
+      <span class="brand-sub">Orono Public Schools</span>
+    </div>
+    <nav class="nav" aria-label="Main">
+      <button class="nav-btn" data-page="dashboard" aria-current="page" onclick="switchPage('dashboard')">Dashboard</button>
+      <button class="nav-btn" data-page="bulk" onclick="switchPage('bulk')">Bulk review</button>
+      <button class="nav-btn" data-page="filtered" onclick="switchPage('filtered')">AI filtered log</button>
+      <button class="nav-btn" data-page="access" onclick="switchPage('access')">Access</button>
+      <button class="nav-btn" data-page="settings" onclick="switchPage('settings')">Settings</button>
+    </nav>
+    <div class="hdr-right">
+      <button class="pill" id="demoToggle" onclick="toggleDemo()" aria-pressed="false" title="Switch between live data and sample data"><span class="pill-dot"></span><span id="demoToggleLabel">Demo</span></button>
+      <button class="icon-btn" id="themeToggle" onclick="toggleTheme()" aria-pressed="false" aria-label="Dark mode">
+        <svg class="ico-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"/></svg>
+        <svg class="ico-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"/></svg>
+      </button>
+      <div class="user">
+        <span class="user-text"><span class="user-name" id="userName"></span><span class="user-sub" id="userSub"></span></span>
+        <span class="avatar" id="userAvatar" aria-hidden="true"></span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<div class="readout"><div class="wrap readout-in" id="readoutIn"><span class="ro-item">LOADING…</span></div></div>
+
+<div class="demo-banner" id="demoBanner">
+  <div class="wrap">
+    <strong>Demo mode</strong>
+    <span>Sample data only. Nothing on this page reads or writes the real Vault sheets, and no email is sent.</span>
+    <span class="sp"></span>
+    <button onclick="resetDemo()">Reset sample data</button>
+    <button onclick="toggleDemo()">Exit demo</button>
+  </div>
+</div>
+
+<!-- ── Dashboard ───────────────────────────────────────────── -->
+<main id="page-dashboard" class="page active">
+  <div class="wrap page-in">
+    <div class="titlebar">
+      <div>
+        <h1>Flag review</h1>
+        <p>Student Gemini prompts from Google Vault, scanned against keyword rules and checked by AI.</p>
+      </div>
+      <div class="actions">
+        <button class="btn btn-2" id="dashRunBtn" onclick="runNow()"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Run import now</button>
+        <button class="btn btn-1" id="bulkBtn" onclick="startBulkReview()">Bulk review</button>
+      </div>
+    </div>
+
+    <div id="dashSkeleton">
+      <div class="skel" style="height:120px;margin-bottom:24px;"></div>
+      <div class="skel" style="height:240px;margin-bottom:24px;"></div>
+      <div class="skel" style="height:520px;"></div>
+    </div>
+
+    <div id="dashContent" style="display:none;">
+      <section class="box" aria-label="Last 7 days" style="margin-bottom:24px;">
+        <h2 class="plate"><span class="rivet"></span><b>BOX 01</b><span>LAST 7 DAYS</span><span class="sp" id="statsRange"></span><span class="rivet"></span></h2>
+        <div class="stats" id="stats"></div>
+      </section>
+
+      <section class="box" aria-label="Activity" style="margin-bottom:24px;">
+        <h2 class="plate"><span class="rivet"></span><b>BOX 02</b><span>ACTIVITY</span><span class="sp">14 DAYS</span><span class="rivet"></span></h2>
+        <div class="trend">
+          <div class="chart">
+            <div class="chart-head">
+              <h3 class="sec-title" style="margin:0;font-size:16px;font-weight:600;color:var(--head);">Flags per day, last 14 days</h3>
+              <span class="legend"><span><i style="background:var(--bar-prev)"></i>Days 8 to 14</span><span><i style="background:var(--bar-cur)"></i>Last 7 days</span></span>
+            </div>
+            <div id="chart" role="img"></div>
+          </div>
+          <div class="cats">
+            <h3 class="sec-title" style="margin:0;font-size:16px;font-weight:600;color:var(--head);">By category, last 7 days</h3>
+            <div id="cats"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="box" aria-label="Flag queue">
+        <h2 class="plate"><span class="rivet"></span><b>BOX 03</b><span>FLAG QUEUE</span><span class="sp" id="queuePlateRight"></span><span class="rivet"></span></h2>
+        <div class="queue" id="queue">
+          <div class="qlist">
+            <div class="qfilters">
+              <div class="chip-rows">
+                <div class="chips seg" role="group" aria-label="Status filter" id="statusChips"></div>
+                <div class="chips" role="group" aria-label="Severity filter" id="sevChips"></div>
+              </div>
+              <div class="two">
+                <label class="field">Category
+                  <select class="ctl" id="catFilter" onchange="setCat(this.value)"><option value="">All categories</option></select>
+                </label>
+                <label class="field">Search
+                  <span class="search">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="4.75" stroke="var(--text2)" stroke-width="1.5"/><path d="M10.5 10.5 14 14" stroke="var(--text2)" stroke-width="1.5" stroke-linecap="round"/></svg>
+                    <input type="search" class="ctl" id="searchBox" placeholder="Prompt text, keyword or grade" oninput="setQuery(this.value)">
+                  </span>
+                </label>
+              </div>
+            </div>
+            <p class="showing" id="showing"></p>
+            <div class="rows" id="rows"></div>
+          </div>
+          <div class="qdetail" id="detail"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<!-- ── Bulk review ─────────────────────────────────────────── -->
+<main id="page-bulk" class="page">
+  <div class="wrap page-in bulk-in">
+    <div class="bulk-top">
+      <button class="btn-link" style="align-self:flex-start;padding:0;min-height:32px;display:inline-flex;align-items:center;gap:6px;font-size:13px;" onclick="bulkExit()"><svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M8.5 3 4.5 7l4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Back to dashboard · finish later</button>
+      <div class="bulk-title">
+        <h1 class="display">Bulk AI review</h1>
+        <span class="bulk-pos" id="bulkPos"></span>
+      </div>
+      <div class="prog" id="bulkProg" role="progressbar" aria-label="Review progress"></div>
+      <p class="counts" id="bulkCounts"></p>
+    </div>
+    <article class="box" id="bulkCase" aria-label="Current flag"></article>
+    <section class="box" aria-label="Session log">
+      <h2 class="plate"><span class="rivet"></span><b>SESSION LOG</b><span class="sp" id="bulkLogCount"></span><span class="rivet"></span></h2>
+      <ol class="log" id="bulkLog"></ol>
+    </section>
+  </div>
+</main>
+
+<!-- ── AI filtered log ─────────────────────────────────────── -->
+<main id="page-filtered" class="page">
+  <div class="wrap page-in">
+    <div class="titlebar">
+      <div>
+        <h1>AI filtered log</h1>
+        <p>Prompts that matched a keyword but were dismissed by AI during import as likely false positives.</p>
+      </div>
+      <div class="actions"><button class="btn btn-danger" onclick="clearFilteredLog()">Clear log</button></div>
+    </div>
+    <div id="filteredLoading" class="loading">Loading filtered log…</div>
+    <section class="box" id="filteredBox" style="display:none;">
+      <h2 class="plate"><span class="rivet"></span><b>AI FILTERED</b><span class="sp" id="filteredCount"></span><span class="rivet"></span></h2>
+      <div class="table-wrap">
+        <table class="tbl">
+          <thead><tr><th>Time</th><th>Student</th><th>Grade</th><th>Category</th><th>Keyword</th><th>AI assessment</th><th>Prompt</th></tr></thead>
+          <tbody id="filteredBody"></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- ── Access ──────────────────────────────────────────────── -->
+<main id="page-access" class="page">
+  <div class="wrap page-in">
+    <div class="titlebar">
+      <div>
+        <h1>Access</h1>
+        <p>Who can open this dashboard. Only Google accounts in your Workspace domain can sign in.</p>
+      </div>
+    </div>
+    <div id="accessLoading" class="loading">Loading access list…</div>
+    <div id="accessContent" style="display:none;">
+      <section class="box" style="margin-bottom:24px;">
+        <h2 class="plate"><span class="rivet"></span><b>ADD USER</b><span class="rivet" style="margin-left:auto;"></span></h2>
+        <div class="box-body">
+          <div class="inline-form">
+            <label class="field">Email address<input type="email" class="ctl" id="accessNewEmail" placeholder="user@yourdistrict.org"></label>
+            <label class="field narrow">Role<select class="ctl" id="accessNewRole"><option value="Viewer">Viewer</option><option value="Admin">Admin</option></select></label>
+            <button class="btn btn-1" onclick="addAccessUser()">Add user</button>
+          </div>
+          <p class="status-line" id="accessAddStatus" style="margin:8px 0 0;display:none;"></p>
+        </div>
+      </section>
+      <section class="box">
+        <h2 class="plate"><span class="rivet"></span><b>AUTHORIZED USERS</b><span class="sp" id="accessCount"></span><span class="rivet"></span></h2>
+        <div class="table-wrap">
+          <table class="tbl">
+            <thead><tr><th>Email</th><th>Role</th><th>Added by</th><th>Added</th><th></th></tr></thead>
+            <tbody id="accessBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<!-- ── Settings ────────────────────────────────────────────── -->
+<main id="page-settings" class="page">
+  <div class="wrap page-in">
+    <div class="titlebar">
+      <div>
+        <h1>Settings</h1>
+        <p>Import schedule, alert delivery and pipeline tools.</p>
+      </div>
+    </div>
+    <div id="settingsLoading" class="loading">Loading settings…</div>
+    <div id="settingsContent" style="display:none;">
+      <section class="box" style="margin-bottom:24px;">
+        <h2 class="plate"><span class="rivet"></span><b>PIPELINE</b><span class="sp" id="settingsPlateRight"></span><span class="rivet"></span></h2>
+        <div class="box-body" style="display:flex;flex-direction:column;gap:12px;">
+          <div class="actions" style="align-items:center;">
+            <button class="btn btn-2" id="runNowBtn" onclick="runNow()">Run import now</button>
+            <button class="btn btn-ai" onclick="suggestCriteria()"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="6.5" y="6.5" width="3" height="3" fill="currentColor"/><path d="M6 1.5V4M10 1.5V4M6 12v2.5M10 12v2.5M1.5 6H4M1.5 10H4M12 6h2.5M12 10h2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>Suggest alert criteria</button>
+            <button class="btn btn-2" onclick="clearVaultDataRows()">Clear Vault_Data</button>
+            <span class="status-line" id="runNowStatus" style="display:none;"></span>
+          </div>
+          <p class="help">Run import now queues Vault exports for the selected OUs; records appear when the exports finish. Suggest alert criteria asks Gemini for K-12 keyword rules you can review and add to the Alerts_Config sheet.</p>
+        </div>
+        <div class="table-wrap" style="border-top:1px solid var(--divider);">
+          <table class="tbl">
+            <thead><tr><th>Started</th><th>Status</th><th>Exports</th><th>Flagged</th><th>Alerted</th><th>Error</th></tr></thead>
+            <tbody id="runLogBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <div class="form-grid">
+        <section class="box">
+          <h2 class="plate"><span class="rivet"></span><b>IMPORT</b><span class="rivet" style="margin-left:auto;"></span></h2>
+          <div class="box-body">
+            <div class="field">Organizational units to import
+              <span class="hint">Where to pull Gemini activity from</span>
+              <div class="ou-list" id="ouList"><div class="loading" style="padding:16px;">Loading OUs…</div></div>
+            </div>
+            <label class="field">Date range<select class="ctl" id="settingDateRange"><option value="day">Past 24 hours</option><option value="week">Past 7 days</option><option value="month">Past 30 days</option></select></label>
+            <label class="field">Import frequency<select class="ctl" id="settingFrequency" onchange="toggleScheduleFields()"><option value="hourly">Hourly</option><option value="daily">Daily</option><option value="weekly">Weekly</option></select></label>
+            <label class="field" id="fieldImportTime">Import time<input type="time" class="ctl" id="settingImportTime"><span class="hint">Time of day to run, 24-hour</span></label>
+            <label class="field" id="fieldImportDay" style="display:none;">Import day<select class="ctl" id="settingImportDay"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select></label>
+            <label class="field">Status<select class="ctl" id="settingStatus"><option value="Active">Active</option><option value="Paused">Paused</option></select></label>
+          </div>
+        </section>
+        <div class="form-col">
+          <section class="box">
+            <h2 class="plate"><span class="rivet"></span><b>ALERTS</b><span class="rivet" style="margin-left:auto;"></span></h2>
+            <div class="box-body">
+              <label class="field">Alert recipients<textarea class="ctl" id="settingAlertRecipients" rows="3" placeholder="counselor@yourdistrict.org, principal@yourdistrict.org"></textarea><span class="hint">Comma-separated. Every new flag goes to these addresses on the next run.</span></label>
+              <label class="field">From name<input type="text" class="ctl" id="settingFromName" placeholder="Vaulter Alerts"></label>
+              <label class="field">Reply-to<input type="email" class="ctl" id="settingReplyTo" placeholder="technology@yourdistrict.org"></label>
+              <label class="field">Alert cooldown, hours<input type="number" class="ctl" id="settingAlertCooldown" min="0" step="1" placeholder="1"><span class="hint">Minimum hours between repeat alerts for the same student</span></label>
+            </div>
+          </section>
+          <section class="box">
+            <h2 class="plate"><span class="rivet"></span><b>ADMIN</b><span class="rivet" style="margin-left:auto;"></span></h2>
+            <div class="box-body">
+              <label class="field">Admin email<input type="email" class="ctl" id="settingAdminEmail" placeholder="superadmin@yourdistrict.org"><span class="hint">The admin account this script runs as. Needs Vault and Admin SDK access.</span></label>
+              <p class="help">Dashboard access is managed on the <a href="#" onclick="switchPage('access');return false;">Access</a> page.</p>
+            </div>
+          </section>
+        </div>
+      </div>
+      <div class="actions" style="align-items:center;gap:12px;">
+        <button class="btn btn-1" id="saveSettingsBtn" onclick="saveSettings()">Save settings</button>
+        <span class="status-line ok" id="saveStatus" style="display:none;">Settings saved.</span>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- ── Suggest criteria modal ──────────────────────────────── -->
+<div id="criteriaModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="criteriaTitle">
+  <div class="box">
+    <h2 class="plate" id="criteriaTitle"><span class="rivet"></span><b>AI SUGGESTED CRITERIA</b><span class="sp"></span><button class="btn-link" style="padding:0 4px;" onclick="closeCriteria()" aria-label="Close">Close</button></h2>
+    <p class="help" style="padding:14px 20px;border-bottom:1px solid var(--divider);">Gemini suggested these K-12 safety categories. Check the ones to add to the Alerts_Config sheet, then apply.</p>
+    <div class="scroll" style="padding:4px 20px;">
+      <div id="criteriaLoading" class="thinking" style="padding:20px 0;"><svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span id="criteriaLoadingText">Generating suggestions with AI…</span></div>
+      <div id="criteriaResults" style="display:none;"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-2" onclick="closeCriteria()">Cancel</button>
+      <button class="btn btn-1" id="criteriaApplyBtn" onclick="applyCriteriaSuggestions()" style="display:none;">Apply selected</button>
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script>
+  // ============================================================
+  // Demo.html — Sample data and a stand-in for google.script.run.
+  //
+  // Included by index.html. When demo mode is on, rpc() in index.html
+  // returns demoRunner() instead of google.script.run, so every call the
+  // dashboard makes is answered from the in-memory store below after a
+  // short delay. Nothing here reads or writes the sheets, calls Vault,
+  // calls Gemini or sends email. All people in this file are fictional.
+  // ============================================================
+
+  const DEMO_DOMAIN = 'demo.orono.k12.mn.us';
+  let demoDB = null;
+
+  // ── Helpers ────────────────────────────────────────────────
+
+  function demoPad(n) { return String(n).padStart(2, '0'); }
+
+  // Local-time stamp in the same shape the sheet rows use: YYYY-MM-DDTHH:MM:SS
+  function demoStamp(d) {
+    return `${d.getFullYear()}-${demoPad(d.getMonth() + 1)}-${demoPad(d.getDate())}` +
+           `T${demoPad(d.getHours())}:${demoPad(d.getMinutes())}:${demoPad(d.getSeconds())}`;
+  }
+
+  function demoAgo(days, hour, minute) {
+    const d = new Date();
+    d.setDate(d.getDate() - days);
+    d.setHours(hour, minute, Math.floor(Math.random() * 60), 0);
+    return d;
+  }
+
+  function demoEmail(name) { return `${name}@${DEMO_DOMAIN}`; }
+
+  function demoWho() { return SIGNED_IN_USER || demoEmail('you'); }
+
+  // ── Sample flagged prompts ─────────────────────────────────
+  // ai        = what the AI reviewer says about this prompt (used by Review with AI and the wizard)
+  // aiShown   = the AI note is already on the row, as if inline review ran during import
+  // reviewedBy/notes = a person already reviewed it
+  // Rows whose ai verdict is "Likely False Positive" and aiShown are auto-cleared, like the real pipeline.
+
+  const DEMO_FLAG_SAMPLES = [
+    // Self-Harm
+    { user: 'nolan.pederson28', grade: 'Grade 10', days: 0, h: 22, m: 14, category: 'Self-Harm', keyword: 'i want to die', severity: 'Critical',
+      text: 'i want to die. nothing is getting better and i dont know who to even talk to about it anymore',
+      ai: { severity: 'Genuine Concern', assessment: 'First-person statement of hopelessness with no academic framing.', reasoning: 'The student describes ongoing distress and isolation. Follow the district self-harm protocol today.' }, aiShown: true },
+    { user: 'maya.thao27', grade: 'Grade 11', days: 1, h: 15, m: 42, category: 'Self-Harm', keyword: 'end my life', severity: 'Critical',
+      text: 'how many sleeping pills does it take to end my life',
+      ai: { severity: 'Genuine Concern', assessment: 'Asks for a lethal dose in the first person.', reasoning: 'Specific method-seeking language. Treat as an immediate safety concern.' },
+      reviewedBy: demoEmail('m.hartley'), notes: 'Met with student and parent the same day. Safety plan in place, follow-up Friday.' },
+    { user: 'sofia.nguyen27', grade: 'Grade 11', days: 4, h: 10, m: 18, category: 'Self-Harm', keyword: 'i want to die', severity: 'Critical',
+      text: 'i want to die my hair purple for homecoming, is that against the dress code',
+      ai: { severity: 'Likely False Positive', assessment: 'Dress-code question. The match is "die" as in hair dye.', reasoning: 'Nothing in the prompt relates to self-harm.' }, aiShown: true },
+
+    // Violence
+    { user: 'liam.okonkwo28', grade: 'Grade 10', days: 1, h: 20, m: 47, category: 'Violence', keyword: 'kill my teacher', severity: 'High',
+      text: 'im so mad i could kill my teacher for giving me a zero on a test i actually studied for',
+      ai: { severity: 'Needs Review', assessment: 'Reads as venting, but names a specific staff member.', reasoning: 'Likely hyperbole about a grade. A low-key check-in is reasonable given the explicit phrasing.' }, aiShown: true },
+    { user: 'grace.mueller28', grade: 'Grade 10', days: 0, h: 13, m: 55, category: 'Violence', keyword: 'bring a gun', severity: 'High',
+      text: 'write a short story where a kid tells everyone he will bring a gun to the homecoming dance and what happens after',
+      ai: { severity: 'Needs Review', assessment: 'Fiction request, but the scenario mirrors a real threat pattern.', reasoning: 'Could be a creative assignment. Confirm the context with the student\'s English teacher.' } },
+    { user: 'ethan.carlson29', grade: 'Grade 8', days: 1, h: 11, m: 26, category: 'Violence', keyword: 'how to shoot', severity: 'High',
+      text: 'how to shoot a free throw so it goes in every time',
+      ai: { severity: 'Likely False Positive', assessment: 'Basketball technique question.', reasoning: 'No weapons context at all.' } },
+
+    // Sexual Content
+    { user: 'zoe.anderson28', grade: 'Grade 10', days: 1, h: 23, m: 8, category: 'Sexual Content', keyword: 'nude photos', severity: 'High',
+      text: 'someone from another school is threatening to post nude photos of me if i dont send more. what do i do',
+      ai: { severity: 'Genuine Concern', assessment: 'Student appears to be the target of sextortion.', reasoning: 'Describes a current threat and asks for help. Involve the counselor and SRO per policy.' }, aiShown: true },
+
+    // Drugs
+    { user: 'mason.hendricks29', grade: 'Grade 8', days: 2, h: 21, m: 19, category: 'Drugs', keyword: 'how to get high on', severity: 'Medium',
+      text: 'how to get high on nutmeg and is it actually dangerous',
+      ai: { severity: 'Needs Review', assessment: 'Asks for a method, then whether it is dangerous.', reasoning: 'Method-seeking phrasing from a middle schooler. Recommend a conversation.' }, aiShown: true },
+
+    // Harassment
+    { user: 'ava.larson29', grade: 'Grade 7', days: 0, h: 16, m: 33, category: 'Harassment', keyword: 'kill yourself', severity: 'Medium',
+      text: "someone in my class dm'd me kill yourself on snapchat and i screenshotted it. what should i do",
+      ai: { severity: 'Genuine Concern', assessment: 'Student reports being targeted by a peer.', reasoning: 'The student is the recipient, not the sender. Follow the bullying reporting procedure.' }, aiShown: true },
+
+    // Cheating
+    { user: 'chloe.bergstrom27', grade: 'Grade 11', days: 1, h: 21, m: 40, category: 'Cheating', keyword: 'write my essay for me', severity: 'Low',
+      text: 'write my essay for me about the causes of the civil war, 5 paragraphs, make it sound like a 9th grader so it doesnt look ai',
+      ai: { severity: 'Genuine Concern', assessment: 'Explicit request to produce a submitted assignment and disguise it.', reasoning: 'Academic integrity issue rather than a safety one. Route to the teacher.' }, aiShown: true },
+  ];
+
+  // Flags that "arrive" when Run Import Now completes in demo mode.
+  const DEMO_NEW_FLAG_SAMPLES = [
+    { user: 'riley.sandoval28', grade: 'Grade 9', category: 'Self-Harm', keyword: 'i want to die', severity: 'Critical',
+      text: 'i want to die lol this math test is impossible',
+      ai: { severity: 'Needs Review', assessment: 'Casual phrasing, but the words are the words.', reasoning: 'Most likely exasperation about a test. A quick check-in costs little.' } },
+    { user: 'tyler.brooks27', grade: 'Grade 11', category: 'Cheating', keyword: 'give me the answers to', severity: 'Low',
+      text: 'give me the answers to the ap us history unit 4 test, the questions are in this photo',
+      ai: { severity: 'Needs Review', assessment: 'Asks for answers to a live assessment.', reasoning: 'Mentions a photographed test. Route to the teacher.' } },
+  ];
+
+  const DEMO_FILTERED_SAMPLES = [
+    { days: 0, h: 6, m: 3, user: 'jordan.ellis28',    grade: 'Grade 10', category: 'Violence',   keyword: 'how to shoot',          text: 'how to shoot a video for my youtube channel on a phone so it doesnt look shaky',                 assessment: 'Video production question.',                        reasoning: 'No weapons context.' },
+    { days: 0, h: 6, m: 3, user: 'parker.olsen29',    grade: 'Grade 7',  category: 'Drugs',      keyword: 'how to get high on',    text: 'tips on how to get high on the leaderboard in mario kart 8 deluxe time trials',                 assessment: 'Video game leaderboard question.',                  reasoning: 'The keyword match is a figure of speech.' },
+    { days: 1, h: 6, m: 2, user: 'quinn.abara28',     grade: 'Grade 8',  category: 'Violence',   keyword: 'make a weapon',         text: 'how do i make a weapon in minecraft with a crafting table and what are the best enchantments', assessment: 'Minecraft crafting question.',                      reasoning: 'In-game items only.' },
+    { days: 1, h: 6, m: 2, user: 'tessa.marin27',     grade: 'Grade 11', category: 'Self-Harm',  keyword: 'suicide note',          text: 'summarize act 5 of romeo and juliet, especially the part with the suicide note and the friar', assessment: 'Literature summary request.',                       reasoning: 'Refers to the plot of an assigned play.' },
+    { days: 2, h: 6, m: 4, user: 'bennett.cho29',     grade: 'Grade 9',  category: 'Self-Harm',  keyword: 'self harm',             text: 'self harm statistics among teens for my health class presentation, cite sources',              assessment: 'Research request for a health class presentation.', reasoning: 'Statistical framing, third person throughout.' },
+    { days: 2, h: 6, m: 4, user: 'nina.volkov28',     grade: 'Grade 10', category: 'Violence',   keyword: 'pipe bomb',             text: 'what is a pipe bomb in the context of the oklahoma city bombing for my history essay',          assessment: 'History essay question about a past event.',        reasoning: 'Definition request with academic context.' },
+    { days: 3, h: 6, m: 1, user: 'sam.whitaker27',    grade: 'Grade 12', category: 'Cheating',   keyword: 'write a test for me',   text: 'write a test for me to practice spanish vocab from chapter 4 so i can quiz myself',             assessment: 'Self-study practice request.',                      reasoning: 'The student is making a practice quiz, not avoiding work.' },
+    { days: 3, h: 6, m: 1, user: 'reese.gallagher29', grade: 'Grade 8',  category: 'Drugs',      keyword: 'how to get weed',       text: 'how to get weed smell out of a used car my dad bought',                                           assessment: 'Odor removal question.',                            reasoning: 'Nothing about acquiring or using.' },
+    { days: 5, h: 6, m: 2, user: 'kai.nakamura28',    grade: 'Grade 10', category: 'Violence',   keyword: 'school shooting',       text: "explain how the school shooting in the book Hate List affects the main character's relationships", assessment: 'Analysis of an assigned YA novel.',            reasoning: 'Literary question, no personal intent.' },
+    { days: 6, h: 6, m: 3, user: 'morgan.reyes27',    grade: 'Grade 11', category: 'Harassment', keyword: 'you should die',        text: 'if you should die in fortnite zero build does your loot drop for the other team',                assessment: 'Game mechanics question.',                          reasoning: 'The phrase is part of a conditional about a video game.' },
+    { days: 7, h: 6, m: 2, user: 'dylan.ferris29',    grade: 'Grade 9',  category: 'Drugs',      keyword: 'drug dealer',           text: 'drug dealer character tropes in film for my media studies project',                              assessment: 'Media studies project research.',                   reasoning: 'Analytical, third-person framing.' },
+    { days: 8, h: 6, m: 4, user: 'hazel.brink28',     grade: 'Grade 7',  category: 'Cheating',   keyword: 'do my homework for me', text: 'dont do my homework for me, just check if i did 3x+5=20 right. i got x=5',                        assessment: 'Asks for a check on completed work.',               reasoning: 'Explicitly declines to have the work done.' },
+  ];
+
+  const DEMO_OUS = [
+    { path: '/',                             name: '/ (All Users)',       depth: 0 },
+    { path: '/Students',                     name: 'Students',            depth: 0 },
+    { path: '/Students/High School',         name: 'High School',         depth: 1 },
+    { path: '/Students/Middle School',       name: 'Middle School',       depth: 1 },
+    { path: '/Students/Intermediate School', name: 'Intermediate School', depth: 1 },
+    { path: '/Students/Schumann Elementary', name: 'Schumann Elementary', depth: 1 },
+    { path: '/Staff',                        name: 'Staff',               depth: 0 },
+    { path: '/Staff/Teachers',               name: 'Teachers',            depth: 1 },
+    { path: '/Staff/Administration',         name: 'Administration',      depth: 1 },
+  ];
+
+  const DEMO_CRITERIA = [
+    { category: 'Self-Harm & Suicide',           severity: 'Critical', action: 'Both',  keywords: 'how to kill myself,want to end it all,painless way to die,how many pills to overdose,no reason to live,goodbye letter to my family,hurting myself on purpose' },
+    { category: 'Violence & Threats',            severity: 'High',     action: 'Both',  keywords: 'going to hurt someone at school,bring a knife to school,make them pay tomorrow,list of people i hate,how to hurt someone without getting caught,shoot up the school' },
+    { category: 'Weapons',                       severity: 'High',     action: 'Both',  keywords: 'how to get a gun without,3d printed gun,buy a ghost gun,how to make a homemade weapon,sneak a weapon past,where to buy a switchblade' },
+    { category: 'Sexual Content & Exploitation', severity: 'High',     action: 'Both',  keywords: 'send me nudes,pictures without clothes,someone is sharing my photos,older guy online wants to meet,how to hide messages from my parents,explicit roleplay' },
+    { category: 'Substance Use',                 severity: 'Medium',   action: 'Email', keywords: 'how to hide vaping from,where to buy a vape underage,how to get drunk fast,how much xanax to take,how to pass a drug test,mixing pills with alcohol' },
+    { category: 'Bullying & Harassment',         severity: 'Medium',   action: 'Email', keywords: 'everyone hates you,make her life miserable,spread a rumor about,post their address online,fake account to mess with,nobody would miss you' },
+    { category: 'Academic Dishonesty',           severity: 'Low',      action: 'Sheet', keywords: 'rewrite this so it does not look like ai,answers to the test tomorrow,make it undetectable by turnitin,write my lab report for me,finish my essay for me' },
+    { category: 'Radicalization & Extremism',    severity: 'High',     action: 'Both',  keywords: 'how to join a militia,manifesto template,great replacement,praise for the shooter,accelerationist,how to find a cell near me' },
+  ];
+
+  // ── Store ──────────────────────────────────────────────────
+
+  function demoBuildFlag(s, index, when) {
+    const at      = when || demoAgo(s.days, s.h, s.m);
+    const stamp   = demoStamp(at);
+    const dateKey = stamp.substring(0, 10).replace(/-/g, '');
+    const autoCleared = !!(s.aiShown && s.ai && s.ai.severity === 'Likely False Positive');
+    const reviewedBy  = s.reviewedBy || (autoCleared ? 'AI Auto-Review' : '');
+    let notes = '';
+    if (s.reviewedBy)   notes = s.notes || '';
+    else if (s.aiShown) notes = `AI (${s.ai.severity}): ${s.ai.assessment} — ${s.ai.reasoning}`;
+    const alertSent = s.severity === 'Critical' || s.severity === 'High';
+    return {
+      flagId:         `FLAG-${dateKey}-${demoPad(index + 1)}`,
+      exportId:       `EXP-${dateKey}-${demoPad(index + 1)}`,
+      userEmail:      demoEmail(s.user),
+      ouPath:         s.grade,
+      timestamp:      stamp,
+      queryText:      s.text,
+      category:       s.category,
+      matchedKeyword: s.keyword,
+      severity:       s.severity,
+      alertSent:      alertSent ? 'TRUE' : 'FALSE',
+      alertSentAt:    alertSent ? demoStamp(new Date(at.getTime() + 21 * 60000)) : '',
+      reviewed:       reviewedBy ? 'TRUE' : 'FALSE',
+      reviewedBy:     reviewedBy,
+      notes:          notes,
+      _ai:            s.ai,
+    };
+  }
+
+  function demoBuildRuns() {
+    const runs = [];
+    for (let days = 9; days >= 0; days--) {
+      const start = demoAgo(days, 6, 0);
+      const end   = new Date(start.getTime() + (3 + Math.floor(Math.random() * 4)) * 60000);
+      const key   = demoStamp(start).substring(0, 10).replace(/-/g, '');
+      const failed  = days === 4;
+      const catchUp = days === 3;
+      const imported = failed ? 0 : (catchUp ? 2610 : 1100 + Math.floor(Math.random() * 800));
+      const flagged  = failed ? 0 : (catchUp ? 5 : Math.floor(Math.random() * 4));
+      const alerted  = Math.floor(flagged * 0.6);
+      runs.push({
+        runId:       `RUN-${key}-0600`,
+        startedAt:   demoStamp(start),
+        completedAt: demoStamp(end),
+        status:      failed ? 'FAILED' : 'SUCCESS',
+        imported, flagged, alerted,
+        error:       failed ? 'Vault export EXPORT-3f9a1c did not finish within the polling window; collected on the next run' : '',
+      });
+    }
+    return runs; // oldest first, like the sheet
+  }
+
+  function resetDemoData() {
+    demoDB = {
+      flags:    DEMO_FLAG_SAMPLES.map((s, i) => demoBuildFlag(s, i)),
+      runs:     demoBuildRuns(),
+      filtered: DEMO_FILTERED_SAMPLES.map(s => ({
+        filteredAt: demoStamp(demoAgo(s.days, s.h, s.m)).replace('T', ' '),
+        userEmail:  demoEmail(s.user),
+        ouPath:     s.grade,
+        category:   s.category,
+        keyword:    s.keyword,
+        verdict:    'Likely False Positive',
+        assessment: s.assessment,
+        reasoning:  s.reasoning,
+        promptText: s.text,
+      })),
+      access: [
+        { email: demoWho(),                role: 'Admin',  addedBy: 'setup',   addedAt: '2026-03-26 14:10:00' },
+        { email: demoEmail('m.hartley'),   role: 'Viewer', addedBy: demoWho(), addedAt: '2026-04-02 09:15:00' },
+        { email: demoEmail('d.okafor'),    role: 'Viewer', addedBy: demoWho(), addedAt: '2026-04-02 09:16:00' },
+        { email: demoEmail('s.lindqvist'), role: 'Admin',  addedBy: demoWho(), addedAt: '2026-04-08 11:42:00' },
+      ],
+      settings: {
+        selectedOUs:     ['/Students/High School', '/Students/Middle School'],
+        dateRange:       'day',
+        frequency:       'daily',
+        importTime:      '06:00',
+        importDay:       'Monday',
+        status:          'Active',
+        adminEmail:      demoEmail('vault-admin'),
+        alertRecipients: `${demoEmail('counselors')}, ${demoEmail('hs-principal')}`,
+        dashboardAccess: '',
+        fromName:        'Vaulter Alerts',
+        replyTo:         demoEmail('technology'),
+        alertCooldown:   '1',
+      },
+      pendingUntil: 0,   // when > 0, Run Import Now is "processing" until this time
+      runCount:     0,
+    };
+  }
+
+  // ── Fake server ────────────────────────────────────────────
+
+  const DEMO_SEVERITY_ORDER = { Critical: 0, High: 1, Medium: 2, Low: 3 };
+
+  function demoIsUnreviewed(f) { return f.reviewed !== 'TRUE' && f.reviewed !== true; }
+
+  function demoFindFlag(flagId) { return demoDB.flags.find(f => f.flagId === flagId); }
+
+  function demoPublicFlag(f) { const { _ai, ...rest } = f; return rest; }
+
+  function demoCompletePendingRun() {
+    const now   = new Date();
+    const key   = demoStamp(now).substring(0, 10).replace(/-/g, '');
+    const start = new Date(now.getTime() - 9000);
+    demoDB.runCount++;
+    const fresh = DEMO_NEW_FLAG_SAMPLES.map((s, i) =>
+      demoBuildFlag(s, demoDB.flags.length + i, new Date(now.getTime() - (i + 1) * 47 * 60000)));
+    // Ids that cannot collide with earlier runs.
+    fresh.forEach((f, i) => { f.flagId = `FLAG-${key}-R${demoDB.runCount}${demoPad(i + 1)}`; });
+    demoDB.flags.push(...fresh);
+    demoDB.runs.push({
+      runId:       `RUN-${key}-${demoPad(now.getHours())}${demoPad(now.getMinutes())}`,
+      startedAt:   demoStamp(start),
+      completedAt: demoStamp(now),
+      status:      'SUCCESS',
+      imported:    180 + Math.floor(Math.random() * 80),
+      flagged:     fresh.length,
+      alerted:     fresh.filter(f => f.alertSent === 'TRUE').length,
+      error:       '',
+    });
+    demoDB.pendingUntil = 0;
+  }
+
+  function demoNextRun() {
+    const s = demoDB.settings;
+    if (s.status === 'Paused') return 'Paused';
+    if (s.frequency === 'hourly') return 'Within the hour';
+    const now = new Date();
+    const nowHM = `${demoPad(now.getHours())}:${demoPad(now.getMinutes())}`;
+    if (s.frequency === 'weekly') return `${s.importDay} ${s.importTime}`;
+    return (nowHM < s.importTime ? 'Today ' : 'Tomorrow ') + s.importTime;
+  }
+
+  const DEMO_API = {
+    getDashboardData() {
+      const runs  = demoDB.runs;
+      const flags = demoDB.flags.slice()
+        .sort((a, b) => String(b.timestamp).localeCompare(String(a.timestamp)));
+      return {
+        totals: {
+          all:        flags.length,
+          unreviewed: flags.filter(demoIsUnreviewed).length,
+        },
+        flags:  flags.slice(0, 300).map(demoPublicFlag),
+        runLog: runs.slice(-10).reverse(),
+        pipeline: {
+          status:         demoDB.settings.status,
+          frequency:      demoDB.settings.frequency,
+          importTime:     demoDB.settings.importTime,
+          importDay:      demoDB.settings.importDay,
+          nextRun:        demoNextRun(),
+          lastRun:        runs.length ? runs[runs.length - 1] : null,
+          ruleCount:      6,
+          pendingExports: demoDB.pendingUntil ? 2 : 0,
+        },
+      };
+    },
+
+    getPendingExportStatus() {
+      if (demoDB.pendingUntil && Date.now() >= demoDB.pendingUntil) demoCompletePendingRun();
+      return { count: demoDB.pendingUntil ? 2 : 0 };
+    },
+
+    runPipelineNow() {
+      demoDB.pendingUntil = Date.now() + 8000;
+      return { success: true };
+    },
+
+    getFilteredLog()   { return demoDB.filtered.slice(); },
+    clearFilteredLog() { demoDB.filtered = []; return { success: true }; },
+    clearAllFlagged()  { demoDB.flags = []; return { success: true }; },
+    clearVaultData()   { return { success: true }; },
+
+    markReviewed(flagId, notes) {
+      const f = demoFindFlag(flagId);
+      if (!f) return { success: false, error: 'Flag ID not found' };
+      f.reviewed   = 'TRUE';
+      f.reviewedBy = demoWho();
+      f.notes      = notes || '';
+      return { success: true };
+    },
+
+    getUnreviewedFlags() {
+      return demoDB.flags.filter(demoIsUnreviewed).map(f => ({
+        flagId: f.flagId, userEmail: f.userEmail, ouPath: f.ouPath, timestamp: f.timestamp,
+        promptText: f.queryText, matchedKeyword: f.matchedKeyword, category: f.category, severity: f.severity,
+        alertSent: f.alertSent, alertSentAt: f.alertSentAt, notes: f.notes,
+      }));
+    },
+
+    applyAIReview(flagId, severity, assessment, reasoning) {
+      const f = demoFindFlag(flagId);
+      if (!f) return { success: false };
+      if (severity === 'Likely False Positive') {
+        f.reviewed   = 'TRUE';
+        f.reviewedBy = 'AI Auto-Review';
+      }
+      f.notes = `AI (${severity}): ${assessment} — ${reasoning}`;
+      return { success: true };
+    },
+
+    reviewFlagWithAI(flagId) {
+      const f  = demoFindFlag(flagId);
+      const ai = (f && f._ai) || {
+        severity: 'Needs Review', assessment: 'Not enough context to decide.', reasoning: 'Review manually.',
+      };
+      return { flagId, ...ai };
+    },
+
+    suggestAlertCriteria() { return DEMO_CRITERIA.map(c => ({ ...c })); },
+    applyAlertCriteria(categories) { return { success: true, added: (categories || []).length }; },
+
+    getSettingsData() {
+      return { ...demoDB.settings, selectedOUs: demoDB.settings.selectedOUs.slice(), ous: DEMO_OUS };
+    },
+    saveSettings(data) {
+      if (!data) throw new Error('No settings data received. Please try again.');
+      Object.assign(demoDB.settings, data, { selectedOUs: (data.selectedOUs || []).slice() });
+      return { success: true };
+    },
+
+    getAccessList() { return demoDB.access.map(u => ({ ...u })); },
+    addAccessUser(email, role) {
+      if (!email || !email.includes('@')) throw new Error('Invalid email address');
+      const lc = email.trim().toLowerCase();
+      if (demoDB.access.some(u => u.email.toLowerCase() === lc)) return { success: false, error: 'User already has access' };
+      demoDB.access.push({ email: email.trim(), role: role || 'Viewer', addedBy: demoWho(), addedAt: demoStamp(new Date()).replace('T', ' ') });
+      return { success: true };
+    },
+    removeAccessUser(email) {
+      const lc = String(email).trim().toLowerCase();
+      const i  = demoDB.access.findIndex(u => u.email.toLowerCase() === lc);
+      if (i < 0) return { success: false, error: 'User not found' };
+      demoDB.access.splice(i, 1);
+      return { success: true };
+    },
+    updateAccessRole(email, newRole) {
+      const u = demoDB.access.find(x => x.email.toLowerCase() === String(email).trim().toLowerCase());
+      if (!u) return { success: false, error: 'User not found' };
+      u.role = newRole;
+      return { success: true };
+    },
+  };
+
+  // How long each fake call takes, so the UI's spinners and states still show.
+  function demoLatency(name) {
+    switch (name) {
+      case 'getPendingExportStatus': return 120;
+      case 'reviewFlagWithAI':       return 1400;
+      case 'suggestAlertCriteria':   return 1800;
+      case 'runPipelineNow':         return 1600;
+      default:                       return 300 + Math.floor(Math.random() * 300);
+    }
+  }
+
+  // Mimics google.script.run: withSuccessHandler / withFailureHandler, then a call.
+  function demoRunner() {
+    if (!demoDB) resetDemoData();
+    let onOk   = () => {};
+    let onFail = err => console.error('Demo mode:', err);
+    const chain = {
+      withSuccessHandler(fn) { onOk = fn;   return proxy; },
+      withFailureHandler(fn) { onFail = fn; return proxy; },
+      withUserObject()       { return proxy; },
+    };
+    const proxy = new Proxy(chain, {
+      get(target, name) {
+        if (name in target) return target[name];
+        return (...args) => {
+          setTimeout(() => {
+            const impl = DEMO_API[name];
+            if (!impl) { onFail(new Error(`Demo mode has no sample for ${String(name)}.`)); return; }
+            let result;
+            try { result = impl(...args); } catch (e) { onFail(e); return; }
+            onOk(result);
+          }, demoLatency(name));
+        };
+      },
+    });
+    return proxy;
+  }
+</script>
+
+
+<script>
+  // ════════════════════════════════════════════════════════════
+  // Vaulter dashboard. Every server call goes through rpc(), which is
+  // google.script.run normally and the sample-data stand-in from
+  // Demo.html when demo mode is on.
+  // ════════════════════════════════════════════════════════════
+
+  const SIGNED_IN_USER = 'you@yourdistrict.org';
+  const USER_ROLE      = 'Admin';
+  const DEMO_PARAM     = '1';
+  const DEMO_KEY  = 'vaulter.demo';
+  const THEME_KEY = 'vaulter.theme';
+
+  const SEV_ORDER    = { Critical: 0, High: 1, Medium: 2, Low: 3 };
+  const SEVERITIES   = ['Critical', 'High', 'Medium', 'Low'];
+  const CATEGORIES   = ['Self-Harm', 'Violence', 'Sexual Content', 'Drugs', 'Harassment', 'Cheating'];
+  const STATUS_LABEL = { unrev: 'Unreviewed', needs: 'AI Needs Review', concern: 'AI Genuine Concern', cleared: 'AI Cleared', reviewed: 'Reviewed' };
+  const OPEN         = { unrev: 1, needs: 1, concern: 1 };
+  const VERDICT_CLS  = { 'Genuine Concern': 'v-concern', 'Needs Review': 'v-needs', 'Likely False Positive': 'v-clear' };
+  const AI_ICON = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><rect x="4" y="4" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="6.5" y="6.5" width="3" height="3" fill="currentColor"/><path d="M6 1.5V4M10 1.5V4M6 12v2.5M10 12v2.5M1.5 6H4M1.5 10H4M12 6h2.5M12 10h2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
+  const SPINNER = '<svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>';
+  const CHECK = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m3 8.5 3 3 7-7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  const CROSS = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+  const EYE = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8Z" stroke="currentColor" stroke-width="1.5"/><circle cx="8" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/></svg>';
+
+  const S = {
+    demo: false, page: 'dashboard', dashLoaded: false,
+    flags: [], totals: { all: 0, unreviewed: 0 }, runLog: [], pipeline: null, pending: 0,
+    filter: { status: 'all', sev: null, cat: '', q: '' },
+    sel: null, revealed: {}, aiPreview: {}, aiBusy: false, saving: false,
+    loaded: { filtered: false, access: false, settings: false },
+    bulk: { active: false, queue: [], idx: 0, results: {} },
+  };
+
+  // ── Demo and theme ─────────────────────────────────────────
+
+  S.demo = DEMO_PARAM === '1';
+  if (!S.demo && DEMO_PARAM !== '0') { try { S.demo = localStorage.getItem(DEMO_KEY) === '1'; } catch (e) {} }
+  try { if (localStorage.getItem(THEME_KEY) === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); } catch (e) {}
+
+  function rpc() { return S.demo ? demoRunner() : google.script.run; }
+
+  function applyChrome() {
+    document.body.classList.toggle('demo', S.demo);
+    el('demoToggle').setAttribute('aria-pressed', S.demo ? 'true' : 'false');
+    el('demoToggleLabel').textContent = S.demo ? 'Demo on' : 'Demo';
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    el('themeToggle').setAttribute('aria-pressed', dark ? 'true' : 'false');
+  }
+
+  function toggleTheme() {
+    const dark = document.documentElement.getAttribute('data-theme') !== 'dark';
+    document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+    try { localStorage.setItem(THEME_KEY, dark ? 'dark' : 'light'); } catch (e) {}
+    applyChrome();
+  }
+
+  function toggleDemo() {
+    S.demo = !S.demo;
+    try { localStorage.setItem(DEMO_KEY, S.demo ? '1' : '0'); } catch (e) {}
+    if (S.demo) resetDemoData();
+    reloadApp();
+  }
+
+  function resetDemo() { resetDemoData(); reloadApp(); }
+
+  function reloadApp() {
+    S.loaded = { filtered: false, access: false, settings: false };
+    S.flags = []; S.sel = null; S.revealed = {}; S.aiPreview = {}; S.dashLoaded = false;
+    S.filter = { status: 'all', sev: null, cat: '', q: '' };
+    S.bulk = { active: false, queue: [], idx: 0, results: {} };
+    el('searchBox').value = '';
+    el('queue').classList.remove('show-detail');
+    switchPage('dashboard');
+    initApp();
+  }
+
+  // ── Boot ───────────────────────────────────────────────────
+
+  function initApp() {
+    applyChrome();
+    renderUser();
+    loadDashboard();
+    checkExportStatus();
+    startExportPolling();
+  }
+
+  function renderUser() {
+    const local = (SIGNED_IN_USER || '').split('@')[0];
+    const words = local.split(/[._-]+/).filter(Boolean).map(w => w.charAt(0).toUpperCase() + w.slice(1));
+    el('userName').textContent   = words.join(' ') || SIGNED_IN_USER || 'Signed in';
+    el('userSub').textContent    = USER_ROLE ? USER_ROLE + ' · Orono Public Schools' : 'Orono Public Schools';
+    el('userAvatar').textContent = (words.map(w => w[0]).join('').slice(0, 2) || '?').toUpperCase();
+  }
+
+  // ── Pages ──────────────────────────────────────────────────
+
+  function switchPage(name) {
+    if (name === 'bulk' && !S.bulk.active) { startBulkReview(); return; }
+    S.page = name;
+    document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-' + name));
+    document.querySelectorAll('.nav-btn').forEach(b => {
+      if (b.dataset.page === name) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+    });
+    if (name === 'filtered' && !S.loaded.filtered) loadFilteredLog();
+    if (name === 'access'   && !S.loaded.access)   loadAccessList();
+    if (name === 'settings' && !S.loaded.settings) loadSettings();
+    window.scrollTo({ top: 0 });
+  }
+
+  // ── Dashboard data ─────────────────────────────────────────
+
+  function loadDashboard(opts) {
+    const quiet = opts && opts.quiet;
+    if (!quiet && !S.dashLoaded) { el('dashSkeleton').style.display = 'block'; el('dashContent').style.display = 'none'; }
+    rpc()
+      .withSuccessHandler(data => {
+        S.flags    = data.flags || [];
+        S.totals   = data.totals || { all: S.flags.length, unreviewed: 0 };
+        S.runLog   = data.runLog || [];
+        S.pipeline = data.pipeline || null;
+        if (S.pipeline && typeof S.pipeline.pendingExports === 'number') S.pending = S.pipeline.pendingExports;
+        S.dashLoaded = true;
+        el('dashSkeleton').style.display = 'none';
+        const c = el('dashContent'); c.style.display = 'block'; if (!quiet) c.classList.add('fade-in');
+        renderDashboard();
+      })
+      .withFailureHandler(err => {
+        el('dashSkeleton').innerHTML = '<div class="box"><div class="empty"><h2>Could not load the dashboard</h2><p>' + esc(err.message) + '</p><div class="actions"><button class="btn btn-1" onclick="loadDashboard()">Try again</button></div></div></div>';
+        toast('Error loading data: ' + err.message, 'bad');
+      })
+      .getDashboardData();
+  }
+
+  function renderDashboard() {
+    renderReadout();
+    const st = computeStats();
+    renderStats(st);
+    renderTrend(st);
+    renderCategoryOptions();
+    if (!S.sel || !S.flags.some(f => f.flagId === S.sel)) {
+      const first = visibleFlags()[0];
+      S.sel = first ? first.flagId : null;
+    }
+    renderList();
+    renderDetail();
+    renderRunLog();
+    el('bulkBtn').textContent = 'Bulk review' + (S.totals.unreviewed ? ' · ' + S.totals.unreviewed + ' unreviewed' : '');
+  }
+
+  // ── Derived values ─────────────────────────────────────────
+
+  function isReviewed(f) { return f.reviewed === 'TRUE' || f.reviewed === true; }
+
+  function parseAINotes(notes) {
+    if (!notes || !String(notes).startsWith('AI (')) return null;
+    const m = String(notes).match(/^AI \(([^)]+)\): (.+?) — (.+)$/s);
+    return m ? { severity: m[1], assessment: m[2], reasoning: m[3] } : null;
+  }
+
+  function aiNoteString(ai) { return 'AI (' + ai.severity + '): ' + ai.assessment + ' — ' + ai.reasoning; }
+
+  function statusOf(f) {
+    if (isReviewed(f)) return f.reviewedBy === 'AI Auto-Review' ? 'cleared' : 'reviewed';
+    const ai = parseAINotes(f.notes);
+    if (ai) return ai.severity === 'Genuine Concern' ? 'concern' : 'needs';
+    return 'unrev';
+  }
+
+  function isOpen(f) { return !!OPEN[statusOf(f)]; }
+
+  function codeOf(flagId) {
+    const s = String(flagId || '');
+    const hex = s.replace(/[^a-z0-9]/gi, '');
+    const short = /^[0-9a-f]{8}-/i.test(s) ? hex.slice(0, 4) : hex.slice(-4);
+    return 'VLT-' + short.toUpperCase();
+  }
+
+  function maskEmail(email) {
+    if (!email || !email.includes('@')) return email || '—';
+    const [local, domain] = email.split('@');
+    return local.substring(0, 2).toUpperCase() + '***@' + domain;
+  }
+
+  function toDate(v) {
+    if (!v) return null;
+    if (v instanceof Date) return v;
+    let s = String(v).trim();
+    if (/^\d{4}-\d{2}-\d{2} \d/.test(s)) s = s.replace(' ', 'T');
+    const d = new Date(s);
+    return isNaN(d) ? null : d;
+  }
+  function startOfDay(d) { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
+  function dayDiff(d, now) { return Math.round((startOfDay(now) - startOfDay(d)) / 86400000); }
+  function fmtTime(d) { return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }); }
+  function fmtWhen(v) {
+    const d = toDate(v); if (!d) return v ? String(v) : '—';
+    const n = dayDiff(d, new Date());
+    if (n === 0) return 'Today ' + fmtTime(d);
+    if (n === 1) return 'Yesterday ' + fmtTime(d);
+    if (n > 1 && n < 7) return d.toLocaleDateString([], { weekday: 'short' }) + ' ' + fmtTime(d);
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' }) + ', ' + fmtTime(d);
+  }
+  function fmtRel(v) {
+    const d = toDate(v); if (!d) return '';
+    const m = Math.floor((Date.now() - d) / 60000);
+    if (m < 1) return 'Just now';
+    if (m < 60) return m + 'm ago';
+    const n = dayDiff(d, new Date());
+    if (n === 0) return Math.floor(m / 60) + 'h ago';
+    if (n === 1) return 'Yesterday';
+    if (n < 7) return n + 'd ago';
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  }
+  function fmtDay(v) {
+    const d = toDate(v); if (!d) return '';
+    const n = dayDiff(d, new Date());
+    if (n === 0) return 'today';
+    if (n === 1) return 'yesterday';
+    if (n < 7) return d.toLocaleDateString([], { weekday: 'long' });
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  }
+  function fmtShortDate(d) { return d.toLocaleDateString([], { month: 'short', day: 'numeric' }).toUpperCase(); }
+
+  function computeStats() {
+    const now = new Date();
+    const start7 = startOfDay(now); start7.setDate(start7.getDate() - 6);
+    const start14 = new Date(start7); start14.setDate(start14.getDate() - 7);
+    const inRange = (f, a, b) => { const d = toDate(f.timestamp); return !!d && d >= a && (!b || d < b); };
+    const thisWeek = S.flags.filter(f => inRange(f, start7));
+    const prevWeek = S.flags.filter(f => inRange(f, start14, start7));
+    const open     = S.flags.filter(isOpen);
+    const oldest   = open.reduce((a, b) => (!a || (toDate(b.timestamp) || 0) < (toDate(a.timestamp) || 0)) ? b : a, null);
+    const critOpen = open.filter(f => f.severity === 'Critical');
+    const cleared  = thisWeek.filter(f => statusOf(f) === 'cleared').length;
+    const days = [];
+    for (let i = 13; i >= 0; i--) { const d = startOfDay(now); d.setDate(d.getDate() - i); days.push({ d, n: 0 }); }
+    S.flags.forEach(f => { const d = toDate(f.timestamp); if (!d) return; const i = 13 - dayDiff(d, now); if (i >= 0 && i < 14) days[i].n++; });
+    const catMap = {};
+    thisWeek.forEach(f => { const c = f.category || 'Other'; catMap[c] = (catMap[c] || 0) + 1; });
+    const cats = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+    return { thisWeek, prevWeek, open, oldest, critOpen, cleared, days, cats, start7, now };
+  }
+
+  // ── Readout, stats, trend ──────────────────────────────────
+
+  function renderReadout() {
+    const p = S.pipeline || {};
+    const paused = p.status === 'Paused';
+    const last = p.lastRun;
+    const parts = [];
+    parts.push('<span class="ro-item strong"><span class="ro-dot ' + (paused ? 'off' : '') + '"></span>PIPELINE ' + (paused ? 'PAUSED' : 'ACTIVE') + '</span>');
+    if (last) parts.push('<span class="ro-item">LAST RUN ' + esc(fmtWhen(last.completedAt || last.startedAt).toUpperCase()) + ' · ' + (last.status === 'SUCCESS' ? 'OK' : 'ERROR') + '</span>');
+    else parts.push('<span class="ro-item">NO RUNS YET</span>');
+    if (p.nextRun) parts.push('<span class="ro-item">NEXT RUN ' + esc(String(p.nextRun).toUpperCase()) + '</span>');
+    if (S.pending > 0) parts.push('<span class="ro-item strong">' + SPINNER + S.pending + ' EXPORT' + (S.pending > 1 ? 'S' : '') + ' PROCESSING</span>');
+    parts.push('<span class="ro-item right">KEYWORD RULES · ' + (p.ruleCount == null ? '—' : p.ruleCount) + ' ACTIVE</span>');
+    el('readoutIn').innerHTML = parts.join('');
+  }
+
+  function renderStats(st) {
+    el('statsRange').textContent = fmtShortDate(st.start7) + ' TO ' + fmtShortDate(st.now);
+    const pct = st.thisWeek.length ? Math.round(st.cleared / st.thisWeek.length * 100) + '%' : '—';
+    const crit = st.critOpen[0];
+    const critMeta = crit ? (crit.alertSent === 'TRUE' ? 'Alert sent ' + fmtWhen(crit.alertSentAt).toLowerCase() : 'Alert email pending') : 'None open';
+    const stat = (label, value, meta, cls) =>
+      '<div class="stat ' + (cls || '') + '"><span class="label">' + label + '</span><span class="v">' + value + '</span><span class="meta">' + esc(meta) + '</span></div>';
+    el('stats').innerHTML = [
+      stat('Flagged, last 7 days', st.thisWeek.length, st.prevWeek.length + ' the 7 days before'),
+      stat('Unreviewed', S.totals.unreviewed, st.oldest ? 'Oldest from ' + fmtDay(st.oldest.timestamp) : 'All caught up'),
+      stat('Critical unreviewed', st.critOpen.length, critMeta, 'crit'),
+      stat('Auto-cleared by AI', pct, st.cleared + ' of ' + st.thisWeek.length + ' this week'),
+    ].join('');
+  }
+
+  function renderTrend(st) {
+    const max = Math.max(1, ...st.days.map(d => d.n));
+    const total7 = st.days.slice(7).reduce((a, d) => a + d.n, 0);
+    const totalPrev = st.days.slice(0, 7).reduce((a, d) => a + d.n, 0);
+    const cols = st.days.map((d, i) => {
+      const h = d.n ? Math.max(4, Math.round(d.n / max * 112)) : 2;
+      return '<span class="bar-col"><span class="n">' + d.n + '</span><span class="bar ' + (d.n === 0 ? 'zero' : i >= 7 ? 'cur' : '') + '" style="height:' + h + 'px"></span></span>';
+    }).join('');
+    const labels = st.days.map((d, i) => '<span>' + ((i === 0 || i === 7) ? d.d.toLocaleDateString([], { month: 'short' }) + ' ' : '') + d.d.getDate() + '</span>').join('');
+    el('chart').setAttribute('aria-label', 'Flags per day for the last 14 days. Days 8 to 14 total ' + totalPrev + ', last 7 days total ' + total7 + '.');
+    el('chart').innerHTML = '<div class="bars"><span class="grid" style="top:0"></span><span class="grid" style="top:64px"></span>' + cols + '</div><div class="bar-labels">' + labels + '</div>';
+    const catMax = Math.max(1, ...st.cats.map(c => c[1]));
+    el('cats').innerHTML = st.cats.length
+      ? st.cats.map(c => '<div class="cat"><span>' + esc(c[0]) + '</span><span class="track"><span class="fill" style="width:' + Math.round(c[1] / catMax * 100) + '%"></span></span><span class="n">' + c[1] + '</span></div>').join('')
+      : '<p class="help">No flags in the last 7 days.</p>';
+    el('cats').style.display = 'flex'; el('cats').style.flexDirection = 'column'; el('cats').style.gap = '14px';
+  }
+
+  // ── Flag queue ─────────────────────────────────────────────
+
+  function visibleFlags() {
+    const f = S.filter, q = f.q.trim().toLowerCase();
+    return S.flags.filter(x => {
+      if (f.status === 'unrev' && !isOpen(x)) return false;
+      if (f.sev && x.severity !== f.sev) return false;
+      if (f.cat && x.category !== f.cat) return false;
+      if (q) {
+        const hay = [x.queryText, x.matchedKeyword, x.ouPath, x.category, x.userEmail, x.severity].join(' ').toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      return true;
+    });
+  }
+
+  function setStatus(v) { S.filter.status = v; afterFilter(); }
+  function setSev(v)    { S.filter.sev = S.filter.sev === v ? null : v; afterFilter(); }
+  function setCat(v)    { S.filter.cat = v; afterFilter(); }
+  function setQuery(v)  { S.filter.q = v; afterFilter(); }
+  function clearFilters() { S.filter = { status: 'all', sev: null, cat: '', q: '' }; el('searchBox').value = ''; el('catFilter').value = ''; afterFilter(); }
+  function afterFilter() {
+    const vis = visibleFlags();
+    if (!vis.some(f => f.flagId === S.sel)) S.sel = vis[0] ? vis[0].flagId : null;
+    renderList(); renderDetail();
+  }
+
+  function renderCategoryOptions() {
+    const seen = new Set(CATEGORIES);
+    S.flags.forEach(f => { if (f.category) seen.add(f.category); });
+    const sel = el('catFilter');
+    const current = S.filter.cat;
+    sel.innerHTML = '<option value="">All categories</option>' + [...seen].map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join('');
+    sel.value = current;
+  }
+
+  function chip(label, count, pressed, onclick, swatch) {
+    return '<button type="button" class="chip" aria-pressed="' + (pressed ? 'true' : 'false') + '" onclick="' + onclick + '">' +
+      (swatch ? '<span class="sw" style="background:' + swatch + '"></span>' : '') + esc(label) + '<span class="n">' + count + '</span></button>';
+  }
+
+  function renderList() {
+    const all = S.flags, vis = visibleFlags();
+    const openCount = all.filter(isOpen).length;
+    el('statusChips').innerHTML =
+      chip('All', all.length, S.filter.status === 'all', "setStatus('all')") +
+      chip('Unreviewed', openCount, S.filter.status === 'unrev', "setStatus('unrev')");
+    el('sevChips').innerHTML = SEVERITIES.map(s =>
+      chip(s, all.filter(f => f.severity === s).length, S.filter.sev === s, "setSev('" + s + "')", 'var(--sev-' + s.toLowerCase() + ')')
+    ).join('');
+    el('showing').textContent = 'Showing ' + vis.length + ' of ' + all.length + (all.length < S.totals.all ? ' loaded' : '') + ' · newest first';
+
+    const rows = el('rows');
+    if (!all.length) {
+      rows.innerHTML = emptyState('No flags yet', 'No student prompts have matched a keyword rule' + lastRunSentence() + '.', '<button class="btn btn-1" onclick="runNow()">Run import now</button>');
+    } else if (!vis.length) {
+      const msg = S.filter.status === 'unrev' && !S.filter.sev && !S.filter.cat && !S.filter.q
+        ? ['No unreviewed flags', 'All ' + all.length + ' loaded flags have been reviewed by a person or cleared by AI' + lastRunSentence() + '.', '<button class="btn btn-2" onclick="setStatus(\'all\')">Show all flags</button>']
+        : ['No matches', 'Nothing matches those filters.', '<button class="btn btn-2" onclick="clearFilters()">Clear filters</button>'];
+      rows.innerHTML = emptyState(msg[0], msg[1], msg[2]);
+    } else {
+      rows.innerHTML = vis.map(f => {
+        const st = statusOf(f);
+        return '<button type="button" class="row" data-id="' + esc(f.flagId) + '" aria-current="' + (f.flagId === S.sel ? 'true' : 'false') + '">' +
+          '<span class="top"><span class="sev sev-' + sevCls(f.severity) + '">' + esc(f.severity || '—') + '</span><span class="cat">' + esc(f.category) + '</span><span class="rel">' + esc(fmtRel(f.timestamp)) + '</span></span>' +
+          '<span class="who">' + esc(maskEmail(f.userEmail)) + ' · ' + esc(f.ouPath || '—') + '</span>' +
+          '<span class="txt">' + esc(f.queryText) + '</span>' +
+          '<span class="foot">' + stChip(st) + '</span></button>';
+      }).join('');
+    }
+    el('queuePlateRight').textContent = S.sel ? 'OPEN FILE ' + codeOf(S.sel) : (all.length ? 'NO FILE OPEN' : 'EMPTY');
+  }
+
+  function lastRunSentence() {
+    const last = S.pipeline && S.pipeline.lastRun;
+    if (!last) return '';
+    return '. The last run was ' + fmtWhen(last.completedAt || last.startedAt).toLowerCase() + (S.pipeline.nextRun ? ', the next is ' + String(S.pipeline.nextRun).toLowerCase() : '');
+  }
+
+  function emptyState(title, text, actions) {
+    return '<div class="empty"><svg width="56" height="56" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="11.5" stroke="var(--accent)" stroke-width="1.4"/><circle cx="14" cy="14" r="4" stroke="var(--accent)" stroke-width="1.4"/><path d="M14 2.5v3M14 22.5v3M2.5 14h3M22.5 14h3M5.9 5.9 8 8M20 20l2.1 2.1M22.1 5.9 20 8M8 20l-2.1 2.1" stroke="var(--accent)" stroke-width="1.2"/><circle cx="14" cy="14" r="1.3" fill="var(--crit)"/></svg>' +
+      '<h2>' + esc(title) + '</h2><p>' + esc(text) + '</p><div class="actions">' + (actions || '') + '</div></div>';
+  }
+
+  el('rows').addEventListener('click', e => {
+    const b = e.target.closest('[data-id]');
+    if (b) pickFlag(b.dataset.id);
+  });
+
+  function pickFlag(id) {
+    S.sel = id;
+    renderList(); renderDetail();
+    if (window.innerWidth <= 900) {
+      el('queue').classList.add('show-detail');
+      el('queue').scrollIntoView({ block: 'start' });
+    }
+  }
+
+  function backToList() { el('queue').classList.remove('show-detail'); }
+
+  function sevCls(s) { return String(s || 'low').toLowerCase(); }
+  function stChip(st) { return '<span class="st st-' + st + '"><span class="d"></span>' + STATUS_LABEL[st] + '</span>'; }
+
+  function highlight(text, kw) {
+    const t = String(text || '');
+    if (!kw) return esc(t);
+    const re = new RegExp('(' + String(kw).replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    return t.split(re).map((part, i) => i % 2 === 1 ? '<mark>' + esc(part) + '</mark>' : esc(part)).join('');
+  }
+
+  function renderDetail() {
+    const d = el('detail');
+    const f = S.flags.find(x => x.flagId === S.sel);
+    if (!f) {
+      d.innerHTML = S.flags.length ? emptyState('Pick a flag', 'Select a flag on the left to read the prompt, the AI assessment and its timeline.') : '';
+      return;
+    }
+    const st = statusOf(f);
+    const reviewed = isReviewed(f) && st === 'reviewed';
+    const revealed = !!S.revealed[f.flagId];
+    const existingAI = parseAINotes(f.notes);
+    const preview = S.aiPreview[f.flagId];
+    const ai = preview || existingAI;
+    const aiStamp = preview ? '· Gemini · just now' : existingAI ? '· Gemini' : '';
+    const humanNotes = isReviewed(f) && !parseAINotes(f.notes) ? f.notes : '';
+
+    const tl = [
+      { t: 'Prompt sent to Gemini', m: fmtWhen(f.timestamp), k: 'done' },
+      { t: 'Flagged', m: 'rule “' + f.matchedKeyword + '” · ' + f.category, k: 'done' },
+      f.alertSent === 'TRUE'
+        ? { t: 'Alert emailed', m: fmtWhen(f.alertSentAt) + ' · alert recipients', k: 'done' }
+        : { t: 'Alert email pending', m: 'Goes out with the next pipeline run', k: 'pending' },
+      ai ? { t: 'AI verdict: ' + ai.severity, m: preview ? 'Just now' : 'During import', k: 'done' } : { t: 'AI verdict', m: 'Not run yet', k: 'pending' },
+      st === 'reviewed' ? { t: 'Reviewed by ' + (f.reviewedBy || 'a person'), m: humanNotes ? 'With notes' : 'No notes', k: 'done' }
+        : st === 'cleared' ? { t: 'Auto-cleared by AI', m: 'Likely false positive · can be reopened by marking reviewed', k: 'done' }
+        : { t: 'Awaiting review', m: 'Open in the queue', k: 'pending' },
+    ];
+
+    d.innerHTML =
+      '<div class="dhead">' +
+        '<div>' +
+          '<div class="chips-row">' +
+            '<button type="button" class="btn btn-2 back" style="min-height:36px;padding:0 10px;" onclick="backToList()">← Flags</button>' +
+            '<span class="sev sev-' + sevCls(f.severity) + '">' + esc(f.severity) + '</span>' + stChip(st) +
+            '<span class="mono" style="font-size:12px;color:var(--text2)">' + codeOf(f.flagId) + '</span>' +
+          '</div>' +
+          '<h2>' + esc(f.category) + ' · matched “' + esc(f.matchedKeyword) + '”</h2>' +
+        '</div>' +
+        '<div class="actions">' +
+          '<button type="button" class="btn btn-ai" id="aiBtn" onclick="aiReview()" ' + (S.aiBusy ? 'disabled' : '') + '>' + (S.aiBusy ? SPINNER + 'Asking Gemini…' : AI_ICON + (ai ? 'Review again with AI' : 'Review with AI')) + '</button>' +
+          '<button type="button" class="btn btn-2" onclick="toggleReveal()">' + EYE + (revealed ? 'Hide student' : 'Reveal student') + '</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="dbody">' +
+        '<div class="dmain">' +
+          '<dl class="dl">' +
+            '<div><dt>Student</dt><dd class="mono">' + esc(revealed ? f.userEmail : maskEmail(f.userEmail)) + '</dd>' + (revealed ? '<dd class="meta">Revealed by you</dd>' : '') + '</div>' +
+            '<div><dt>Grade</dt><dd>' + esc(f.ouPath || '—') + '</dd></div>' +
+            '<div><dt>Prompt sent</dt><dd>' + esc(fmtWhen(f.timestamp)) + '</dd></div>' +
+            '<div><dt>Alert email</dt><dd>' + (f.alertSent === 'TRUE' ? 'Sent ' + esc(fmtWhen(f.alertSentAt).toLowerCase()) : 'Not sent yet') + '</dd></div>' +
+          '</dl>' +
+          '<div class="sec"><h3 class="label">Prompt</h3><p class="prompt">' + highlight(f.queryText, f.matchedKeyword) + '</p></div>' +
+          '<div class="sec">' +
+            '<h3 class="label ai-head">' + AI_ICON + 'AI assessment<span class="stamp">' + esc(aiStamp) + '</span></h3>' +
+            (ai
+              ? '<p class="verdict ' + (VERDICT_CLS[ai.severity] || '') + '">' + esc(ai.severity) + '</p><p class="assess">' + esc(ai.assessment) + '</p><p class="reason">' + esc(ai.reasoning) + '</p>'
+              : '<p class="reason">No AI verdict yet. Use Review with AI to get one, or review it yourself below.</p>') +
+          '</div>' +
+          '<div class="sec">' +
+            (reviewed
+              ? '<h3 class="label">Review notes</h3><p style="margin:0">' + esc(humanNotes || 'No notes') + '</p><p class="meta" style="margin:0">' + esc(f.reviewedBy) + '</p>'
+              : '<label class="label" for="notes">Review notes</label>' +
+                '<textarea class="ctl" id="notes" rows="3" placeholder="What you did, who you contacted, any follow-up"></textarea>' +
+                '<div class="actions" style="align-items:center;gap:12px;">' +
+                  '<button type="button" class="btn btn-1 btn-lg" id="markBtn" onclick="markReviewed()" ' + (S.saving ? 'disabled' : '') + '>' + (S.saving ? SPINNER + 'Saving…' : CHECK + (st === 'cleared' ? 'Mark reviewed by me' : 'Mark reviewed')) + '</button>' +
+                  '<span class="meta">Saved with your name.</span>' +
+                '</div>') +
+          '</div>' +
+        '</div>' +
+        '<aside class="tl-aside" aria-label="Timeline"><h3 class="label">Timeline</h3><ol class="tl">' +
+          tl.map(x => '<li><span class="rail"><span class="dot ' + (x.k === 'done' ? 'done' : x.k === 'skip' ? 'skip' : '') + '"></span><span class="line"></span></span><span class="body"><span class="t">' + esc(x.t) + '</span><span class="m">' + esc(x.m) + '</span></span></li>').join('') +
+        '</ol></aside>' +
+      '</div>';
+  }
+
+  function toggleReveal() { if (S.sel) { S.revealed[S.sel] = !S.revealed[S.sel]; renderDetail(); } }
+
+  function aiReview() {
+    const f = S.flags.find(x => x.flagId === S.sel);
+    if (!f || S.aiBusy) return;
+    S.aiBusy = true; renderDetail();
+    rpc()
+      .withSuccessHandler(res => { S.aiBusy = false; S.aiPreview[f.flagId] = res; renderDetail(); })
+      .withFailureHandler(err => { S.aiBusy = false; renderDetail(); toast('AI review failed: ' + err.message, 'bad'); })
+      .reviewFlagWithAI(f.flagId, f.queryText, f.matchedKeyword, f.category);
+  }
+
+  function markReviewed() {
+    const f = S.flags.find(x => x.flagId === S.sel);
+    if (!f || S.saving) return;
+    const typed = (el('notes') && el('notes').value || '').trim();
+    const notes = typed || (parseAINotes(f.notes) ? f.notes : '');   // keep the AI note when nothing is typed
+    S.saving = true; renderDetail();
+    rpc()
+      .withSuccessHandler(res => {
+        S.saving = false;
+        if (!res || !res.success) { renderDetail(); toast('Could not save: ' + (res && res.error || 'unknown error'), 'bad'); return; }
+        f.reviewed = 'TRUE'; f.reviewedBy = SIGNED_IN_USER; f.notes = notes;
+        S.totals.unreviewed = Math.max(0, S.totals.unreviewed - 1);
+        toast('Marked reviewed.');
+        renderDashboard();
+        loadDashboard({ quiet: true });
+      })
+      .withFailureHandler(err => { S.saving = false; renderDetail(); toast('Failed to save: ' + err.message, 'bad'); })
+      .markReviewed(f.flagId, notes);
+  }
+
+  // Keyboard: arrows move through the list, Escape leaves phone detail or closes the modal.
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeCriteria(); backToList(); return; }
+    if (S.page !== 'dashboard' || /input|textarea|select/i.test(e.target.tagName)) return;
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const vis = visibleFlags(); if (!vis.length) return;
+    const i = vis.findIndex(f => f.flagId === S.sel);
+    const next = vis[Math.min(vis.length - 1, Math.max(0, i + (e.key === 'ArrowDown' ? 1 : -1)))];
+    if (next && next.flagId !== S.sel) { e.preventDefault(); S.sel = next.flagId; renderList(); renderDetail(); const r = el('rows').querySelector('[aria-current="true"]'); if (r) r.scrollIntoView({ block: 'nearest' }); }
+  });
+
+  // ── Export polling and Run now ─────────────────────────────
+
+  let exportPollInterval = null;
+
+  function startExportPolling() {
+    if (exportPollInterval) clearInterval(exportPollInterval);
+    exportPollInterval = setInterval(checkExportStatus, S.demo ? 3000 : 30000);
+  }
+
+  function checkExportStatus() {
+    rpc()
+      .withSuccessHandler(status => {
+        const was = S.pending;
+        S.pending = status && status.count || 0;
+        if (S.pending !== was) {
+          renderReadout();
+          if (S.pending === 0 && was > 0) { toast('Vault export finished. Refreshing.'); loadDashboard({ quiet: true }); }
+        }
+        if (S.pending === 0 && exportPollInterval) { clearInterval(exportPollInterval); exportPollInterval = null; }
+      })
+      .getPendingExportStatus();
+  }
+
+  function runNow() {
+    const btns = ['runNowBtn', 'dashRunBtn'].map(id => el(id)).filter(Boolean);
+    const status = el('runNowStatus');
+    btns.forEach(b => { b.disabled = true; b.innerHTML = SPINNER + 'Running…'; });
+    if (status) { status.style.display = 'inline'; status.className = 'status-line'; status.textContent = 'Pipeline running. This may take a minute.'; }
+    const restore = () => btns.forEach(b => { b.disabled = false; b.innerHTML = '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9M13.5 2.5v3h-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Run import now'; });
+    rpc()
+      .withSuccessHandler(() => {
+        restore();
+        if (status) { status.className = 'status-line ok'; status.textContent = 'Export jobs queued. Processing in the background.'; setTimeout(() => { status.style.display = 'none'; }, 5000); }
+        toast('Export jobs queued. Records appear when the exports finish.');
+        checkExportStatus();
+        startExportPolling();
+      })
+      .withFailureHandler(err => {
+        restore();
+        if (status) { status.className = 'status-line bad'; status.textContent = 'Error: ' + err.message; }
+        toast('Run failed: ' + err.message, 'bad');
+      })
+      .runPipelineNow();
+  }
+
+  function renderRunLog() {
+    const tbody = el('runLogBody');
+    if (!S.runLog.length) { tbody.innerHTML = '<tr><td colspan="6" class="empty-row">No runs yet.</td></tr>'; return; }
+    tbody.innerHTML = S.runLog.map(r => '<tr>' +
+      '<td class="mono">' + esc(fmtWhen(r.startedAt)) + '</td>' +
+      '<td class="' + (r.status === 'SUCCESS' ? 'run-ok' : 'run-bad') + '">' + esc(r.status) + '</td>' +
+      '<td class="mono">' + esc(r.imported) + '</td><td class="mono">' + esc(r.flagged) + '</td><td class="mono">' + esc(r.alerted) + '</td>' +
+      '<td class="muted">' + esc(r.error || '') + '</td></tr>').join('');
+    const p = S.pipeline || {};
+    el('settingsPlateRight').textContent = p.nextRun ? 'NEXT RUN ' + String(p.nextRun).toUpperCase() : '';
+  }
+
+  // ── Bulk review ────────────────────────────────────────────
+
+  function startBulkReview() {
+    S.bulk = { active: true, loading: true, queue: [], idx: 0, results: {}, ai: null, aiStamp: '', fetching: false, autoClearing: false, aiError: false, busy: false, done: false, error: '' };
+    S.page = 'bulk';
+    document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === 'page-bulk'));
+    document.querySelectorAll('.nav-btn').forEach(b => { if (b.dataset.page === 'bulk') b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+    window.scrollTo({ top: 0 });
+    renderBulk();
+    rpc()
+      .withSuccessHandler(items => {
+        const b = S.bulk; if (!b.active) return;
+        b.queue = (items || []).slice().sort((x, y) => (SEV_ORDER[x.severity] ?? 9) - (SEV_ORDER[y.severity] ?? 9) || String(x.timestamp).localeCompare(String(y.timestamp)));
+        b.loading = false;
+        bulkNext();
+      })
+      .withFailureHandler(err => { S.bulk.loading = false; S.bulk.error = err.message; renderBulk(); })
+      .getUnreviewedFlags();
+  }
+
+  function bulkExit() {
+    S.bulk.active = false;
+    switchPage('dashboard');
+    if (S.dashLoaded) loadDashboard({ quiet: true });
+  }
+
+  function bulkItem() { return S.bulk.queue[S.bulk.idx]; }
+
+  function bulkNext() {
+    const b = S.bulk;
+    b.ai = null; b.aiStamp = ''; b.busy = false; b.fetching = false; b.autoClearing = false; b.aiError = false;
+    if (b.idx >= b.queue.length) { b.done = true; renderBulk(); loadDashboard({ quiet: true }); return; }
+    const item = bulkItem();
+    const existing = parseAINotes(item.notes);
+    if (existing) { b.ai = existing; b.aiStamp = '· Gemini · during import'; afterVerdict(); return; }
+    b.fetching = true; renderBulk();
+    rpc()
+      .withSuccessHandler(res => { if (!b.active || bulkItem() !== item) return; b.fetching = false; b.ai = res; b.aiStamp = '· Gemini · just now'; afterVerdict(); })
+      .withFailureHandler(() => { if (!b.active || bulkItem() !== item) return; b.fetching = false; b.aiError = true; renderBulk(); })
+      .reviewFlagWithAI(item.flagId, item.promptText, item.matchedKeyword, item.category);
+  }
+
+  function afterVerdict() {
+    const b = S.bulk, item = bulkItem();
+    if (b.ai && b.ai.severity === 'Likely False Positive') {
+      b.autoClearing = true; renderBulk();
+      rpc()
+        .withSuccessHandler(() => { bulkRecord('Auto-cleared'); setTimeout(() => { if (!b.active) return; b.idx++; bulkNext(); }, 1200); })
+        .withFailureHandler(() => { bulkRecord('Error'); b.idx++; bulkNext(); })
+        .applyAIReview(item.flagId, b.ai.severity, b.ai.assessment, b.ai.reasoning);
+      return;
+    }
+    renderBulk();
+  }
+
+  function bulkRecord(result) { S.bulk.results[bulkItem().flagId] = result; }
+
+  function bulkConfirm() {
+    const b = S.bulk, item = bulkItem();
+    if (b.busy) return;
+    const typed = (el('bulkNotes') && el('bulkNotes').value || '').trim();
+    const notes = typed || (b.ai ? aiNoteString(b.ai) : '');
+    b.busy = true; renderBulk();
+    const finish = () => rpc()
+      .withSuccessHandler(() => { bulkRecord('Confirmed'); b.idx++; bulkNext(); })
+      .withFailureHandler(err => { b.busy = false; renderBulk(); toast('Could not save: ' + err.message, 'bad'); })
+      .markReviewed(item.flagId, notes);
+    if (b.ai) rpc().withSuccessHandler(finish).withFailureHandler(finish).applyAIReview(item.flagId, b.ai.severity, b.ai.assessment, b.ai.reasoning);
+    else finish();
+  }
+
+  function bulkDismiss() {
+    const b = S.bulk, item = bulkItem();
+    if (b.busy) return;
+    const typed = (el('bulkNotes') && el('bulkNotes').value || '').trim();
+    b.busy = true; renderBulk();
+    const finish = () => rpc()
+      .withSuccessHandler(() => { bulkRecord('Dismissed'); b.idx++; bulkNext(); })
+      .withFailureHandler(err => { b.busy = false; renderBulk(); toast('Could not save: ' + err.message, 'bad'); })
+      .markReviewed(item.flagId, typed || 'Dismissed as not a concern');
+    rpc().withSuccessHandler(finish).withFailureHandler(finish)
+      .applyAIReview(item.flagId, 'Likely False Positive', 'Manually dismissed', 'Reviewed and dismissed by ' + (SIGNED_IN_USER || 'a reviewer'));
+  }
+
+  function bulkSkip() { const b = S.bulk; if (b.busy) return; bulkRecord('Skipped'); b.idx++; bulkNext(); }
+
+  function renderBulk() {
+    const b = S.bulk, n = b.queue.length;
+    const counts = { Confirmed: 0, Dismissed: 0, Skipped: 0, 'Auto-cleared': 0, Error: 0 };
+    Object.values(b.results).forEach(r => { counts[r] = (counts[r] || 0) + 1; });
+    const shownIdx = Math.min(b.idx + 1, n);
+    el('bulkPos').textContent = n ? pad2(shownIdx) + ' / ' + pad2(n) : '';
+    const prog = el('bulkProg');
+    prog.style.gridTemplateColumns = 'repeat(' + Math.max(1, n) + ', minmax(0, 1fr))';
+    prog.setAttribute('aria-valuemin', '0'); prog.setAttribute('aria-valuemax', String(n)); prog.setAttribute('aria-valuenow', String(Math.min(b.idx, n)));
+    prog.innerHTML = b.queue.map((q, i) => '<span class="' + (b.results[q.flagId] ? 'done' : i === b.idx && !b.done ? 'now' : '') + '"></span>').join('') || '<span></span>';
+    el('bulkCounts').innerHTML = n
+      ? '<span><b>' + counts.Confirmed + '</b> confirmed</span><span><b>' + counts.Dismissed + '</b> dismissed</span><span><b>' + counts['Auto-cleared'] + '</b> auto-cleared</span><span><b>' + counts.Skipped + '</b> skipped</span>' + (counts.Error ? '<span><b>' + counts.Error + '</b> errors</span>' : '')
+      : '';
+
+    const card = el('bulkCase');
+    if (b.loading) {
+      card.innerHTML = '<div class="empty"><div class="thinking">' + SPINNER + 'Loading unreviewed flags…</div></div>';
+    } else if (b.error) {
+      card.innerHTML = emptyState('Could not load the queue', b.error, '<button class="btn btn-1" onclick="startBulkReview()">Try again</button>');
+    } else if (!n) {
+      card.innerHTML = emptyState('No unreviewed flags', 'Everything has been reviewed by a person or cleared by AI.', '<button class="btn btn-1" onclick="bulkExit()">Back to dashboard</button>');
+    } else if (b.done) {
+      card.innerHTML = emptyState('Session complete', counts.Confirmed + ' confirmed, ' + counts.Dismissed + ' dismissed, ' + counts['Auto-cleared'] + ' auto-cleared, ' + counts.Skipped + ' skipped.', '<button class="btn btn-1" onclick="bulkExit()">Back to dashboard</button>');
+    } else {
+      const item = bulkItem();
+      const st = b.ai ? (b.ai.severity === 'Genuine Concern' ? 'concern' : b.ai.severity === 'Likely False Positive' ? 'cleared' : 'needs') : 'unrev';
+      let aiBlock;
+      if (b.fetching) aiBlock = '<div class="thinking">' + SPINNER + 'Asking Gemini…</div>';
+      else if (b.ai) aiBlock = '<p class="verdict ' + (VERDICT_CLS[b.ai.severity] || '') + '">' + esc(b.ai.severity) + '</p><p class="assess">' + esc(b.ai.assessment) + '</p><p class="reason">' + esc(b.ai.reasoning) + '</p>';
+      else aiBlock = '<p class="reason">' + (b.aiError ? 'The AI verdict is unavailable right now. Decide yourself or skip.' : 'No AI verdict.') + '</p>';
+      let actions;
+      if (b.autoClearing) actions = '<div class="thinking">' + CHECK + 'AI cleared this as a likely false positive. Moving on…</div>';
+      else if (b.fetching) actions = '';
+      else actions =
+        '<label class="field" for="bulkNotes">Note (optional)<textarea class="ctl" id="bulkNotes" rows="2" placeholder="Saved with your decision"></textarea></label>' +
+        '<div class="case-actions">' +
+          '<button type="button" class="btn btn-1 btn-lg" onclick="bulkConfirm()" ' + (b.busy ? 'disabled' : '') + '>' + (b.busy ? SPINNER + 'Saving…' : CHECK + 'Confirm, follow up') + '</button>' +
+          '<button type="button" class="btn btn-2 btn-lg" onclick="bulkDismiss()" ' + (b.busy ? 'disabled' : '') + '>' + CROSS + 'Dismiss, not a concern</button>' +
+          '<button type="button" class="btn btn-link btn-lg" onclick="bulkSkip()" ' + (b.busy ? 'disabled' : '') + '>Skip</button>' +
+        '</div>' +
+        '<p class="help">Confirm marks it reviewed by you and keeps your note. Dismiss marks it reviewed as a false positive. Skip leaves it unreviewed.</p>';
+      card.innerHTML =
+        '<h2 class="plate"><span class="rivet"></span><b>CASE FILE ' + codeOf(item.flagId) + '</b><span class="sp">' + pad2(shownIdx) + ' / ' + pad2(n) + '</span><span class="rivet"></span></h2>' +
+        '<div class="case-head"><span class="sev sev-' + sevCls(item.severity) + '">' + esc(item.severity || '—') + '</span><span style="font-weight:600">' + esc(item.category) + '</span>' +
+          '<span class="who">' + esc(maskEmail(item.userEmail)) + ' · ' + esc(item.ouPath || '—') + ' · ' + esc(fmtWhen(item.timestamp)) + '</span>' + stChip(st) + '</div>' +
+        '<div class="case-sec"><h3 class="label">Prompt · matched “' + esc(item.matchedKeyword) + '”</h3><p class="prompt">' + highlight(item.promptText, item.matchedKeyword) + '</p></div>' +
+        '<div class="case-sec"><h3 class="label ai-head">' + AI_ICON + 'AI verdict<span class="stamp">' + esc(b.aiStamp) + '</span></h3>' + aiBlock + '</div>' +
+        '<div class="case-sec" style="gap:16px">' + actions + '</div>';
+    }
+
+    el('bulkLogCount').textContent = n ? n + ' FILES' : '';
+    el('bulkLog').innerHTML = b.queue.map((q, i) => {
+      const r = b.results[q.flagId];
+      const now = i === b.idx && !b.done && !r;
+      const existing = parseAINotes(q.notes);
+      const res = r ? '<span class="res ' + (r === 'Confirmed' || r === 'Auto-cleared' ? 'strong' : '') + '">' + esc(r) + '</span>'
+        : now ? '<span class="res now">Now</span>'
+        : '<span class="res">' + (existing ? 'AI ' + esc(existing.severity) : 'Unreviewed') + '</span>';
+      return '<li ' + (now ? 'aria-current="step"' : '') + '><span class="i">' + (i + 1) + '</span><span class="sev sev-' + sevCls(q.severity) + '" style="justify-self:start">' + esc(q.severity || '—') + '</span><span class="desc">' + esc(q.category) + ' · ' + esc(maskEmail(q.userEmail).split('@')[0]) + ' · ' + esc(q.ouPath || '—') + '</span>' + res + '</li>';
+    }).join('') || '<li><span class="i"></span><span></span><span class="desc muted">Nothing queued.</span><span></span></li>';
+  }
+
+  // ── AI filtered log ────────────────────────────────────────
+
+  function loadFilteredLog() {
+    el('filteredLoading').style.display = 'block'; el('filteredBox').style.display = 'none';
+    rpc()
+      .withSuccessHandler(rows => {
+        S.loaded.filtered = true;
+        renderFilteredLog(rows || []);
+        el('filteredLoading').style.display = 'none';
+        el('filteredBox').style.display = 'block';
+      })
+      .withFailureHandler(err => { el('filteredLoading').textContent = 'Error: ' + err.message; })
+      .getFilteredLog();
+  }
+
+  function renderFilteredLog(rows) {
+    el('filteredCount').textContent = rows.length + ' ENTR' + (rows.length === 1 ? 'Y' : 'IES');
+    const tbody = el('filteredBody');
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7" class="empty-row">Nothing filtered yet. Entries appear here after an import where AI dismissed a keyword match.</td></tr>'; return; }
+    tbody.innerHTML = rows.map(r => '<tr>' +
+      '<td class="mono muted" style="white-space:nowrap">' + esc(fmtWhen(r.filteredAt)) + '</td>' +
+      '<td class="mono">' + esc(maskEmail(r.userEmail)) + '</td>' +
+      '<td class="muted">' + esc(r.ouPath || '—') + '</td>' +
+      '<td>' + esc(r.category) + '</td>' +
+      '<td><span class="kw">' + esc(r.keyword) + '</span></td>' +
+      '<td style="max-width:280px"><span class="v-clear" style="font-weight:600">' + esc(r.assessment) + '</span><br><span class="muted" style="font-size:12px">' + esc(r.reasoning) + '</span></td>' +
+      '<td style="max-width:260px" class="muted">' + esc((r.promptText || '').substring(0, 120)) + ((r.promptText || '').length > 120 ? '…' : '') + '</td></tr>').join('');
+  }
+
+  function clearFilteredLog() {
+    if (!confirm('Clear all AI-filtered log entries? This cannot be undone.')) return;
+    rpc()
+      .withSuccessHandler(() => { renderFilteredLog([]); toast('Filtered log cleared.'); })
+      .withFailureHandler(err => toast('Error: ' + err.message, 'bad'))
+      .clearFilteredLog();
+  }
+
+  // ── Access ─────────────────────────────────────────────────
+
+  function loadAccessList() {
+    el('accessLoading').style.display = 'block'; el('accessContent').style.display = 'none';
+    rpc()
+      .withSuccessHandler(users => {
+        S.loaded.access = true;
+        renderAccessList(users || []);
+        el('accessLoading').style.display = 'none';
+        el('accessContent').style.display = 'block';
+      })
+      .withFailureHandler(err => { el('accessLoading').textContent = 'Error: ' + err.message; })
+      .getAccessList();
+  }
+
+  function renderAccessList(users) {
+    el('accessCount').textContent = users.length + ' USER' + (users.length === 1 ? '' : 'S');
+    const tbody = el('accessBody');
+    if (!users.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-row">No users yet. Add an email above to grant dashboard access.</td></tr>'; return; }
+    tbody.innerHTML = users.map(u => '<tr>' +
+      '<td style="font-weight:600">' + esc(u.email) + '</td>' +
+      '<td><select class="ctl" style="min-height:32px;padding:2px 8px;width:auto" onchange="updateAccessRole(\'' + esc(u.email) + '\', this.value)"><option value="Viewer" ' + (u.role === 'Viewer' ? 'selected' : '') + '>Viewer</option><option value="Admin" ' + (u.role === 'Admin' ? 'selected' : '') + '>Admin</option></select></td>' +
+      '<td class="muted">' + esc(u.addedBy) + '</td><td class="mono muted">' + esc(fmtWhen(u.addedAt)) + '</td>' +
+      '<td><button class="btn btn-danger" style="min-height:32px;padding:0 10px;font-size:12px" onclick="removeAccessUser(\'' + esc(u.email) + '\')">Remove</button></td></tr>').join('');
+  }
+
+  function addAccessUser() {
+    const email = el('accessNewEmail').value.trim(), role = el('accessNewRole').value;
+    const status = el('accessAddStatus');
+    const show = (cls, msg) => { status.style.display = 'block'; status.className = 'status-line ' + cls; status.textContent = msg; };
+    if (!email || !email.includes('@')) { show('bad', 'Enter a valid email address.'); return; }
+    show('', 'Adding…');
+    rpc()
+      .withSuccessHandler(res => {
+        if (res.success) { el('accessNewEmail').value = ''; show('ok', email + ' added.'); setTimeout(() => { status.style.display = 'none'; }, 3000); loadAccessList(); }
+        else show('bad', res.error || 'Failed to add user.');
+      })
+      .withFailureHandler(err => show('bad', 'Error: ' + err.message))
+      .addAccessUser(email, role);
+  }
+
+  function removeAccessUser(email) {
+    if (!confirm('Remove access for ' + email + '?')) return;
+    rpc()
+      .withSuccessHandler(res => { if (res.success) { toast('Removed ' + email + '.'); loadAccessList(); } else toast(res.error || 'Failed to remove user.', 'bad'); })
+      .withFailureHandler(err => toast('Error: ' + err.message, 'bad'))
+      .removeAccessUser(email);
+  }
+
+  function updateAccessRole(email, newRole) {
+    rpc()
+      .withSuccessHandler(() => toast(email + ' is now ' + newRole + '.'))
+      .withFailureHandler(err => { toast('Error updating role: ' + err.message, 'bad'); loadAccessList(); })
+      .updateAccessRole(email, newRole);
+  }
+
+  // ── Settings ───────────────────────────────────────────────
+
+  let allOUs = [], selectedOUs = [];
+
+  function loadSettings() {
+    el('settingsLoading').style.display = 'block'; el('settingsContent').style.display = 'none';
+    rpc()
+      .withSuccessHandler(data => renderSettings(data))
+      .withFailureHandler(err => { el('settingsLoading').textContent = 'Error: ' + err.message; })
+      .getSettingsData();
+  }
+
+  function renderSettings(data) {
+    S.loaded.settings = true;
+    allOUs = data.ous || []; selectedOUs = (data.selectedOUs || []).slice();
+    const ouList = el('ouList');
+    ouList.innerHTML = allOUs.length
+      ? allOUs.map(ou => {
+          const path = typeof ou === 'object' ? ou.path : ou, name = typeof ou === 'object' ? ou.name : ou, depth = typeof ou === 'object' ? (ou.depth || 0) : 0;
+          return '<label class="ou-item" style="padding-left:' + (12 + depth * 20) + 'px"><input type="checkbox" value="' + esc(path) + '" ' + (selectedOUs.includes(path) ? 'checked' : '') + ' onchange="toggleOU(this)"><span class="ou-path">' + esc(name) + '</span></label>';
+        }).join('')
+      : '<div class="loading" style="padding:16px">No OUs found. Check that Admin Email is set and the service account has Admin SDK access.</div>';
+    setVal('settingDateRange', data.dateRange); setVal('settingFrequency', data.frequency); setVal('settingImportTime', data.importTime);
+    setVal('settingImportDay', data.importDay); setVal('settingStatus', data.status);
+    toggleScheduleFields();
+    setVal('settingAdminEmail', data.adminEmail); setVal('settingAlertRecipients', data.alertRecipients);
+    setVal('settingFromName', data.fromName); setVal('settingReplyTo', data.replyTo); setVal('settingAlertCooldown', data.alertCooldown);
+    renderRunLog();
+    el('settingsLoading').style.display = 'none'; el('settingsContent').style.display = 'block';
+  }
+
+  function toggleOU(cb) {
+    if (cb.checked) { if (!selectedOUs.includes(cb.value)) selectedOUs.push(cb.value); }
+    else selectedOUs = selectedOUs.filter(o => o !== cb.value);
+  }
+
+  function toggleScheduleFields() {
+    const freq = el('settingFrequency').value;
+    el('fieldImportTime').style.display = freq === 'hourly' ? 'none' : 'flex';
+    el('fieldImportDay').style.display  = freq === 'weekly' ? 'flex' : 'none';
+  }
+
+  function saveSettings() {
+    const btn = el('saveSettingsBtn');
+    btn.disabled = true; btn.innerHTML = SPINNER + 'Saving…';
+    const data = {
+      selectedOUs, dateRange: getVal('settingDateRange'), frequency: getVal('settingFrequency'), importTime: getVal('settingImportTime'),
+      importDay: getVal('settingImportDay'), status: getVal('settingStatus'), adminEmail: getVal('settingAdminEmail'),
+      alertRecipients: getVal('settingAlertRecipients'), dashboardAccess: '', fromName: getVal('settingFromName'),
+      replyTo: getVal('settingReplyTo'), alertCooldown: getVal('settingAlertCooldown'),
+    };
+    const done = () => { btn.disabled = false; btn.textContent = 'Save settings'; };
+    rpc()
+      .withSuccessHandler(() => { done(); const s = el('saveStatus'); s.style.display = 'inline'; setTimeout(() => { s.style.display = 'none'; }, 3000); toast('Settings saved.'); loadDashboard({ quiet: true }); })
+      .withFailureHandler(err => { done(); toast('Save failed: ' + err.message, 'bad'); })
+      .saveSettings(data);
+  }
+
+  function clearVaultDataRows() {
+    if (!confirm('Clear all rows from the Vault_Data sheet? This removes legacy pre-scan records and cannot be undone.')) return;
+    rpc()
+      .withSuccessHandler(() => toast('Vault_Data sheet cleared.'))
+      .withFailureHandler(err => toast('Error: ' + err.message, 'bad'))
+      .clearVaultData();
+  }
+
+  // ── Suggest criteria ───────────────────────────────────────
+
+  let _criteriaData = [];
+
+  function suggestCriteria() {
+    el('criteriaModal').classList.add('open');
+    el('criteriaLoading').style.display = 'flex'; el('criteriaResults').style.display = 'none'; el('criteriaApplyBtn').style.display = 'none';
+    el('criteriaLoadingText').textContent = 'Generating suggestions with AI…';
+    rpc()
+      .withSuccessHandler(data => { _criteriaData = data || []; renderCriteriaSuggestions(_criteriaData); })
+      .withFailureHandler(err => { el('criteriaLoadingText').textContent = 'Error: ' + err.message; })
+      .suggestAlertCriteria();
+  }
+
+  function closeCriteria() { el('criteriaModal').classList.remove('open'); }
+
+  function renderCriteriaSuggestions(data) {
+    el('criteriaResults').innerHTML = data.map((c, i) =>
+      '<div class="crit-item"><div class="top"><input type="checkbox" id="crit_' + i + '" checked style="width:16px;height:16px;accent-color:var(--accent)"><label for="crit_' + i + '">' + esc(c.category) + '</label>' +
+      '<span class="sev sev-' + sevCls(c.severity) + '">' + esc(c.severity) + '</span><span class="kw">' + esc(c.action || 'Email') + '</span></div>' +
+      '<div class="kws">' + esc(c.keywords) + '</div></div>').join('') || '<p class="help">No suggestions came back.</p>';
+    el('criteriaLoading').style.display = 'none'; el('criteriaResults').style.display = 'block'; el('criteriaApplyBtn').style.display = 'inline-flex';
+  }
+
+  function applyCriteriaSuggestions() {
+    const selected = _criteriaData.filter((_, i) => { const cb = el('crit_' + i); return cb && cb.checked; });
+    if (!selected.length) { toast('No categories selected.', 'bad'); return; }
+    const btn = el('criteriaApplyBtn');
+    btn.disabled = true; btn.innerHTML = SPINNER + 'Applying…';
+    rpc()
+      .withSuccessHandler(res => { btn.disabled = false; btn.textContent = 'Apply selected'; closeCriteria(); toast(res.added + ' categor' + (res.added === 1 ? 'y' : 'ies') + ' added to Alerts_Config.'); loadDashboard({ quiet: true }); })
+      .withFailureHandler(err => { btn.disabled = false; btn.textContent = 'Apply selected'; toast('Error applying criteria: ' + err.message, 'bad'); })
+      .applyAlertCriteria(selected);
+  }
+
+  // ── Helpers ────────────────────────────────────────────────
+
+  function el(id) { return document.getElementById(id); }
+  function pad2(n) { return String(n).padStart(2, '0'); }
+  function setVal(id, v) { const e = el(id); if (e) e.value = v == null ? '' : v; }
+  function getVal(id) { const e = el(id); return e ? e.value : ''; }
+  function esc(str) { return String(str == null ? '' : str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'); }
+  function toast(msg, kind) {
+    const t = document.createElement('div');
+    t.className = 'toast' + (kind === 'bad' ? ' bad' : '');
+    t.textContent = msg;
+    el('toasts').appendChild(t);
+    setTimeout(() => t.remove(), kind === 'bad' ? 6000 : 3500);
+  }
+
+  initApp();
+</script>
+<script>
+  // Static demo build: always sample data, and no way out of demo mode here.
+  toggleDemo = function () {};
+  document.getElementById('demoToggle').style.display = 'none';
+  (function () {
+    var banner = document.querySelector('.demo-banner .wrap');
+    banner.querySelector('strong').textContent = 'Live demo';
+    banner.querySelector('span:not(.sp)').textContent = 'This is the real Vaulter dashboard running on fictional sample data in your browser. Nothing here touches a district.';
+    banner.querySelector('button:last-child').remove();
+  })();
+</script>
+</body>
+</html>

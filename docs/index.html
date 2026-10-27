@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vaulter</title>
+  <meta name="description" content="Vaulter watches what students ask Gemini and tells a counselor when something needs a human. Google Apps Script on a Google Sheet, built by Orono Public Schools.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --page:#d5dae3; --panel:#fff; --plate:#e8ebf0; --border:#9ea6b8; --divider:#e3e6ee; --text:#1a2033; --text2:#4a5368; --head:#1d2a5d; --accent:#2d3f89; --crit:#ad2122; --sel:#eef1fa; --hdr:#1d2a5d; --hdr-sub:#d3d8ec; --hdr-rule:#46538a; --readout:#2d3f89; --ok:#8ee6b4; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body { background: var(--page); color: var(--text); font: 15px/1.55 'Lexend', sans-serif; }
+    a { color: var(--accent); }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+    @media (max-width: 700px) { .wrap { padding: 0 16px; } }
+    .hdr { background: var(--hdr); color: #fff; }
+    .hdr .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; min-height: 64px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 600; }
+    .brand small { font-size: 13px; font-weight: 400; color: var(--hdr-sub); padding-left: 12px; border-left: 1px solid var(--hdr-rule); }
+    .nav { margin-left: auto; display: flex; gap: 4px; }
+    .nav a { color: var(--hdr-sub); text-decoration: none; padding: 20px 12px 18px; border-bottom: 3px solid transparent; font-size: 14px; }
+    .nav a:hover, .nav a[aria-current] { color: #fff; border-bottom-color: #fff; }
+    .readout { background: var(--readout); color: #fff; font-size: 12px; font-weight: 500; letter-spacing: .03em; }
+    .readout .wrap { display: flex; flex-wrap: wrap; gap: 4px 24px; padding-top: 8px; padding-bottom: 8px; }
+    .readout .dot { display: inline-block; width: 8px; height: 8px; background: var(--ok); margin-right: 8px; }
+    .readout .right { margin-left: auto; }
+    main .wrap { padding-top: 40px; padding-bottom: 56px; display: flex; flex-direction: column; gap: 28px; }
+    h1 { margin: 0; font-size: 40px; line-height: 1.15; font-weight: 600; color: var(--head); max-width: 760px; }
+    .lead { font-size: 18px; max-width: 760px; color: var(--text2); margin: 0; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 4px; font-size: 15px; font-weight: 500; text-decoration: none; border: 1px solid var(--head); }
+    .btn-1 { background: var(--head); color: #fff; }
+    .btn-2 { background: var(--panel); color: var(--head); }
+    .box { background: var(--panel); border: 1px solid var(--border); border-radius: 3px; }
+    .plate { display: flex; align-items: center; gap: 10px; margin: 0; padding: 8px 14px; background: var(--plate); border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 400; letter-spacing: .04em; color: var(--head); }
+    .plate b { font-weight: 600; }
+    .plate .sp { margin-left: auto; }
+    .plate .rivet { width: 6px; height: 6px; border-radius: 50%; background: #8a92a6; }
+    .body { padding: 22px 24px; }
+    h2 { margin: 0 0 10px; font-size: 20px; font-weight: 600; color: var(--head); }
+    .flow { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; }
+    .step { flex: 1 1 150px; border: 1px solid var(--border); border-radius: 3px; padding: 12px 14px; }
+    .step.main { background: var(--sel); border: 2px solid var(--accent); }
+    .step b { display: block; font-size: 15px; color: var(--head); }
+    .step span { font-size: 13px; color: var(--text2); }
+    .arrow { align-self: center; color: #8a92a6; flex: none; }
+    @media (max-width: 760px) { .flow { flex-direction: column; } .arrow { transform: rotate(90deg); align-self: flex-start; margin-left: 24px; } }
+    .note { font-size: 14px; color: var(--text2); margin: 14px 0 0; }
+    .demo-frame { width: 100%; height: 760px; border: 0; display: block; background: var(--page); }
+    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 800px) { .two { grid-template-columns: 1fr; } }
+    ul { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
+    li b { color: var(--head); }
+    .sev { display: inline-block; padding: 1px 8px; border-radius: 3px; font-size: 12px; font-weight: 600; color: #fff; }
+    footer { border-top: 1px solid var(--border); padding: 20px 0 48px; font-size: 14px; color: var(--text2); }
+    footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 12px; }
+  </style>
+</head>
+<body>
+<header class="hdr">
+  <div class="wrap">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="11.5" stroke="#fff" stroke-width="2"/><circle cx="14" cy="14" r="4" stroke="#fff" stroke-width="2"/><path d="M14 2.5v3M14 22.5v3M2.5 14h3M22.5 14h3M5.9 5.9 8 8M20 20l2.1 2.1M22.1 5.9 20 8M8 20l-2.1 2.1" stroke="#fff" stroke-width="1.6"/><circle cx="14" cy="14" r="1.5" fill="#ff8a8b"/></svg>
+      Vaulter <small>Orono Public Schools</small>
+    </div>
+    <nav class="nav" aria-label="Site">
+      <a href="./" aria-current="page">Overview</a>
+      <a href="demo/">Live demo</a>
+      <a href="setup.html">Setup guide</a>
+      <a href="https://github.com/OPS-JMellor/Vaulter">GitHub</a>
+    </nav>
+  </div>
+</header>
+<div class="readout"><div class="wrap"><span><span class="dot"></span>OPEN SOURCE · GOOGLE APPS SCRIPT</span><span>RUNS INSIDE YOUR WORKSPACE</span><span class="right">NO SERVERS · NO VENDOR</span></div></div>
+
+<main>
+  <div class="wrap">
+    <div>
+      <h1>Student Gemini prompts, watched. Counselors told.</h1>
+      <p class="lead" style="margin-top:12px">Vaulter pulls Gemini activity from Google Vault, scans every prompt against keyword rules, asks Gemini whether a match is a real concern, emails the flagged ones, and gives reviewers a queue to work. It is an Apps Script on a Google Sheet. Nothing to install, nothing to buy.</p>
+      <div class="actions" style="margin-top:20px">
+        <a class="btn btn-1" href="demo/">Try the live demo</a>
+        <a class="btn btn-2" href="setup.html">Set it up in your district</a>
+        <a class="btn btn-2" href="https://github.com/OPS-JMellor/Vaulter">View the code</a>
+      </div>
+    </div>
+
+    <section class="box" aria-label="How it works">
+      <h2 class="plate"><span class="rivet"></span><b>BOX 01</b><span>HOW IT WORKS</span><span class="sp">ONLY RULE MATCHES THAT SURVIVE AI TRIAGE REACH A PERSON</span><span class="rivet"></span></h2>
+      <div class="body">
+        <div class="flow">
+          <div class="step"><b>Google Vault</b><span>holds Gemini activity for licensed students</span></div>
+          <svg class="arrow" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3 9h11M10 5l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="step"><b>Scheduled export</b><span>daily, collected in the background</span></div>
+          <svg class="arrow" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3 9h11M10 5l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="step"><b>Keyword rules</b><span>prompts read in memory; no match, dropped</span></div>
+          <svg class="arrow" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3 9h11M10 5l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="step"><b>Gemini triage</b><span>real concern or not? likely false positives go to a log</span></div>
+          <svg class="arrow" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><path d="M3 9h11M10 5l4 4-4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="step main"><b>Counselor review</b><span>email alert plus the dashboard queue</span></div>
+        </div>
+        <p class="note">Gemini for Education is on for students and Vault keeps every prompt, but nobody reads Vault. Vaulter closes that gap: the first-person prompt about self-harm or the sextortion threat reaches a counselor the next morning. The same scan catches the chemistry student asking about a bomb calorimeter, and the AI step clears it before anyone's time is spent.</p>
+      </div>
+    </section>
+
+    <section class="box" aria-label="Live demo">
+      <h2 class="plate"><span class="rivet"></span><b>BOX 02</b><span>LIVE DEMO</span><span class="sp">THE REAL DASHBOARD ON FICTIONAL SAMPLE DATA</span><span class="rivet"></span></h2>
+      <iframe class="demo-frame" src="demo/" title="Vaulter dashboard, live demo on sample data" loading="lazy"></iframe>
+      <div class="body" style="padding-top:14px;padding-bottom:14px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+        <span style="color:var(--text2);font-size:14px">Click a flag, run the bulk review, press Run import now. Every student here is invented.</span>
+        <a class="btn btn-2" href="demo/">Open the demo full screen</a>
+      </div>
+    </section>
+
+    <section class="box" aria-label="What a reviewer sees">
+      <h2 class="plate"><span class="rivet"></span><b>BOX 03</b><span>WHAT A REVIEWER SEES</span><span class="rivet sp" style="margin-left:auto"></span></h2>
+      <div class="body two">
+        <ul>
+          <li><b>A queue of flagged prompts</b>, newest first, with severity <span class="sev" style="background:#ad2122">Critical</span> <span class="sev" style="background:#b4410c">High</span> <span class="sev" style="background:#8a6400">Medium</span> <span class="sev" style="background:#4a5368">Low</span>, category, grade and a two-line preview. Filters for unreviewed, severity and category, plus search.</li>
+          <li><b>A detail pane</b> with the full prompt and the matched keyword marked, the AI verdict and its reasoning, review notes, and a timeline: sent, flagged, alert emailed, AI verdict, reviewed by whom.</li>
+          <li><b>Students are masked</b> until the reviewer clicks Reveal, one flag at a time.</li>
+        </ul>
+        <ul>
+          <li><b>Bulk review</b> steps through everything unreviewed with the AI verdict beside each prompt and three choices: Confirm, Dismiss or Skip. Likely false positives clear themselves.</li>
+          <li><b>Seven-day stats and a 14-day activity chart</b>: flagged, unreviewed, critical open, share cleared by AI.</li>
+          <li><b>Demo mode</b> swaps in fictional sample data so the tool can be shown without exposing a real student. It is what you see above.</li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="two">
+      <section class="box" aria-label="Privacy">
+        <h2 class="plate"><span class="rivet"></span><b>BOX 04</b><span>PRIVACY</span><span class="rivet" style="margin-left:auto"></span></h2>
+        <div class="body"><ul>
+          <li>Everything lives in the district's own Google Workspace: the script, the Sheet that holds flags, the alert email. No outside server, no vendor account.</li>
+          <li>Only prompts that match a rule are kept. The rest are read in memory and discarded.</li>
+          <li>Triage sends the matched prompt text to Google's Gemini API and keeps only the verdict.</li>
+          <li>Vault is read as the admin who deploys the script. No service account, no key file.</li>
+          <li>Dashboard access is a named list of district accounts with Admin and Viewer roles.</li>
+        </ul></div>
+      </section>
+      <section class="box" aria-label="What you need">
+        <h2 class="plate"><span class="rivet"></span><b>BOX 05</b><span>WHAT YOU NEED</span><span class="rivet" style="margin-left:auto"></span></h2>
+        <div class="body"><ul>
+          <li>Google Workspace for Education with Gemini on for students and Vault licenses for them.</li>
+          <li>A super-admin with Vault privileges to deploy it. It runs as that account.</li>
+          <li>A Gemini API key for triage. Optional: without it, matches are flagged without a verdict.</li>
+          <li>A Google Sheet, the script from this repo, and an afternoon. <a href="setup.html">The setup guide</a> walks through it.</li>
+          <li>Someone who will read the alerts. The tool moves a prompt to a person, nothing more.</li>
+        </ul></div>
+      </section>
+    </div>
+
+    <section class="box" aria-label="Limits">
+      <h2 class="plate"><span class="rivet"></span><b>BOX 06</b><span>LIMITS, HONESTLY</span><span class="rivet" style="margin-left:auto"></span></h2>
+      <div class="body"><ul>
+        <li>Keyword rules are blunt. "i want to die" also catches "i want to die my hair purple." The AI step clears most of these, but the rules need tending and the final call is a counselor's.</li>
+        <li>It is not real time. Vault exports take minutes to hours, so the pipeline runs on a schedule and collects finished exports on the next pass.</li>
+        <li>The AI verdict is triage, not a decision. Genuine Concern and Needs Review both wait for a person.</li>
+        <li>It sees Gemini prompts only, not other chatbots, web search or documents.</li>
+      </ul></div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Built by Joel Mellor, Technology, Orono Public Schools · <a href="mailto:joel.mellor@orono.k12.mn.us">joel.mellor@orono.k12.mn.us</a></span>
+    <span><a href="https://github.com/OPS-JMellor/Vaulter">github.com/OPS-JMellor/Vaulter</a></span>
+  </div>
+</footer>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vaulter · setup guide</title>
+  <meta name="description" content="Set up Vaulter from scratch in your own Google Workspace: prerequisites, Sheet and script, configuration, publishing the dashboard, first run, troubleshooting.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root { --page:#d5dae3; --panel:#fff; --plate:#e8ebf0; --border:#9ea6b8; --divider:#e3e6ee; --text:#1a2033; --text2:#4a5368; --head:#1d2a5d; --accent:#2d3f89; --hdr:#1d2a5d; --hdr-sub:#d3d8ec; --hdr-rule:#46538a; --sel:#eef1fa; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body { background: var(--page); color: var(--text); font: 15px/1.6 'Lexend', sans-serif; }
+    a { color: var(--accent); }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 0 32px; }
+    @media (max-width: 700px) { .wrap { padding: 0 16px; } }
+    .hdr { background: var(--hdr); color: #fff; }
+    .hdr .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; min-height: 64px; max-width: 1100px; }
+    .brand { display: flex; align-items: center; gap: 12px; font-size: 20px; font-weight: 600; }
+    .brand small { font-size: 13px; font-weight: 400; color: var(--hdr-sub); padding-left: 12px; border-left: 1px solid var(--hdr-rule); }
+    .nav { margin-left: auto; display: flex; gap: 4px; }
+    .nav a { color: var(--hdr-sub); text-decoration: none; padding: 20px 12px 18px; border-bottom: 3px solid transparent; font-size: 14px; }
+    .nav a:hover, .nav a[aria-current] { color: #fff; border-bottom-color: #fff; }
+    main .wrap { padding-top: 36px; padding-bottom: 56px; display: flex; flex-direction: column; gap: 20px; }
+    h1 { margin: 0; font-size: 32px; line-height: 1.2; font-weight: 600; color: var(--head); }
+    .lead { margin: 10px 0 0; font-size: 17px; color: var(--text2); }
+    .box { background: var(--panel); border: 1px solid var(--border); border-radius: 3px; }
+    .plate { display: flex; align-items: center; gap: 10px; margin: 0; padding: 8px 14px; background: var(--plate); border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 400; letter-spacing: .04em; color: var(--head); }
+    .plate b { font-weight: 600; }
+    .plate .rivet { width: 6px; height: 6px; border-radius: 50%; background: #8a92a6; }
+    .plate .rivet.r { margin-left: auto; }
+    .body { padding: 20px 24px; }
+    ol, ul { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+    code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .92em; background: var(--sel); padding: 1px 5px; border-radius: 3px; }
+    table { width: 100%; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--head); }
+    td { padding: 9px 10px; border-bottom: 1px solid var(--divider); vertical-align: top; }
+    tr:last-child td { border-bottom: 0; }
+    footer { border-top: 1px solid var(--border); padding: 20px 0 48px; font-size: 14px; color: var(--text2); }
+  </style>
+</head>
+<body>
+<header class="hdr">
+  <div class="wrap">
+    <div class="brand">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" aria-hidden="true"><circle cx="14" cy="14" r="11.5" stroke="#fff" stroke-width="2"/><circle cx="14" cy="14" r="4" stroke="#fff" stroke-width="2"/><path d="M14 2.5v3M14 22.5v3M2.5 14h3M22.5 14h3M5.9 5.9 8 8M20 20l2.1 2.1M22.1 5.9 20 8M8 20l-2.1 2.1" stroke="#fff" stroke-width="1.6"/><circle cx="14" cy="14" r="1.5" fill="#ff8a8b"/></svg>
+      Vaulter <small>Orono Public Schools</small>
+    </div>
+    <nav class="nav" aria-label="Site">
+      <a href="./">Overview</a>
+      <a href="demo/">Live demo</a>
+      <a href="setup.html" aria-current="page">Setup guide</a>
+      <a href="https://github.com/OPS-JMellor/Vaulter">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="wrap">
+    <div>
+      <h1>Set up Vaulter from scratch</h1>
+      <p class="lead">Plan on an afternoon. You need a super-admin with Vault privileges, a new Google Sheet and the code from <a href="https://github.com/OPS-JMellor/Vaulter">github.com/OPS-JMellor/Vaulter</a>. Nothing runs anywhere but Apps Script, and the whole thing runs as the admin who sets it up, so sign in as that account for every step.</p>
+    </div>
+
+    <section class="box">
+      <h2 class="plate"><span class="rivet"></span><b>BEFORE YOU START</b><span class="rivet r"></span></h2>
+      <div class="body"><ul>
+        <li>Google Workspace for Education with Gemini turned on for the student organizational units you want to watch.</li>
+        <li>Those students hold a Google Vault license. Vault is where Gemini activity is retained; without it, every export comes back empty.</li>
+        <li>A super-admin account with Vault privileges (manage matters, manage exports) and Admin SDK read access. Everything runs as this account.</li>
+        <li>Optional: a Gemini API key from <a href="https://aistudio.google.com">Google AI Studio</a> for the triage step. Without it, matches are still flagged, just without an AI verdict.</li>
+      </ul></div>
+    </section>
+
+    <section class="box">
+      <h2 class="plate"><span class="rivet"></span><b>STEP 1</b><span>MAKE THE SHEET AND THE SCRIPT</span><span class="rivet r"></span></h2>
+      <div class="body"><ol>
+        <li>Create a Google Sheet and name it Vaulter.</li>
+        <li>Open Extensions, then Apps Script. In Project Settings tick "Show appsscript.json manifest file in editor".</li>
+        <li>Copy every file from the repo's <code>apps-script/src</code> folder into the script with the same names, replacing the default Code.gs: <code>Config.js</code>, <code>Auth.js</code>, <code>VaultImport.js</code>, <code>Scanner.js</code>, <code>Alerts.js</code>, <code>Scheduler.js</code>, <code>SheetSetup.js</code>, <code>WebApp.js</code>, <code>index.html</code>, <code>Demo.html</code> and <code>appsscript.json</code>. The manifest carries the OAuth scopes, so it must be copied too.</li>
+        <li>Prefer the command line? Install clasp (<code>npm install -g @google/clasp</code>), run <code>clasp login</code>, copy <code>apps-script/.clasp.json.example</code> to <code>.clasp.json</code> with your script ID (Project Settings), and run <code>clasp push</code> from that folder.</li>
+      </ol>
+      <p style="margin:14px 0 0;color:var(--text2)">The script finds its own Sheet because it is bound to it. Nothing in the code needs editing for your district.</p></div>
+    </section>
+
+    <section class="box">
+      <h2 class="plate"><span class="rivet"></span><b>STEP 2</b><span>CREATE THE TABS</span><span class="rivet r"></span></h2>
+      <div class="body"><ol>
+        <li>In the editor, pick <code>setupSheets</code> from the function list and press Run.</li>
+        <li>Approve the permissions prompt. It asks for Vault, Admin SDK read, Sheets, Gmail send and triggers, all on your own account.</li>
+        <li>Eight tabs appear with headers and defaults: Vault_Data, Flagged, Alerts_Config, App_Config, Setup, Run_Log, AI_Filtered and Access_List.</li>
+      </ol></div>
+    </section>
+
+    <section class="box">
+      <h2 class="plate"><span class="rivet"></span><b>STEP 3</b><span>FILL IN THE CONFIGURATION</span><span class="rivet r"></span></h2>
+      <div class="body">
+        <table>
+          <thead><tr><th>Tab</th><th>Row</th><th>Set it to</th></tr></thead>
+          <tbody>
+            <tr><td>App_Config</td><td>Alert Recipients</td><td>Comma-separated counselor and admin emails that get the alert digest</td></tr>
+            <tr><td>App_Config</td><td>From Name, Reply-To</td><td>How the alert email appears</td></tr>
+            <tr><td>App_Config</td><td>Admin Email</td><td>The admin account running the script, for reference</td></tr>
+            <tr><td>Setup</td><td>OUs to Import</td><td>Comma-separated OU paths, for example <code>/Students/High School,/Students/Middle School</code></td></tr>
+            <tr><td>Setup</td><td>Date Range</td><td><code>day</code> for daily runs; <code>week</code> or <code>month</code> for a first backfill</td></tr>
+            <tr><td>Setup</td><td>Import Frequency, Time, Day</td><td><code>hourly</code>, <code>daily</code> (06:00 by default) or <code>weekly</code></td></tr>
+            <tr><td>Setup</td><td>Status</td><td><code>Active</code></td></tr>
+            <tr><td>Alerts_Config</td><td>each row</td><td>Six default categories ship. Edit keywords, severity and Enabled; multi-word phrases cut false positives</td></tr>
+            <tr><td>Access_List</td><td>each row</td><td>Your email with role Admin, then each reviewer with Viewer or Admin</td></tr>
+          </tbody>
+        </table>
+        <p style="margin:14px 0 0">Then add the Gemini key: Project Settings, Script properties, add <code>GEMINI_API_KEY</code> with the key as its value. Every setting in the table can also be changed later from the dashboard's Settings and Access pages.</p>
+      </div>
+    </section>
+
+    <section class="box">
+      <h2 class="plate"><span class="rivet"></span><b>STEP 4</b><span>PUBLISH THE DASHBOARD</span><span class="rivet r"></span></h2>
+      <div class="body"><ol>
+        <li>Deploy, then New deployment. Type: Web app. Execute as: Me. Who has access: Anyone within your domain. Deploy and copy the URL.</li>
+        <li>Add a script property <code>DASHBOARD_URL</code> with that URL so the Sheet's Vaulter menu opens it.</li>
+        <li>Open the URL. Your account is on Access_List, so it loads. Add other reviewers on the Access page. The Demo switch in the header shows fictional sample data for walkthroughs.</li>
+        <li>For every later code change: Deploy, Manage deployments, edit the existing deployment and pick New version. The URL stays the same. A brand-new deployment makes a new URL.</li>
+      </ol></div>
+    </section>
+
+    <section class="box">
+      <h2 class="plate"><span class="rivet"></span><b>STEP 5</b><span>SCHEDULE AND FIRST RUN</span><span class="rivet r"></span></h2>
+      <div class="body"><ol>
+        <li>Run <code>installTrigger</code> once from the editor. It creates the scheduled <code>runPipeline</code> trigger at the configured time. Saving settings in the dashboard reinstalls it too.</li>
+        <li>Click Run import now. The first run creates a Vault matter named "Vaulter — Gemini Activity Imports", queues one export per OU, and installs a five-minute checker trigger that collects each export when Vault finishes it, usually within the hour.</li>
+        <li>Watch Run_Log and the readout strip at the top of the dashboard. When an export lands, matches appear in Flagged and the queue, and the alert email goes out on that run or the next.</li>
+      </ol></div>
+    </section>
+
+    <section class="box">
+      <h2 class="plate"><span class="rivet"></span><b>IF SOMETHING IS OFF</b><span class="rivet r"></span></h2>
+      <div class="body"><ul>
+        <li>Settings shows no OUs, or Run_Log says it could not resolve an OU: the account lacks Admin SDK read, or the OU path in Setup is misspelled.</li>
+        <li>Run_Log says Vault POST failed with 403: the account lacks Vault privileges, or Gemini activity is not retained in Vault for those users.</li>
+        <li>Exports never finish: open Vault in the Admin console, find the matter and its Exports list; failed exports show there. Run <code>clearPendingExports</code> from the editor to reset the queue.</li>
+        <li>No email: check Alert Recipients and the Run_Log Alerted column. Apps Script caps daily mail per account.</li>
+        <li>No AI verdicts: <code>GEMINI_API_KEY</code> is missing, or the key's project has the Generative Language API turned off. Flags still appear.</li>
+        <li>A run stops at six minutes: that is the Apps Script execution cap, which is why exports are collected by the checker trigger instead of in the run itself.</li>
+      </ul></div>
+    </section>
+  </div>
+</main>
+
+<footer><div class="wrap">Questions or a walkthrough: Joel Mellor, Technology, Orono Public Schools · <a href="mailto:joel.mellor@orono.k12.mn.us">joel.mellor@orono.k12.mn.us</a></div></footer>
+</body>
+</html>
