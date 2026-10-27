@@ -96,6 +96,10 @@ Keyword rules are blunt and need tending. The AI verdict is triage, not a decisi
 scheduled, not real time, because Vault exports take minutes to hours. It sees Gemini prompts only.
 Apps Script's six-minute execution cap is why exports are collected by a checker trigger.
 
+## License
+
+MIT. See [LICENSE](LICENSE).
+
 ## Contact
 
 Joel Mellor, Technology, Orono Public Schools · joel.mellor@orono.k12.mn.us
