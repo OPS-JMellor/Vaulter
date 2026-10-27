@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vaulter · setup guide</title>
-  <meta name="description" content="Set up Vaulter from scratch in your own Google Workspace in five stages: Sheet and script, tabs, configuration, dashboard, first run. With checkpoints and troubleshooting.">
+  <title>Vaulter · setup walkthrough</title>
+  <meta name="description" content="A guided walkthrough for setting up Vaulter in your own Google Workspace: five stages with drawn screens, numbered callouts, checklists and copy buttons.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    :root { --page:#d5dae3; --panel:#fff; --plate:#e8ebf0; --border:#9ea6b8; --divider:#e3e6ee; --text:#1a2033; --text2:#4a5368; --head:#1d2a5d; --accent:#2d3f89; --hdr:#1d2a5d; --hdr-sub:#d3d8ec; --hdr-rule:#46538a; --sel:#eef1fa; --ok:#1d5e40; --ok-bg:#eaf6ee; --warn:#7a5200; --crit:#ad2122; }
+    :root { --page:#d5dae3; --panel:#fff; --plate:#e8ebf0; --border:#9ea6b8; --divider:#e3e6ee; --text:#1a2033; --text2:#4a5368; --head:#1d2a5d; --accent:#2d3f89; --hdr:#1d2a5d; --hdr-sub:#d3d8ec; --hdr-rule:#46538a; --sel:#eef1fa; --ok:#1d5e40; --ok-bg:#eaf6ee; --ok-bd:#bfe0cb; --crit:#ad2122; --ui-bg:#f6f7f9; --ui-bd:#d9dde5; --ui-text:#2b2f3a; --ui-muted:#6c7382; --ui-blue:#1a5fd0; }
     *, *::before, *::after { box-sizing: border-box; }
     html, body { margin: 0; }
-    html { scroll-behavior: smooth; }
     body { background: var(--page); color: var(--text); font: 15px/1.6 'Lexend', sans-serif; }
     a { color: var(--accent); }
-    .wrap { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+    button { font-family: inherit; font-size: inherit; cursor: pointer; }
+    .wrap { max-width: 1140px; margin: 0 auto; padding: 0 32px; }
     @media (max-width: 700px) { .wrap { padding: 0 16px; } }
     .hdr { background: var(--hdr); color: #fff; }
     .hdr .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 24px; min-height: 64px; }
@@ -25,78 +25,153 @@
     .nav a { color: var(--hdr-sub); text-decoration: none; padding: 20px 12px 18px; border-bottom: 3px solid transparent; font-size: 14px; }
     .nav a:hover, .nav a[aria-current] { color: #fff; border-bottom-color: #fff; }
     .readout { background: var(--accent); color: #fff; font-size: 12px; font-weight: 500; letter-spacing: .03em; }
-    .readout .wrap { display: flex; flex-wrap: wrap; gap: 4px 24px; padding-top: 8px; padding-bottom: 8px; }
-    .readout .right { margin-left: auto; }
+    .readout .wrap { display: flex; flex-wrap: wrap; gap: 4px 24px; padding-top: 8px; padding-bottom: 8px; align-items: center; }
+    .readout .right { margin-left: auto; display: flex; gap: 14px; align-items: center; }
+    .readout button { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.4); border-radius: 4px; font-size: 11px; font-weight: 600; letter-spacing: .03em; padding: 3px 9px; }
 
-    main .wrap { padding-top: 36px; padding-bottom: 64px; display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 32px; align-items: start; }
-    @media (max-width: 900px) { main .wrap { grid-template-columns: 1fr; } .side { display: none; } }
-    .side { position: sticky; top: 20px; background: var(--panel); border: 1px solid var(--border); border-radius: 3px; }
-    .side ol { list-style: none; margin: 0; padding: 6px 0; }
-    .side a { display: flex; align-items: center; gap: 10px; padding: 9px 14px; color: var(--text); text-decoration: none; font-size: 13px; border-left: 3px solid transparent; }
-    .side a:hover { background: var(--sel); }
-    .side .n { width: 22px; height: 22px; border-radius: 50%; background: var(--head); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex: none; }
-    .side .n.alt { background: var(--panel); color: var(--head); border: 1.5px solid var(--head); }
-    .content { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
-    h1 { margin: 0; font-size: 34px; line-height: 1.15; font-weight: 600; color: var(--head); }
-    .lead { margin: 10px 0 0; font-size: 17px; color: var(--text2); max-width: 720px; }
+    main .wrap { padding-top: 32px; padding-bottom: 64px; display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 28px; align-items: start; }
+    @media (max-width: 900px) { main .wrap { grid-template-columns: 1fr; } .rail { position: static; } }
+    .rail { position: sticky; top: 20px; background: var(--panel); border: 1px solid var(--border); border-radius: 3px; }
+    .rail .plate { border-radius: 3px 3px 0 0; }
+    .rail ol { list-style: none; margin: 0; padding: 6px 0; }
+    .rail button { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; padding: 9px 14px; color: var(--text); background: none; border: 0; border-left: 3px solid transparent; font-size: 13px; }
+    .rail button:hover { background: var(--sel); }
+    .rail button[aria-current="step"] { background: var(--sel); border-left-color: var(--accent); font-weight: 600; color: var(--head); }
+    .rail .n { width: 24px; height: 24px; border-radius: 50%; background: var(--head); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; flex: none; }
+    .rail .n.alt { background: var(--panel); color: var(--head); border: 1.5px solid var(--head); }
+    .rail li.done .n { background: var(--ok); border-color: var(--ok); color: #fff; }
+    .rail li.done .n::before { content: '✓'; }
+    .rail li.done .n span { display: none; }
+    .rail .pct { padding: 10px 14px 12px; border-top: 1px solid var(--divider); font-size: 12px; color: var(--text2); }
+    .rail .bar { height: 6px; background: var(--plate); margin-top: 6px; }
+    .rail .bar i { display: block; height: 6px; background: var(--ok); width: 0; transition: width .3s; }
 
-    .stepper { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0; background: var(--panel); border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
-    .stepper a { display: flex; flex-direction: column; gap: 6px; padding: 14px 16px; text-decoration: none; color: var(--text); border-right: 1px solid var(--divider); }
-    .stepper a:last-child { border-right: 0; }
-    .stepper a:hover { background: var(--sel); }
-    .stepper .top { display: flex; align-items: center; gap: 8px; }
-    .stepper .n { width: 26px; height: 26px; border-radius: 50%; background: var(--head); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; flex: none; }
-    .stepper .t { font-size: 14px; font-weight: 600; color: var(--head); line-height: 1.25; }
-    .stepper .m { font-size: 12px; color: var(--text2); }
-    @media (max-width: 800px) { .stepper { grid-template-columns: 1fr; } .stepper a { border-right: 0; border-bottom: 1px solid var(--divider); } }
-
-    .box { background: var(--panel); border: 1px solid var(--border); border-radius: 3px; }
+    .content { min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+    .stage { display: none; flex-direction: column; gap: 20px; }
+    .stage.active { display: flex; }
+    body.all .stage { display: flex; }
+    body.all .pager { display: none; }
     .plate { display: flex; align-items: center; gap: 10px; margin: 0; padding: 8px 14px; background: var(--plate); border-bottom: 1px solid var(--border); font-size: 12px; font-weight: 500; letter-spacing: .04em; color: var(--head); }
     .plate b { font-weight: 600; }
-    .plate .sp { margin-left: auto; font-weight: 500; }
+    .plate .sp { margin-left: auto; }
     .plate .rivet { width: 6px; height: 6px; border-radius: 50%; background: #8a92a6; flex: none; }
+    .box { background: var(--panel); border: 1px solid var(--border); border-radius: 3px; }
     .body { padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
-    .step-head { display: flex; align-items: flex-start; gap: 14px; }
-    .step-head .n { width: 40px; height: 40px; border-radius: 50%; background: var(--head); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 16px; font-weight: 600; flex: none; }
-    .step-head h2 { margin: 0; font-size: 22px; line-height: 1.25; font-weight: 600; color: var(--head); }
-    .step-head p { margin: 4px 0 0; color: var(--text2); }
-    ol.steps { margin: 0; padding: 0; list-style: none; counter-reset: s; display: flex; flex-direction: column; gap: 10px; }
-    ol.steps[start="3"] { counter-reset: s 2; }
-    ol.steps li { counter-increment: s; display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; }
-    ol.steps li::before { content: counter(s); width: 24px; height: 24px; border-radius: 50%; border: 1.5px solid var(--head); color: var(--head); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; margin-top: 1px; }
+    @media (max-width: 700px) { .body { padding: 16px; } }
+    .stage-head { display: flex; align-items: flex-start; gap: 14px; }
+    .stage-head .n { width: 44px; height: 44px; border-radius: 50%; background: var(--head); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 600; flex: none; }
+    .stage-head h1 { margin: 0; font-size: 26px; line-height: 1.2; font-weight: 600; color: var(--head); }
+    .stage-head p { margin: 4px 0 0; color: var(--text2); }
+    h2.sub { margin: 0; font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase; color: var(--head); display: flex; align-items: center; gap: 8px; }
+    h2.sub::after { content: ''; flex: 1; height: 1px; background: var(--divider); }
+    ol.steps { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    ol.steps li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; align-items: start; }
+    .co { width: 24px; height: 24px; border-radius: 50%; background: var(--crit); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex: none; box-shadow: 0 0 0 2px #fff; }
+    ol.steps .co { margin-top: 2px; }
     ul.plain { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; }
     code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .92em; background: var(--sel); padding: 1px 5px; border-radius: 3px; }
     .crumbs { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: 12.5px; vertical-align: middle; }
     .crumb { background: var(--sel); border: 1px solid var(--divider); color: var(--head); padding: 1px 8px; border-radius: 3px; font-weight: 500; white-space: nowrap; }
     .crumbs .sep { color: var(--text2); }
-    .done { display: flex; align-items: flex-start; gap: 10px; background: var(--ok-bg); border: 1px solid #bfe0cb; border-radius: 3px; padding: 10px 14px; font-size: 14px; color: var(--ok); }
-    .done b { font-weight: 600; }
+    .copy { display: inline-flex; align-items: center; gap: 6px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; background: #fff; border: 1px solid var(--border); border-radius: 4px; padding: 3px 6px 3px 9px; color: var(--text); vertical-align: middle; }
+    .copy button { font-size: 11px; font-weight: 600; font-family: 'Lexend', sans-serif; background: var(--sel); border: 1px solid var(--divider); border-radius: 3px; padding: 1px 7px; color: var(--head); }
+    .copy button.ok { background: var(--ok-bg); border-color: var(--ok-bd); color: var(--ok); }
+    .files { display: flex; flex-wrap: wrap; gap: 6px; }
+    .see { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 860px) { .see { grid-template-columns: 1fr; } }
+    .done { display: flex; align-items: flex-start; gap: 10px; background: var(--ok-bg); border: 1px solid var(--ok-bd); border-radius: 3px; padding: 10px 14px; font-size: 14px; color: var(--ok); }
     .done svg { flex: none; margin-top: 2px; }
-    .mock { border: 1px solid var(--border); border-radius: 3px; overflow: hidden; font-size: 13px; }
-    .mock .bar { background: var(--plate); border-bottom: 1px solid var(--border); padding: 6px 12px; font-size: 11px; font-weight: 600; letter-spacing: .04em; color: var(--head); }
-    .tabs-mock { display: flex; flex-wrap: wrap; gap: 0; padding: 8px 10px 0; background: #f4f5f9; }
-    .tabs-mock span { padding: 6px 12px; background: #fff; border: 1px solid var(--divider); border-bottom: 0; border-radius: 4px 4px 0 0; margin-right: 4px; font-size: 12px; color: var(--text); }
-    .tabs-mock span:first-child { background: var(--sel); font-weight: 600; color: var(--head); }
-    .form-mock { padding: 12px 14px; display: grid; grid-template-columns: 150px 1fr; gap: 8px 14px; align-items: center; }
-    .form-mock .k { font-size: 12.5px; font-weight: 600; color: var(--head); }
-    .form-mock .v { border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; background: #fff; }
-    .form-mock .v.pick::after { content: '▾'; float: right; color: var(--text2); }
-    .kv { padding: 12px 14px; display: grid; grid-template-columns: 180px 1fr auto; gap: 8px 14px; align-items: center; }
-    .kv .k { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; color: var(--head); }
-    .kv .v { border: 1px solid var(--border); border-radius: 4px; padding: 6px 10px; background: #fff; color: var(--text2); font-size: 13px; }
-    .kv .tag { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 999px; border: 1.5px solid currentColor; white-space: nowrap; }
-    .kv .tag.opt { color: var(--text2); }
-    .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 760px) { .two { grid-template-columns: 1fr; } .form-mock, .kv { grid-template-columns: 1fr; } }
+    .check { display: flex; flex-direction: column; gap: 6px; }
+    .check label { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border: 1px solid var(--divider); border-radius: 3px; font-size: 14px; cursor: pointer; }
+    .check label:has(input:checked) { background: var(--ok-bg); border-color: var(--ok-bd); color: var(--ok); }
+    .check input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--ok); flex: none; }
+    .tip { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--text2); border-left: 3px solid var(--border); padding: 2px 0 2px 12px; }
+    .pager { display: flex; justify-content: space-between; gap: 12px; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 4px; font-size: 15px; font-weight: 500; text-decoration: none; border: 1px solid var(--head); background: var(--panel); color: var(--head); }
+    .btn-1 { background: var(--head); color: #fff; }
+    .btn:disabled { opacity: .4; cursor: default; }
     table { width: 100%; border-collapse: collapse; font-size: 14px; }
     th { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); font-size: 11px; letter-spacing: .04em; text-transform: uppercase; color: var(--head); font-weight: 600; }
     td { padding: 9px 10px; border-bottom: 1px solid var(--divider); vertical-align: top; }
     tr:last-child td { border-bottom: 0; }
-    .files { display: flex; flex-wrap: wrap; gap: 6px; }
-    .files code { background: #fff; border: 1px solid var(--divider); padding: 3px 8px; }
-    .tip { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--text2); border-left: 3px solid var(--border); padding: 2px 0 2px 12px; }
+
+    /* ── Drawn screens ────────────────────────────────────── */
+    .shot { position: relative; border: 1px solid var(--border); border-radius: 4px; overflow: hidden; background: var(--ui-bg); color: var(--ui-text); font-size: 12.5px; line-height: 1.4; }
+    .shot .cap { position: absolute; left: 0; top: 0; background: var(--head); color: #fff; font-size: 10.5px; font-weight: 600; letter-spacing: .05em; padding: 3px 9px; border-radius: 0 0 4px 0; z-index: 2; }
+    .shot .co { position: absolute; z-index: 3; }
+    .win { padding-top: 24px; }
+    .tb { height: 34px; display: flex; align-items: center; gap: 14px; padding: 0 12px; background: #fff; border-bottom: 1px solid var(--ui-bd); font-size: 12.5px; color: var(--ui-text); }
+    .tb .logo { width: 16px; height: 16px; border-radius: 3px; background: #1e8e3e; }
+    .tb .logo.gs { background: #4285f4; }
+    .tb .t { font-weight: 600; }
+    .tb .m { color: var(--ui-muted); }
+    .tb .m.on { color: var(--ui-text); background: #e8eaed; padding: 2px 8px; border-radius: 4px; }
+    .menu { position: absolute; background: #fff; border: 1px solid var(--ui-bd); border-radius: 6px; box-shadow: 0 6px 20px rgba(0,0,0,.14); padding: 6px 0; min-width: 200px; z-index: 1; }
+    .menu div { padding: 6px 14px; color: var(--ui-text); }
+    .menu div.hi { background: #e8eaed; font-weight: 500; }
+    .menu .dv { height: 1px; background: var(--ui-bd); margin: 4px 0; padding: 0; }
+    .grid { display: grid; grid-template-columns: 34px repeat(3, 1fr); font-size: 12px; }
+    .grid span { border-right: 1px solid var(--ui-bd); border-bottom: 1px solid var(--ui-bd); padding: 4px 6px; min-height: 24px; background: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .grid span.h { background: #f1f3f4; color: var(--ui-muted); text-align: center; font-weight: 500; }
+    .grid span.b { font-weight: 600; }
+    .tabs { display: flex; align-items: flex-end; gap: 0; padding: 6px 8px 0; background: #f1f3f4; border-top: 1px solid var(--ui-bd); flex-wrap: wrap; }
+    .tabs span { padding: 5px 12px; background: #fff; border: 1px solid var(--ui-bd); border-bottom: 0; border-radius: 4px 4px 0 0; margin-right: 3px; font-size: 11.5px; }
+    .tabs span.on { font-weight: 600; color: var(--ui-blue); box-shadow: inset 0 -2px 0 var(--ui-blue); }
+    .ide { display: grid; grid-template-columns: 44px 190px 1fr; min-height: 230px; }
+    .ide .icons { background: #fff; border-right: 1px solid var(--ui-bd); display: flex; flex-direction: column; align-items: center; gap: 14px; padding-top: 12px; }
+    .ide .icons i { width: 20px; height: 20px; border-radius: 4px; background: #dfe3ea; }
+    .ide .icons i.on { background: var(--ui-blue); }
+    .ide .side { background: #fff; border-right: 1px solid var(--ui-bd); padding: 10px 0; }
+    .ide .side .h { display: flex; align-items: center; justify-content: space-between; padding: 0 12px 6px; font-weight: 600; color: var(--ui-muted); font-size: 11px; letter-spacing: .04em; }
+    .ide .side .h b { width: 20px; height: 20px; border-radius: 50%; background: #e8eaed; display: inline-flex; align-items: center; justify-content: center; font-size: 15px; color: var(--ui-text); }
+    .ide .side div.f { padding: 3px 14px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; color: var(--ui-text); }
+    .ide .side div.f.on { background: #e8f0fe; color: var(--ui-blue); }
+    .ide .side div.f.x { color: #b3261e; text-decoration: line-through; }
+    .ide .main { padding: 12px 14px; }
+    .ide .bar2 { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+    .ui-btn { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; border-radius: 4px; border: 1px solid var(--ui-bd); background: #fff; font-size: 12px; color: var(--ui-text); }
+    .ui-btn.pri { background: var(--ui-blue); border-color: var(--ui-blue); color: #fff; font-weight: 500; }
+    .ui-btn.sel::after { content: '▾'; color: var(--ui-muted); }
+    .code { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11.5px; color: #3c4043; white-space: pre; line-height: 1.5; }
+    .log { margin-top: 10px; border: 1px solid var(--ui-bd); background: #fff; font-size: 11.5px; }
+    .log div { padding: 4px 10px; border-bottom: 1px solid var(--ui-bd); display: flex; gap: 12px; }
+    .log div:last-child { border-bottom: 0; }
+    .log .k { color: var(--ui-muted); width: 92px; flex: none; }
+    .settings { padding: 14px 18px; display: flex; flex-direction: column; gap: 12px; }
+    .settings h4 { margin: 0; font-size: 13px; font-weight: 600; }
+    .cb { display: flex; align-items: center; gap: 8px; font-size: 12.5px; }
+    .cb i { width: 16px; height: 16px; border: 2px solid var(--ui-blue); border-radius: 3px; background: var(--ui-blue); display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; font-style: normal; }
+    .cb i.off { background: #fff; border-color: #777; }
+    .props { border: 1px solid var(--ui-bd); background: #fff; }
+    .props div { display: grid; grid-template-columns: 170px 1fr; border-bottom: 1px solid var(--ui-bd); }
+    .props div:last-child { border-bottom: 0; }
+    .props span { padding: 7px 10px; font-size: 12px; }
+    .props .h span { background: #f1f3f4; color: var(--ui-muted); font-weight: 500; }
+    .props .mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
+    .dlg { background: #fff; margin: 18px auto; max-width: 480px; border-radius: 8px; box-shadow: 0 8px 28px rgba(0,0,0,.18); overflow: hidden; }
+    .dlg .dh { padding: 14px 20px; font-size: 15px; font-weight: 600; border-bottom: 1px solid var(--ui-bd); }
+    .dlg .db { padding: 14px 20px; display: flex; flex-direction: column; gap: 10px; }
+    .dlg .df { padding: 12px 20px; display: flex; justify-content: flex-end; gap: 8px; border-top: 1px solid var(--ui-bd); }
+    .fld { display: grid; grid-template-columns: 130px 1fr; align-items: center; gap: 10px; font-size: 12.5px; }
+    .fld .in { border: 1px solid var(--ui-bd); border-radius: 4px; padding: 6px 10px; background: #fff; }
+    .fld .in.sel::after { content: '▾'; float: right; color: var(--ui-muted); }
+    .fld .in.url { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 11px; color: var(--ui-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .scopes { font-size: 12px; display: flex; flex-direction: column; gap: 4px; color: var(--ui-text); }
+    .scopes span::before { content: '•  '; color: var(--ui-muted); }
+    .dash { font-family: 'Lexend', sans-serif; }
+    .dash .dh2 { background: var(--hdr); color: #fff; height: 36px; display: flex; align-items: center; gap: 10px; padding: 0 12px; font-weight: 600; font-size: 13px; }
+    .dash .dh2 span { font-weight: 400; color: var(--hdr-sub); font-size: 11.5px; }
+    .dash .ro { background: var(--accent); color: #fff; font-size: 10.5px; font-weight: 500; letter-spacing: .03em; padding: 6px 12px; display: flex; gap: 14px; flex-wrap: wrap; }
+    .dash .ro .d { display: inline-block; width: 7px; height: 7px; background: #8ee6b4; margin-right: 5px; }
+    .dash .ro .spin { display: inline-block; width: 9px; height: 9px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; border-radius: 50%; margin-right: 5px; vertical-align: -1px; }
+    .dash .emp { padding: 22px 14px; text-align: center; color: var(--text2); font-size: 12.5px; background: #fff; }
+    .dash .emp b { display: block; color: var(--head); font-size: 14px; margin-bottom: 4px; }
+    .dash .emp .ui-btn { margin-top: 10px; background: var(--head); border-color: var(--head); color: #fff; }
+    .dash .tbl { background: #fff; font-size: 11.5px; }
+    .dash .tbl div { display: grid; grid-template-columns: 1.4fr .9fr .6fr .6fr .6fr; padding: 6px 12px; border-bottom: 1px solid var(--divider); }
+    .dash .tbl div.h { color: var(--head); font-weight: 600; font-size: 10px; letter-spacing: .04em; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+    .dash .ok { color: var(--ok); font-weight: 600; }
     footer { border-top: 1px solid var(--border); padding: 20px 0 48px; font-size: 14px; color: var(--text2); }
-    footer .wrap { display: block; }
   </style>
 </head>
 <body>
@@ -114,148 +189,320 @@
     </nav>
   </div>
 </header>
-<div class="readout"><div class="wrap"><span>FIVE STAGES · ABOUT AN AFTERNOON</span><span>RUNS AS THE ADMIN WHO SETS IT UP</span><span class="right">NOTHING TO INSTALL BUT THE SCRIPT</span></div></div>
+<div class="readout"><div class="wrap"><span>FIVE STAGES · ABOUT AN AFTERNOON</span><span>RUNS AS THE ADMIN WHO SETS IT UP</span><span class="right"><span>YOUR TICKS ARE SAVED IN THIS BROWSER</span><button type="button" id="allBtn" onclick="toggleAll()">Show all stages</button></span></div></div>
 
 <main>
   <div class="wrap">
-    <aside class="side" aria-label="On this page">
-      <ol>
-        <li><a href="#before"><span class="n alt">0</span>Before you start</a></li>
-        <li><a href="#s1"><span class="n">1</span>Sheet and script</a></li>
-        <li><a href="#s2"><span class="n">2</span>Create the tabs</a></li>
-        <li><a href="#s3"><span class="n">3</span>Configure</a></li>
-        <li><a href="#s4"><span class="n">4</span>Publish the dashboard</a></li>
-        <li><a href="#s5"><span class="n">5</span>Schedule and first run</a></li>
-        <li><a href="#fix"><span class="n alt">?</span>If something is off</a></li>
+    <aside class="rail" aria-label="Progress">
+      <h2 class="plate"><span class="rivet"></span><b>WALKTHROUGH</b><span class="rivet sp"></span></h2>
+      <ol id="rail">
+        <li data-stage="before"><button type="button" onclick="show('before')"><span class="n alt"><span>0</span></span>Before you start</button></li>
+        <li data-stage="s1"><button type="button" onclick="show('s1')"><span class="n"><span>1</span></span>Sheet and script</button></li>
+        <li data-stage="s2"><button type="button" onclick="show('s2')"><span class="n"><span>2</span></span>Create the tabs</button></li>
+        <li data-stage="s3"><button type="button" onclick="show('s3')"><span class="n"><span>3</span></span>Configure</button></li>
+        <li data-stage="s4"><button type="button" onclick="show('s4')"><span class="n"><span>4</span></span>Publish the dashboard</button></li>
+        <li data-stage="s5"><button type="button" onclick="show('s5')"><span class="n"><span>5</span></span>Schedule and first run</button></li>
+        <li data-stage="fix"><button type="button" onclick="show('fix')"><span class="n alt"><span>?</span></span>If something is off</button></li>
       </ol>
+      <div class="pct"><span id="pctText">0 of 21 checks done</span><div class="bar"><i id="pctBar"></i></div></div>
     </aside>
 
     <div class="content">
-      <div>
-        <h1>Set up Vaulter from scratch</h1>
-        <p class="lead">Five stages, about an afternoon. You need a super-admin with Vault privileges, a new Google Sheet and the code from <a href="https://github.com/Orono-Public-Schools/Vaulter">GitHub</a>. Everything runs as the admin who sets it up, so sign in as that account for every step.</p>
-      </div>
 
-      <nav class="stepper" aria-label="Stages">
-        <a href="#s1"><span class="top"><span class="n">1</span><span class="t">Sheet and script</span></span><span class="m">20 min · copy 11 files in</span></a>
-        <a href="#s2"><span class="top"><span class="n">2</span><span class="t">Create the tabs</span></span><span class="m">5 min · run one function</span></a>
-        <a href="#s3"><span class="top"><span class="n">3</span><span class="t">Configure</span></span><span class="m">15 min · four tabs, one key</span></a>
-        <a href="#s4"><span class="top"><span class="n">4</span><span class="t">Publish the dashboard</span></span><span class="m">10 min · one deployment</span></a>
-        <a href="#s5"><span class="top"><span class="n">5</span><span class="t">Schedule and first run</span></span><span class="m">10 min, then wait for Vault</span></a>
-      </nav>
-
-      <section class="box" id="before">
-        <h2 class="plate"><span class="rivet"></span><b>BEFORE YOU START</b><span class="sp">WHAT HAS TO BE TRUE ALREADY</span><span class="rivet"></span></h2>
+      <!-- ── Stage 0 ─────────────────────────────────────── -->
+      <section class="stage" id="before" aria-label="Before you start">
+        <div class="box"><h2 class="plate"><span class="rivet"></span><b>BEFORE YOU START</b><span class="sp">WHAT HAS TO BE TRUE ALREADY</span><span class="rivet"></span></h2>
         <div class="body">
-          <div class="two">
-            <ul class="plain">
-              <li><b>Google Workspace for Education</b> with Gemini turned on for the student organizational units you want to watch.</li>
-              <li><b>Vault licenses</b> for those students. Vault is where Gemini activity is retained; without it, every export comes back empty.</li>
-            </ul>
-            <ul class="plain">
-              <li><b>A super-admin account</b> with Vault privileges (manage matters, manage exports) and Admin SDK read. Everything runs as this account.</li>
-              <li><b>Optional: a Gemini API key</b> from <a href="https://aistudio.google.com">Google AI Studio</a> for the triage step. Without it, matches are still flagged, just without an AI verdict.</li>
-            </ul>
+          <div class="stage-head"><span class="n">0</span><div><h1>Check four things first</h1><p>Five stages, about an afternoon. Everything runs as the admin who sets it up, so sign in as that account for every step.</p></div></div>
+          <ul class="plain">
+            <li><b>Google Workspace for Education</b> with Gemini turned on for the student organizational units you want to watch.</li>
+            <li><b>Vault licenses</b> for those students. Vault is where Gemini activity is retained; without it, every export comes back empty.</li>
+            <li><b>A super-admin account</b> with Vault privileges (manage matters, manage exports) and Admin SDK read. Everything runs as this account.</li>
+            <li><b>Optional: a Gemini API key</b> from <a href="https://aistudio.google.com">Google AI Studio</a> for the triage step. Without it, matches are still flagged, just without an AI verdict.</li>
+          </ul>
+          <h2 class="sub">Checklist</h2>
+          <div class="check">
+            <label><input type="checkbox" data-k="b1">Gemini is on for the student OUs I want to watch</label>
+            <label><input type="checkbox" data-k="b2">Those students have Vault licenses</label>
+            <label><input type="checkbox" data-k="b3">I am signed in as a super-admin with Vault privileges</label>
           </div>
-        </div>
+        </div></div>
+        <div class="pager"><span></span><button class="btn btn-1" onclick="show('s1')">Stage 1: Sheet and script →</button></div>
       </section>
 
-      <section class="box" id="s1">
-        <h2 class="plate"><span class="rivet"></span><b>STAGE 1</b><span class="sp">ABOUT 20 MINUTES</span><span class="rivet"></span></h2>
+      <!-- ── Stage 1 ─────────────────────────────────────── -->
+      <section class="stage" id="s1" aria-label="Stage 1">
+        <div class="box"><h2 class="plate"><span class="rivet"></span><b>STAGE 1</b><span class="sp">ABOUT 20 MINUTES</span><span class="rivet"></span></h2>
         <div class="body">
-          <div class="step-head"><span class="n">1</span><div><h2>Make the Sheet and the script</h2><p>The Sheet holds the data; the script bound to it is Vaulter.</p></div></div>
+          <div class="stage-head"><span class="n">1</span><div><h1>Make the Sheet and the script</h1><p>The Sheet holds the data. The script bound to it is Vaulter.</p></div></div>
+
+          <h2 class="sub">Do this</h2>
           <ol class="steps">
-            <li><span>Create a new Google Sheet and name it <b>Vaulter</b>.</span></li>
-            <li><span>Open the script editor: <span class="crumbs"><span class="crumb">Extensions</span><span class="sep">›</span><span class="crumb">Apps Script</span></span></span></li>
-            <li><span>Show the manifest: <span class="crumbs"><span class="crumb">Project Settings</span><span class="sep">›</span><span class="crumb">Show "appsscript.json" manifest file in editor</span></span></span></li>
-            <li><span>Add each file from the repo's <code>apps-script/src</code> folder with the same name, and delete the default <code>Code.gs</code>. Use the <b>+</b> next to Files; pick Script for <code>.js</code> files and HTML for <code>.html</code> files. Replace the manifest's contents too, since it carries the OAuth scopes.</span></li>
+            <li><span class="co">1</span><span>Create a new Google Sheet and name it <b>Vaulter</b>.</span></li>
+            <li><span class="co">2</span><span>Open the script editor: <span class="crumbs"><span class="crumb">Extensions</span><span class="sep">›</span><span class="crumb">Apps Script</span></span>. A new tab opens with an empty project.</span></li>
+            <li><span class="co">3</span><span>Turn on the manifest: click the gear (Project Settings) and tick <b>Show "appsscript.json" manifest file in editor</b>.</span></li>
+            <li><span class="co">4</span><span>Back in the Editor, use the <b>+</b> beside Files to add each file from the repo's <code>apps-script/src</code> folder with the same name. Script for <code>.js</code>, HTML for <code>.html</code>. Paste each file's contents. Replace the manifest's contents too; it carries the OAuth scopes. Delete the default <code>Code.gs</code>.</span></li>
           </ol>
           <div class="files">
-            <code>Config.js</code><code>Auth.js</code><code>VaultImport.js</code><code>Scanner.js</code><code>Alerts.js</code><code>Scheduler.js</code><code>SheetSetup.js</code><code>WebApp.js</code><code>index.html</code><code>Demo.html</code><code>appsscript.json</code>
+            <span class="copy">Config.js<button type="button" data-copy="Config.js">Copy</button></span>
+            <span class="copy">Auth.js<button type="button" data-copy="Auth.js">Copy</button></span>
+            <span class="copy">VaultImport.js<button type="button" data-copy="VaultImport.js">Copy</button></span>
+            <span class="copy">Scanner.js<button type="button" data-copy="Scanner.js">Copy</button></span>
+            <span class="copy">Alerts.js<button type="button" data-copy="Alerts.js">Copy</button></span>
+            <span class="copy">Scheduler.js<button type="button" data-copy="Scheduler.js">Copy</button></span>
+            <span class="copy">SheetSetup.js<button type="button" data-copy="SheetSetup.js">Copy</button></span>
+            <span class="copy">WebApp.js<button type="button" data-copy="WebApp.js">Copy</button></span>
+            <span class="copy">index.html<button type="button" data-copy="index.html">Copy</button></span>
+            <span class="copy">Demo.html<button type="button" data-copy="Demo.html">Copy</button></span>
+            <span class="copy">appsscript.json<button type="button" data-copy="appsscript.json">Copy</button></span>
           </div>
-          <div class="tip"><span>Prefer the command line? <code>npm install -g @google/clasp</code>, <code>clasp login</code>, copy <code>apps-script/.clasp.json.example</code> to <code>.clasp.json</code> with your script ID from Project Settings, then <code>clasp push</code> from the <code>apps-script</code> folder.</span></div>
-          <div class="done"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.6"/><path d="m5.5 9.5 2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Done when</b> the Files list shows the eleven names above and nothing else. Nothing in the code needs editing for your district: the script finds its own Sheet because it is bound to it.</span></div>
-        </div>
+          <div class="tip"><span>Prefer the command line? <code>npm install -g @google/clasp</code>, <code>clasp login</code>, copy <code>apps-script/.clasp.json.example</code> to <code>.clasp.json</code> with your script ID from Project Settings, then <code>clasp push</code> from the <code>apps-script</code> folder. That does step 4 in one go.</span></div>
+
+          <h2 class="sub">Where to click</h2>
+          <div class="see">
+            <div class="shot win"><span class="cap">YOUR SHEET · STEP 2</span>
+              <div class="tb"><span class="logo"></span><span class="t">Vaulter</span><span class="m">File</span><span class="m">Edit</span><span class="m">View</span><span class="m">Insert</span><span class="m">Format</span><span class="m">Data</span><span class="m">Tools</span><span class="m on">Extensions</span><span class="m">Help</span></div>
+              <div class="menu" style="left: 318px; top: 58px"><div>Add-ons</div><div>Macros</div><div class="dv"></div><div class="hi">Apps Script</div><div>AppSheet</div></div>
+              <span class="co" style="left: 500px; top: 96px">2</span>
+              <div class="grid" style="margin-top: 6px"><span class="h"></span><span class="h">A</span><span class="h">B</span><span class="h">C</span><span class="h">1</span><span></span><span></span><span></span><span class="h">2</span><span></span><span></span><span></span><span class="h">3</span><span></span><span></span><span></span><span class="h">4</span><span></span><span></span><span></span><span class="h">5</span><span></span><span></span><span></span></div>
+              <div class="tabs"><span class="on">Sheet1</span></div>
+            </div>
+            <div class="shot win"><span class="cap">APPS SCRIPT · STEPS 3 AND 4</span>
+              <div class="tb"><span class="logo gs"></span><span class="t">Vaulter</span><span class="m" style="margin-left:auto">Deploy ▾</span></div>
+              <div class="ide">
+                <div class="icons"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+                <div class="side"><div class="h">FILES <b>+</b></div><div class="f x">Code.gs</div><div class="f on">Config.js</div><div class="f">Auth.js</div><div class="f">VaultImport.js</div><div class="f">Scanner.js</div><div class="f">Alerts.js</div><div class="f">Scheduler.js</div><div class="f">SheetSetup.js</div><div class="f">WebApp.js</div><div class="f">index.html</div><div class="f">Demo.html</div><div class="f">appsscript.json</div></div>
+                <div class="main"><div class="code">// Config.js — Central constants.
+const SPREADSHEET_ID = …
+const SHEETS = {
+  VAULT_DATA:    'Vault_Data',
+  FLAGGED:       'Flagged',
+  …
+};</div></div>
+              </div>
+              <span class="co" style="left: 10px; top: 148px">3</span>
+              <span class="co" style="left: 210px; top: 38px">4</span>
+            </div>
+          </div>
+          <div class="tip"><span>Callout 3 is the gear in the left rail, Project Settings. The manifest checkbox is the first option under General settings. Callout 4 is the plus beside Files.</span></div>
+
+          <h2 class="sub">You should see</h2>
+          <div class="shot win" style="max-width: 520px"><span class="cap">PROJECT SETTINGS</span>
+            <div class="settings"><h4>General settings</h4><div class="cb"><i>✓</i>Show "appsscript.json" manifest file in editor</div><div class="cb"><i class="off"></i>Enable Chrome V8 runtime</div><h4 style="margin-top:6px">IDs</h4><div class="fld"><span>Script ID</span><span class="in url">1AbC…your script id…xYz</span></div></div>
+          </div>
+
+          <div class="done"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.6"/><path d="m5.5 9.5 2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Done when</b> the Files list shows exactly the eleven names and Code.gs is gone. Nothing in the code needs editing for your district: the script finds its own Sheet because it is bound to it.</span></div>
+          <h2 class="sub">Checklist</h2>
+          <div class="check">
+            <label><input type="checkbox" data-k="s1a">Sheet created and named Vaulter</label>
+            <label><input type="checkbox" data-k="s1b">Manifest file shown in the editor</label>
+            <label><input type="checkbox" data-k="s1c">All eleven files added with matching names, Code.gs deleted</label>
+            <label><input type="checkbox" data-k="s1d">appsscript.json contents replaced with the repo's</label>
+          </div>
+        </div></div>
+        <div class="pager"><button class="btn" onclick="show('before')">← Before you start</button><button class="btn btn-1" onclick="show('s2')">Stage 2: Create the tabs →</button></div>
       </section>
 
-      <section class="box" id="s2">
-        <h2 class="plate"><span class="rivet"></span><b>STAGE 2</b><span class="sp">ABOUT 5 MINUTES</span><span class="rivet"></span></h2>
+      <!-- ── Stage 2 ─────────────────────────────────────── -->
+      <section class="stage" id="s2" aria-label="Stage 2">
+        <div class="box"><h2 class="plate"><span class="rivet"></span><b>STAGE 2</b><span class="sp">ABOUT 5 MINUTES</span><span class="rivet"></span></h2>
         <div class="body">
-          <div class="step-head"><span class="n">2</span><div><h2>Create the tabs</h2><p>One function builds every tab with its headers and defaults.</p></div></div>
+          <div class="stage-head"><span class="n">2</span><div><h1>Create the tabs</h1><p>One function builds every tab with its headers and default rules.</p></div></div>
+          <h2 class="sub">Do this</h2>
           <ol class="steps">
-            <li><span>In the editor toolbar, pick <code>setupSheets</code> from the function dropdown and press <b>Run</b>.</span></li>
-            <li><span>Approve the permissions prompt. It asks for Vault, Admin SDK read, Sheets, Gmail send and triggers, all on your own account. Choose your admin account and allow.</span></li>
-            <li><span>Switch back to the Sheet. Eight tabs are now there:</span></li>
+            <li><span class="co">1</span><span>In the editor toolbar, open the function dropdown and pick <code>setupSheets</code>.</span></li>
+            <li><span class="co">2</span><span>Press <b>Run</b>.</span></li>
+            <li><span class="co">3</span><span>A permissions prompt appears the first time. Choose your admin account, review the scopes and press <b>Allow</b>. It asks for Vault, Admin SDK read, Sheets, Gmail send and triggers, all on your own account.</span></li>
+            <li><span class="co">4</span><span>Switch back to the Sheet tab in your browser.</span></li>
           </ol>
-          <div class="mock"><div class="bar">YOUR SHEET</div><div class="tabs-mock"><span>Vault_Data</span><span>Flagged</span><span>Alerts_Config</span><span>App_Config</span><span>Setup</span><span>Run_Log</span><span>AI_Filtered</span><span>Access_List</span></div></div>
-          <div class="done"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.6"/><path d="m5.5 9.5 2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Done when</b> the eight tabs exist and <code>Alerts_Config</code> shows six default categories. A Vaulter menu also appears in the Sheet's menu bar the next time you open it.</span></div>
-        </div>
+          <h2 class="sub">Where to click</h2>
+          <div class="see">
+            <div class="shot win"><span class="cap">APPS SCRIPT · STEPS 1 AND 2</span>
+              <div class="tb"><span class="logo gs"></span><span class="t">Vaulter</span></div>
+              <div class="ide" style="min-height: 180px">
+                <div class="icons"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+                <div class="side"><div class="h">FILES <b>+</b></div><div class="f">Config.js</div><div class="f">Auth.js</div><div class="f">VaultImport.js</div><div class="f">Scanner.js</div><div class="f">Alerts.js</div><div class="f">Scheduler.js</div><div class="f on">SheetSetup.js</div><div class="f">WebApp.js</div></div>
+                <div class="main"><div class="bar2"><span class="ui-btn">Debug</span><span class="ui-btn sel">setupSheets</span><span class="ui-btn pri">▶ Run</span></div><div class="code">function setupSheets() {
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
+  setupVaultDataSheet_(ss);
+  setupFlaggedSheet_(ss);
+  …</div><div class="log"><div><span class="k">Execution log</span></div><div><span class="k">10:42:05 AM</span><span>Notice  Execution started</span></div><div><span class="k">10:42:09 AM</span><span>Info  All sheets initialized.</span></div></div></div>
+              </div>
+              <span class="co" style="left: 318px; top: 36px">1</span>
+              <span class="co" style="left: 442px; top: 36px">2</span>
+            </div>
+            <div class="shot" style="background:#e9ebef; padding: 0 0 12px"><span class="cap">PERMISSIONS PROMPT · STEP 3</span>
+              <div class="dlg" style="margin-top: 36px"><div class="dh">Vaulter wants to access your Google Account</div><div class="db"><div style="font-size:12px;color:var(--ui-muted)">This will allow Vaulter to:</div><div class="scopes"><span>See, edit, create, and delete your spreadsheets</span><span>Manage your eDiscovery data (Vault)</span><span>View organizational units on your domain</span><span>Send email on your behalf</span><span>Connect to an external service</span><span>Allow this application to run when you are not present</span></div></div><div class="df"><span class="ui-btn">Cancel</span><span class="ui-btn pri">Allow</span></div></div>
+              <span class="co" style="right: 30px; bottom: 32px">3</span>
+            </div>
+          </div>
+          <h2 class="sub">You should see</h2>
+          <div class="shot win"><span class="cap">YOUR SHEET · EIGHT TABS</span>
+            <div class="tb"><span class="logo"></span><span class="t">Vaulter</span><span class="m">File</span><span class="m">Edit</span><span class="m">View</span><span class="m">Insert</span><span class="m" style="margin-left:auto;color:var(--ui-text);font-weight:500">🛡 Vaulter</span></div>
+            <div class="grid" style="grid-template-columns: 34px 1.2fr 2fr 1fr"><span class="h"></span><span class="h">A</span><span class="h">B</span><span class="h">C</span><span class="h">1</span><span class="b" style="background:var(--head);color:#fff">Category</span><span class="b" style="background:var(--head);color:#fff">Keywords (comma-separated)</span><span class="b" style="background:var(--head);color:#fff">Severity</span><span class="h">2</span><span>Self-Harm</span><span>how to kill myself,i want to die,…</span><span>Critical</span><span class="h">3</span><span>Sexual Content</span><span>nude photos,send nudes,…</span><span>High</span><span class="h">4</span><span>Violence</span><span>how to make a bomb,school shooting,…</span><span>High</span><span class="h">5</span><span>Drugs</span><span>how to get weed,drug dealer,…</span><span>Medium</span></div>
+            <div class="tabs"><span>Vault_Data</span><span>Flagged</span><span class="on">Alerts_Config</span><span>App_Config</span><span>Setup</span><span>Run_Log</span><span>AI_Filtered</span><span>Access_List</span></div>
+          </div>
+          <div class="done"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.6"/><path d="m5.5 9.5 2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Done when</b> the eight tabs exist and Alerts_Config shows six default categories. A Vaulter menu appears in the Sheet's menu bar the next time you reload it.</span></div>
+          <h2 class="sub">Checklist</h2>
+          <div class="check">
+            <label><input type="checkbox" data-k="s2a">setupSheets ran without an error in the execution log</label>
+            <label><input type="checkbox" data-k="s2b">Permissions allowed on the admin account</label>
+            <label><input type="checkbox" data-k="s2c">Eight tabs visible in the Sheet</label>
+          </div>
+        </div></div>
+        <div class="pager"><button class="btn" onclick="show('s1')">← Stage 1</button><button class="btn btn-1" onclick="show('s3')">Stage 3: Configure →</button></div>
       </section>
 
-      <section class="box" id="s3">
-        <h2 class="plate"><span class="rivet"></span><b>STAGE 3</b><span class="sp">ABOUT 15 MINUTES</span><span class="rivet"></span></h2>
+      <!-- ── Stage 3 ─────────────────────────────────────── -->
+      <section class="stage" id="s3" aria-label="Stage 3">
+        <div class="box"><h2 class="plate"><span class="rivet"></span><b>STAGE 3</b><span class="sp">ABOUT 15 MINUTES</span><span class="rivet"></span></h2>
         <div class="body">
-          <div class="step-head"><span class="n">3</span><div><h2>Configure</h2><p>Four tabs in the Sheet and one script property. All of it can be changed later from the dashboard.</p></div></div>
+          <div class="stage-head"><span class="n">3</span><div><h1>Configure</h1><p>Four tabs in the Sheet and one script property. All of it can be changed later from the dashboard.</p></div></div>
+          <h2 class="sub">Do this</h2>
+          <ol class="steps">
+            <li><span class="co">1</span><span>On the <b>Setup</b> tab, fill column B: which OUs to import, the date range and the schedule.</span></li>
+            <li><span class="co">2</span><span>On the <b>App_Config</b> tab, set who gets the alert email and how it appears.</span></li>
+            <li><span class="co">3</span><span>On the <b>Access_List</b> tab, add yourself with role Admin, then each reviewer.</span></li>
+            <li><span class="co">4</span><span>Back in the script editor, <span class="crumbs"><span class="crumb">Project Settings</span><span class="sep">›</span><span class="crumb">Script properties</span><span class="sep">›</span><span class="crumb">Add script property</span></span> and add the Gemini key.</span></li>
+          </ol>
           <table>
             <thead><tr><th>Tab</th><th>Row</th><th>Set it to</th></tr></thead>
             <tbody>
-              <tr><td><b>Setup</b></td><td>OUs to Import</td><td>Comma-separated OU paths, for example <code>/Students/High School,/Students/Middle School</code></td></tr>
+              <tr><td><b>Setup</b></td><td>OUs to Import</td><td>Comma-separated OU paths, for example <span class="copy">/Students/High School,/Students/Middle School<button type="button" data-copy="/Students/High School,/Students/Middle School">Copy</button></span></td></tr>
               <tr><td>Setup</td><td>Date Range</td><td><code>day</code> for daily runs; <code>week</code> or <code>month</code> once, for a first backfill</td></tr>
               <tr><td>Setup</td><td>Import Frequency, Time, Day</td><td><code>daily</code> at <code>06:00</code> is the default; <code>hourly</code> and <code>weekly</code> also work</td></tr>
               <tr><td>Setup</td><td>Status</td><td><code>Active</code></td></tr>
-              <tr><td><b>App_Config</b></td><td>Alert Recipients</td><td>Comma-separated counselor and admin emails that get the alert digest</td></tr>
+              <tr><td><b>App_Config</b></td><td>Alert Recipients</td><td>Comma-separated counselor and admin emails</td></tr>
               <tr><td>App_Config</td><td>From Name, Reply-To</td><td>How the alert email appears</td></tr>
-              <tr><td><b>Alerts_Config</b></td><td>each row</td><td>Edit keywords, severity and Enabled. Multi-word phrases cut false positives</td></tr>
-              <tr><td><b>Access_List</b></td><td>each row</td><td>Your email with role <code>Admin</code>, then each reviewer with <code>Viewer</code> or <code>Admin</code></td></tr>
+              <tr><td><b>Alerts_Config</b></td><td>each row</td><td>Keep or edit the six defaults. Multi-word phrases cut false positives</td></tr>
+              <tr><td><b>Access_List</b></td><td>each row</td><td>Your email with <code>Admin</code>, then each reviewer with <code>Viewer</code> or <code>Admin</code></td></tr>
             </tbody>
           </table>
-          <p style="margin:0">Then the script properties: <span class="crumbs"><span class="crumb">Project Settings</span><span class="sep">›</span><span class="crumb">Script properties</span><span class="sep">›</span><span class="crumb">Add script property</span></span></p>
-          <div class="mock"><div class="bar">SCRIPT PROPERTIES</div><div class="kv">
-            <span class="k">GEMINI_API_KEY</span><span class="v">your key from AI Studio</span><span class="tag opt">optional, enables AI triage</span>
-            <span class="k">DASHBOARD_URL</span><span class="v">filled in at stage 4</span><span class="tag opt">optional, for the Sheet menu</span>
-            <span class="k">SPREADSHEET_ID</span><span class="v">leave unset</span><span class="tag opt">only to use a different Sheet</span>
-          </div></div>
+          <h2 class="sub">Where to click</h2>
+          <div class="see">
+            <div class="shot win"><span class="cap">YOUR SHEET · SETUP TAB · STEP 1</span>
+              <div class="tb"><span class="logo"></span><span class="t">Vaulter</span></div>
+              <div class="grid" style="grid-template-columns: 34px 1.1fr 1.6fr 1.6fr"><span class="h"></span><span class="h">A</span><span class="h">B</span><span class="h">C</span><span class="h">1</span><span class="b" style="background:var(--head);color:#fff">Setting</span><span class="b" style="background:var(--head);color:#fff">Value</span><span class="b" style="background:var(--head);color:#fff">Notes</span><span class="h">2</span><span>OUs to Import</span><span style="outline:2px solid var(--ui-blue);outline-offset:-2px">/Students/High School,/Students/Middle School</span><span style="color:var(--ui-muted)">Comma-separated OU paths</span><span class="h">3</span><span>Date Range</span><span>day</span><span style="color:var(--ui-muted)">day | week | month</span><span class="h">4</span><span>Import Frequency</span><span>daily</span><span style="color:var(--ui-muted)">hourly | daily | weekly</span><span class="h">5</span><span>Import Time (24h)</span><span>06:00</span><span style="color:var(--ui-muted)">HH:MM</span><span class="h">6</span><span>Import Day</span><span>Monday</span><span style="color:var(--ui-muted)">weekly only</span><span class="h">7</span><span>Status</span><span>Active</span><span style="color:var(--ui-muted)">Active | Paused</span></div>
+              <div class="tabs"><span>Vault_Data</span><span>Flagged</span><span>Alerts_Config</span><span>App_Config</span><span class="on">Setup</span><span>Run_Log</span><span>AI_Filtered</span><span>Access_List</span></div>
+              <span class="co" style="left: 150px; top: 86px">1</span>
+            </div>
+            <div class="shot win"><span class="cap">APPS SCRIPT · SCRIPT PROPERTIES · STEP 4</span>
+              <div class="tb"><span class="logo gs"></span><span class="t">Vaulter</span><span class="m" style="margin-left:auto">Project Settings</span></div>
+              <div class="settings"><h4>Script Properties</h4>
+                <div class="props"><div class="h"><span>Property</span><span>Value</span></div><div><span class="mono">GEMINI_API_KEY</span><span class="mono" style="color:var(--ui-muted)">AIza…your key…</span></div><div><span class="mono">DASHBOARD_URL</span><span class="mono" style="color:var(--ui-muted)">(added at stage 4)</span></div></div>
+                <div style="display:flex;gap:8px"><span class="ui-btn">Add script property</span><span class="ui-btn pri">Save script properties</span></div>
+              </div>
+              <span class="co" style="left: 120px; top: 158px">4</span>
+            </div>
+          </div>
+          <div class="files">
+            <span class="copy">GEMINI_API_KEY<button type="button" data-copy="GEMINI_API_KEY">Copy</button></span>
+            <span class="copy">DASHBOARD_URL<button type="button" data-copy="DASHBOARD_URL">Copy</button></span>
+          </div>
           <div class="done"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.6"/><path d="m5.5 9.5 2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Done when</b> Setup names at least one OU, App_Config has at least one alert recipient, and your own email is on Access_List as Admin.</span></div>
-        </div>
+          <h2 class="sub">Checklist</h2>
+          <div class="check">
+            <label><input type="checkbox" data-k="s3a">Setup: OUs, date range, schedule and Status = Active</label>
+            <label><input type="checkbox" data-k="s3b">App_Config: alert recipients, from name, reply-to</label>
+            <label><input type="checkbox" data-k="s3c">Access_List: my email with role Admin</label>
+            <label><input type="checkbox" data-k="s3d">GEMINI_API_KEY saved as a script property (or deliberately skipped)</label>
+          </div>
+        </div></div>
+        <div class="pager"><button class="btn" onclick="show('s2')">← Stage 2</button><button class="btn btn-1" onclick="show('s4')">Stage 4: Publish the dashboard →</button></div>
       </section>
 
-      <section class="box" id="s4">
-        <h2 class="plate"><span class="rivet"></span><b>STAGE 4</b><span class="sp">ABOUT 10 MINUTES</span><span class="rivet"></span></h2>
+      <!-- ── Stage 4 ─────────────────────────────────────── -->
+      <section class="stage" id="s4" aria-label="Stage 4">
+        <div class="box"><h2 class="plate"><span class="rivet"></span><b>STAGE 4</b><span class="sp">ABOUT 10 MINUTES</span><span class="rivet"></span></h2>
         <div class="body">
-          <div class="step-head"><span class="n">4</span><div><h2>Publish the dashboard</h2><p>One web app deployment. Its URL is what reviewers bookmark, so keep it.</p></div></div>
+          <div class="stage-head"><span class="n">4</span><div><h1>Publish the dashboard</h1><p>One web app deployment. Its URL is what reviewers bookmark, so keep it.</p></div></div>
+          <h2 class="sub">Do this</h2>
           <ol class="steps">
-            <li><span>In the editor: <span class="crumbs"><span class="crumb">Deploy</span><span class="sep">›</span><span class="crumb">New deployment</span><span class="sep">›</span><span class="crumb">Select type: Web app</span></span></span></li>
-            <li><span>Fill the dialog exactly like this, then press <b>Deploy</b> and copy the URL:</span></li>
+            <li><span class="co">1</span><span>In the editor, top right: <span class="crumbs"><span class="crumb">Deploy</span><span class="sep">›</span><span class="crumb">New deployment</span></span>.</span></li>
+            <li><span class="co">2</span><span>Click the gear beside Select type and choose <b>Web app</b>.</span></li>
+            <li><span class="co">3</span><span>Fill the dialog: Description <b>Vaulter dashboard</b>, Execute as <b>Me</b>, Who has access <b>Anyone within your domain</b>. Press <b>Deploy</b> and copy the Web app URL.</span></li>
+            <li><span class="co">4</span><span>Add a script property <code>DASHBOARD_URL</code> with that URL, so the Sheet's Vaulter menu opens it.</span></li>
+            <li><span class="co">5</span><span>Open the URL. Your account is on Access_List, so it loads. Add other reviewers on the <b>Access</b> page. The <b>Demo</b> switch in the header shows fictional sample data for walkthroughs.</span></li>
           </ol>
-          <div class="mock"><div class="bar">NEW DEPLOYMENT · WEB APP</div><div class="form-mock">
-            <span class="k">Description</span><span class="v">Vaulter dashboard</span>
-            <span class="k">Execute as</span><span class="v pick">Me (your admin account)</span>
-            <span class="k">Who has access</span><span class="v pick">Anyone within your domain</span>
-          </div></div>
-          <ol class="steps" start="3">
-            <li><span>Paste the URL into the <code>DASHBOARD_URL</code> script property so the Sheet's Vaulter menu opens it.</span></li>
-            <li><span>Open the URL. Your account is on Access_List, so it loads. Add other reviewers on the <b>Access</b> page. The <b>Demo</b> switch in the header shows fictional sample data for walkthroughs.</span></li>
-          </ol>
-          <div class="tip"><span>Every later code change: <span class="crumbs"><span class="crumb">Deploy</span><span class="sep">›</span><span class="crumb">Manage deployments</span><span class="sep">›</span><span class="crumb">Edit</span><span class="sep">›</span><span class="crumb">Version: New version</span></span> keeps the same URL. A brand-new deployment makes a new URL and breaks bookmarks.</span></div>
-          <div class="done"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.6"/><path d="m5.5 9.5 2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Done when</b> the dashboard opens with an empty queue, the readout strip says PIPELINE ACTIVE, and the Settings page lists your organizational units.</span></div>
-        </div>
+          <h2 class="sub">Where to click</h2>
+          <div class="see">
+            <div class="shot" style="background:#e9ebef; padding-bottom: 12px"><span class="cap">NEW DEPLOYMENT · STEPS 2 AND 3</span>
+              <div class="dlg" style="margin-top: 36px"><div class="dh">New deployment</div><div class="db">
+                <div class="fld"><span>Select type ⚙</span><span class="in sel">Web app</span></div>
+                <div class="fld"><span>Description</span><span class="in">Vaulter dashboard</span></div>
+                <div class="fld"><span>Execute as</span><span class="in sel">Me (admin@yourdistrict.org)</span></div>
+                <div class="fld"><span>Who has access</span><span class="in sel">Anyone within yourdistrict.org</span></div>
+              </div><div class="df"><span class="ui-btn">Cancel</span><span class="ui-btn pri">Deploy</span></div></div>
+              <span class="co" style="left: 46px; top: 94px">2</span>
+              <span class="co" style="right: 30px; bottom: 32px">3</span>
+            </div>
+            <div class="shot" style="background:#e9ebef; padding-bottom: 12px"><span class="cap">AFTER DEPLOY · COPY THE URL</span>
+              <div class="dlg" style="margin-top: 36px"><div class="dh">Deployment updated</div><div class="db">
+                <div style="font-size:12px;color:var(--ui-muted)">Version 1 on Oct 29, 10:58 AM</div>
+                <div class="fld"><span>Deployment ID</span><span class="in url">AKfycb…</span></div>
+                <div class="fld"><span>Web app URL</span><span class="in url">https://script.google.com/a/macros/yourdistrict.org/s/AKfycb…/exec</span></div>
+                <div><span class="ui-btn">Copy</span></div>
+              </div><div class="df"><span class="ui-btn pri">Done</span></div></div>
+              <span class="co" style="left: 150px; bottom: 96px">3</span>
+            </div>
+          </div>
+          <div class="tip"><span>Every later code change: <span class="crumbs"><span class="crumb">Deploy</span><span class="sep">›</span><span class="crumb">Manage deployments</span><span class="sep">›</span><span class="crumb">Edit ✎</span><span class="sep">›</span><span class="crumb">Version: New version</span></span> keeps the same URL. A brand-new deployment makes a new URL and breaks bookmarks.</span></div>
+          <h2 class="sub">You should see</h2>
+          <div class="shot dash"><span class="cap">THE DASHBOARD · FIRST OPEN</span>
+            <div class="dh2" style="padding-top:22px;height:58px">Vaulter <span>Dashboard · Bulk review · AI filtered log · Access · Settings</span></div>
+            <div class="ro"><span><span class="d"></span>PIPELINE ACTIVE</span><span>NO RUNS YET</span><span>NEXT RUN TOMORROW 06:00</span><span style="margin-left:auto">KEYWORD RULES · 6 ACTIVE</span></div>
+            <div class="emp"><b>No flags yet</b>No student prompts have matched a keyword rule.<br><span class="ui-btn">Run import now</span></div>
+          </div>
+          <div class="done"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.6"/><path d="m5.5 9.5 2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Done when</b> the dashboard opens with an empty queue, the strip says PIPELINE ACTIVE, and the Settings page lists your organizational units.</span></div>
+          <h2 class="sub">Checklist</h2>
+          <div class="check">
+            <label><input type="checkbox" data-k="s4a">Web app deployed as Me, access limited to my domain</label>
+            <label><input type="checkbox" data-k="s4b">DASHBOARD_URL script property added</label>
+            <label><input type="checkbox" data-k="s4c">Dashboard opens for me; Settings lists my OUs</label>
+            <label><input type="checkbox" data-k="s4d">Reviewers added on the Access page</label>
+          </div>
+        </div></div>
+        <div class="pager"><button class="btn" onclick="show('s3')">← Stage 3</button><button class="btn btn-1" onclick="show('s5')">Stage 5: Schedule and first run →</button></div>
       </section>
 
-      <section class="box" id="s5">
-        <h2 class="plate"><span class="rivet"></span><b>STAGE 5</b><span class="sp">10 MINUTES, THEN WAIT FOR VAULT</span><span class="rivet"></span></h2>
+      <!-- ── Stage 5 ─────────────────────────────────────── -->
+      <section class="stage" id="s5" aria-label="Stage 5">
+        <div class="box"><h2 class="plate"><span class="rivet"></span><b>STAGE 5</b><span class="sp">10 MINUTES, THEN WAIT FOR VAULT</span><span class="rivet"></span></h2>
         <div class="body">
-          <div class="step-head"><span class="n">5</span><div><h2>Schedule and first run</h2><p>Install the trigger, kick off an import, watch the first flags arrive.</p></div></div>
+          <div class="stage-head"><span class="n">5</span><div><h1>Schedule and first run</h1><p>Install the trigger, kick off an import, watch the first flags arrive.</p></div></div>
+          <h2 class="sub">Do this</h2>
           <ol class="steps">
-            <li><span>In the editor, run <code>installTrigger</code> once. It creates the scheduled <code>runPipeline</code> trigger at the configured time. Saving settings in the dashboard reinstalls it too.</span></li>
-            <li><span>In the dashboard, press <b>Run import now</b>. The first run creates a Vault matter named "Vaulter — Gemini Activity Imports", queues one export per OU, and installs a five-minute checker trigger that collects each export when Vault finishes it, usually within the hour.</span></li>
-            <li><span>Watch the readout strip. It shows exports processing, then the last run. The Run_Log table on the Settings page shows every run with counts and any error.</span></li>
+            <li><span class="co">1</span><span>In the editor, pick <code>installTrigger</code> in the function dropdown and press <b>Run</b>. It creates the scheduled <code>runPipeline</code> trigger at the configured time. Saving settings in the dashboard reinstalls it too.</span></li>
+            <li><span class="co">2</span><span>In the dashboard, press <b>Run import now</b>. The first run creates a Vault matter named "Vaulter — Gemini Activity Imports", queues one export per OU, and installs a five-minute checker trigger that collects each export when Vault finishes it, usually within the hour.</span></li>
+            <li><span class="co">3</span><span>Watch the readout strip, then the Run_Log table on the Settings page.</span></li>
           </ol>
+          <h2 class="sub">You should see</h2>
+          <div class="see">
+            <div class="shot dash"><span class="cap">RIGHT AFTER RUN IMPORT NOW</span>
+              <div class="dh2" style="padding-top:22px;height:58px">Vaulter</div>
+              <div class="ro"><span><span class="d"></span>PIPELINE ACTIVE</span><span>LAST RUN TODAY 11:02 AM · OK</span><span><span class="spin"></span>2 EXPORTS PROCESSING</span></div>
+              <div class="emp"><b>No flags yet</b>Exports are processing in the background. Records appear when they finish.</div>
+            </div>
+            <div class="shot dash"><span class="cap">SETTINGS PAGE · RUN LOG, AN HOUR LATER</span>
+              <div class="dh2" style="padding-top:22px;height:58px">Vaulter <span>Settings</span></div>
+              <div class="tbl"><div class="h"><span>Started</span><span>Status</span><span>Exports</span><span>Flagged</span><span>Alerted</span></div><div><span>Today 11:02 AM</span><span class="ok">SUCCESS</span><span>2</span><span>3</span><span>3</span></div></div>
+              <div class="emp" style="text-align:left;padding:12px 14px">Three matches are now in the queue and the alert email went out.</div>
+            </div>
+          </div>
           <div class="done"><svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true"><circle cx="9" cy="9" r="8" stroke="currentColor" stroke-width="1.6"/><path d="m5.5 9.5 2.5 2.5 4.5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg><span><b>Done when</b> Run_Log shows a SUCCESS row, matches appear in the queue, and the alert recipients get an email on that run or the next. From here the schedule runs itself.</span></div>
-        </div>
+          <h2 class="sub">Checklist</h2>
+          <div class="check">
+            <label><input type="checkbox" data-k="s5a">installTrigger ran once</label>
+            <label><input type="checkbox" data-k="s5b">Run import now pressed; strip showed exports processing</label>
+            <label><input type="checkbox" data-k="s5c">Run_Log shows a SUCCESS row</label>
+          </div>
+        </div></div>
+        <div class="pager"><button class="btn" onclick="show('s4')">← Stage 4</button><button class="btn btn-1" onclick="show('fix')">If something is off →</button></div>
       </section>
 
-      <section class="box" id="fix">
-        <h2 class="plate"><span class="rivet"></span><b>IF SOMETHING IS OFF</b><span class="sp">SYMPTOM · LIKELY CAUSE · FIX</span><span class="rivet"></span></h2>
+      <!-- ── Troubleshooting ─────────────────────────────── -->
+      <section class="stage" id="fix" aria-label="Troubleshooting">
+        <div class="box"><h2 class="plate"><span class="rivet"></span><b>IF SOMETHING IS OFF</b><span class="sp">SYMPTOM · LIKELY CAUSE · FIX</span><span class="rivet"></span></h2>
         <div class="body" style="padding-top:0;padding-bottom:0">
           <table>
             <thead><tr><th>You see</th><th>Likely cause</th><th>Fix</th></tr></thead>
@@ -269,12 +516,66 @@
               <tr><td>Access Denied on the dashboard</td><td>The signed-in account is not on Access_List</td><td>Add it on the Access_List tab, or have an Admin add it on the Access page</td></tr>
             </tbody>
           </table>
-        </div>
+        </div></div>
+        <div class="pager"><button class="btn" onclick="show('s5')">← Stage 5</button><a class="btn btn-1" href="demo/">See the finished dashboard in the demo →</a></div>
       </section>
+
     </div>
   </div>
 </main>
 
 <footer><div class="wrap">Questions or a walkthrough: Joel Mellor, Technology, Orono Public Schools · <a href="mailto:joel.mellor@orono.k12.mn.us">joel.mellor@orono.k12.mn.us</a></div></footer>
+
+<script>
+  var STAGES = ['before', 's1', 's2', 's3', 's4', 's5', 'fix'];
+  var KEY = 'vaulter.setup.checks';
+  var checks = {};
+  try { checks = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch (e) {}
+
+  function show(id) {
+    if (STAGES.indexOf(id) < 0) id = 'before';
+    document.querySelectorAll('.stage').forEach(function (s) { s.classList.toggle('active', s.id === id); });
+    document.querySelectorAll('#rail li').forEach(function (li) {
+      var b = li.querySelector('button');
+      if (li.dataset.stage === id) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+    });
+    if (location.hash !== '#' + id) history.replaceState(null, '', '#' + id);
+    window.scrollTo({ top: 0 });
+  }
+
+  function toggleAll() {
+    var all = document.body.classList.toggle('all');
+    document.getElementById('allBtn').textContent = all ? 'One stage at a time' : 'Show all stages';
+  }
+
+  function saveChecks() {
+    try { localStorage.setItem(KEY, JSON.stringify(checks)); } catch (e) {}
+    var boxes = document.querySelectorAll('.check input');
+    var done = 0;
+    boxes.forEach(function (b) { if (b.checked) done++; });
+    document.getElementById('pctText').textContent = done + ' of ' + boxes.length + ' checks done';
+    document.getElementById('pctBar').style.width = Math.round(done / boxes.length * 100) + '%';
+    document.querySelectorAll('.stage').forEach(function (s) {
+      var own = s.querySelectorAll('.check input');
+      var li = document.querySelector('#rail li[data-stage="' + s.id + '"]');
+      if (li && own.length) li.classList.toggle('done', Array.prototype.every.call(own, function (b) { return b.checked; }));
+    });
+  }
+
+  document.querySelectorAll('.check input').forEach(function (b) {
+    b.checked = !!checks[b.dataset.k];
+    b.addEventListener('change', function () { checks[b.dataset.k] = b.checked; saveChecks(); });
+  });
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var text = btn.dataset.copy;
+      var done = function () { btn.textContent = 'Copied'; btn.classList.add('ok'); setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('ok'); }, 1500); };
+      if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, done); else done();
+    });
+  });
+  window.addEventListener('hashchange', function () { show(location.hash.slice(1)); });
+  saveChecks();
+  show(location.hash.slice(1) || 'before');
+</script>
 </body>
 </html>
