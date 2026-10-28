@@ -96,7 +96,7 @@
     .acc[open] .acc-chev { transform: rotate(180deg); }
     .acc[open] summary { border-bottom: 1px solid var(--divider); }
     .acc > *:not(summary) { margin-left: 16px; margin-right: 16px; }
-    .acc > p { margin-top: 12px !important; }
+    .acc > p.acc-lead { margin: 14px 16px 12px; }
     .acc > .prompt-box { margin-bottom: 16px; }
     .prompt-box { border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
     .prompt-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 12px; background: var(--plate); border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; letter-spacing: .05em; color: var(--head); }
@@ -239,7 +239,7 @@
           </ul>
           <details class="acc">
             <summary><span class="acc-title">Using an AI coding agent? Paste this prompt</span><span class="acc-sub">Claude Code, Gemini CLI, Codex or similar</span><span class="acc-chev" aria-hidden="true">▾</span></summary>
-            <p style="margin:0 0 12px">Let the agent drive. It can clone the repo, create the Sheet and its bound script with clasp, and push the code. It cannot click Google's dialogs, so it hands those to you one at a time.</p>
+            <p class="acc-lead">Let the agent drive. It can clone the repo, create the Sheet and its bound script with clasp, and push the code. It cannot click Google's dialogs, so it hands those to you one at a time.</p>
           <div class="prompt-box">
             <div class="prompt-head"><span>PROMPT FOR YOUR AGENT</span><button type="button" class="pbtn" data-copy-from="agentPrompt">Copy prompt</button></div>
 <pre id="agentPrompt">I want to set up Vaulter in my Google Workspace for Education district.
