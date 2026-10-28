@@ -33,6 +33,10 @@ until a reviewer clicks Reveal.
 
 Follow the [setup walkthrough](https://orono-public-schools.github.io/Vaulter/setup.html). In short:
 
+Using an AI coding agent such as Claude Code or Gemini CLI? The walkthrough's first stage has a
+prompt to paste that lets the agent clone, create the Sheet with clasp, push the code and hand you
+the steps only a person can do.
+
 1. Create a Google Sheet, open Extensions → Apps Script, turn on "Show appsscript.json" in Project
    Settings, and add every file from `apps-script/src` with the same name (or push with clasp).
 2. Run `setupSheets` from the editor and approve the permissions. Eight tabs appear with defaults.

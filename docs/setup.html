@@ -86,6 +86,11 @@
     .check label:has(input:checked) { background: var(--ok-bg); border-color: var(--ok-bd); color: var(--ok); }
     .check input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--ok); flex: none; }
     .tip { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--text2); border-left: 3px solid var(--border); padding: 2px 0 2px 12px; }
+    .prompt-box { border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
+    .prompt-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 12px; background: var(--plate); border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; letter-spacing: .05em; color: var(--head); }
+    .pbtn { font-size: 12px; font-weight: 600; background: var(--head); color: #fff; border: 1px solid var(--head); border-radius: 3px; padding: 4px 10px; }
+    .pbtn.ok { background: var(--ok); border-color: var(--ok); }
+    .prompt-box pre { margin: 0; padding: 14px 16px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 12.5px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; background: #fff; color: var(--text); }
     .pager { display: flex; justify-content: space-between; gap: 12px; }
     .btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 4px; font-size: 15px; font-weight: 500; text-decoration: none; border: 1px solid var(--head); background: var(--panel); color: var(--head); }
     .btn-1 { background: var(--head); color: #fff; }
@@ -220,6 +225,34 @@
             <li><b>A super-admin account</b> with Vault privileges (manage matters, manage exports) and Admin SDK read. Everything runs as this account.</li>
             <li><b>Optional: a Gemini API key</b> from <a href="https://aistudio.google.com">Google AI Studio</a> for the triage step. Without it, matches are still flagged, just without an AI verdict.</li>
           </ul>
+          <h2 class="sub">Using an AI coding agent?</h2>
+          <p style="margin:0">If you work with Claude Code, Gemini CLI, Codex or similar, paste this prompt and let it drive. It can clone the repo, create the Sheet and its bound script with clasp, and push the code. It cannot click Google's dialogs, so it will hand those to you one at a time.</p>
+          <div class="prompt-box">
+            <div class="prompt-head"><span>PROMPT FOR YOUR AGENT</span><button type="button" class="pbtn" data-copy-from="agentPrompt">Copy prompt</button></div>
+<pre id="agentPrompt">I want to set up Vaulter in my Google Workspace for Education district.
+Repo: https://github.com/Orono-Public-Schools/Vaulter
+Guide: https://orono-public-schools.github.io/Vaulter/setup.html
+
+Work through the guide with me, in order:
+
+1. Clone the repo. Read README.md and docs/setup.html before doing anything else.
+2. Install clasp (npm install -g @google/clasp) and run `clasp login`. I will
+   finish the browser sign-in as our super-admin and tell you when it is done.
+3. In apps-script/, run `clasp create --type sheets --title "Vaulter" --rootDir src`
+   to make a new Google Sheet with a bound Apps Script project, then `clasp push`
+   to load the code. Give me the Sheet URL and the script URL (`clasp open`).
+4. From here, tell me exactly what to do for each step only I can do, one step at
+   a time, and wait for me to confirm before moving on:
+   - run setupSheets in the editor and approve the permissions prompt
+   - fill the Setup, App_Config, Alerts_Config and Access_List tabs
+   - add GEMINI_API_KEY and later DASHBOARD_URL as script properties
+   - deploy as a web app: execute as Me, access anyone within my domain
+   - run installTrigger, then press Run import now in the dashboard
+5. Do not edit anything under apps-script/src for my district. Configuration
+   lives in the Sheet and in script properties. Never put keys or IDs in files.
+6. When the first run finishes, help me read Run_Log and the dashboard, and use
+   the troubleshooting table at the end of the guide if something is off.</pre>
+          </div>
           <h2 class="sub">Checklist</h2>
           <div class="check">
             <label><input type="checkbox" data-k="b1">Gemini is on for the student OUs I want to watch</label>
@@ -566,10 +599,11 @@ const SHEETS = {
     b.checked = !!checks[b.dataset.k];
     b.addEventListener('change', function () { checks[b.dataset.k] = b.checked; saveChecks(); });
   });
-  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+  document.querySelectorAll('[data-copy], [data-copy-from]').forEach(function (btn) {
     btn.addEventListener('click', function () {
-      var text = btn.dataset.copy;
-      var done = function () { btn.textContent = 'Copied'; btn.classList.add('ok'); setTimeout(function () { btn.textContent = 'Copy'; btn.classList.remove('ok'); }, 1500); };
+      var text = btn.dataset.copyFrom ? document.getElementById(btn.dataset.copyFrom).textContent : btn.dataset.copy;
+      var label = btn.textContent;
+      var done = function () { btn.textContent = 'Copied'; btn.classList.add('ok'); setTimeout(function () { btn.textContent = label; btn.classList.remove('ok'); }, 1500); };
       if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, done); else done();
     });
   });
