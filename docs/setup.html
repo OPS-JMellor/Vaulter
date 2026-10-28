@@ -86,6 +86,18 @@
     .check label:has(input:checked) { background: var(--ok-bg); border-color: var(--ok-bd); color: var(--ok); }
     .check input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--ok); flex: none; }
     .tip { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; color: var(--text2); border-left: 3px solid var(--border); padding: 2px 0 2px 12px; }
+    .acc { border: 1px solid var(--border); border-radius: 3px; background: var(--panel); }
+    .acc summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 12px; padding: 12px 16px; }
+    .acc summary::-webkit-details-marker { display: none; }
+    .acc summary:hover { background: var(--sel); }
+    .acc-title { font-size: 16px; font-weight: 700; color: var(--head); }
+    .acc-sub { font-size: 13px; color: var(--text2); }
+    .acc-chev { margin-left: auto; color: var(--head); font-size: 16px; transition: transform .15s; }
+    .acc[open] .acc-chev { transform: rotate(180deg); }
+    .acc[open] summary { border-bottom: 1px solid var(--divider); }
+    .acc > *:not(summary) { margin-left: 16px; margin-right: 16px; }
+    .acc > p { margin-top: 12px !important; }
+    .acc > .prompt-box { margin-bottom: 16px; }
     .prompt-box { border: 1px solid var(--border); border-radius: 3px; overflow: hidden; }
     .prompt-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 12px; background: var(--plate); border-bottom: 1px solid var(--border); font-size: 11px; font-weight: 600; letter-spacing: .05em; color: var(--head); }
     .pbtn { font-size: 12px; font-weight: 600; background: var(--head); color: #fff; border: 1px solid var(--head); border-radius: 3px; padding: 4px 10px; }
@@ -225,8 +237,9 @@
             <li><b>A super-admin account</b> with Vault privileges (manage matters, manage exports) and Admin SDK read. Everything runs as this account.</li>
             <li><b>Optional: a Gemini API key</b> from <a href="https://aistudio.google.com">Google AI Studio</a> for the triage step. Without it, matches are still flagged, just without an AI verdict.</li>
           </ul>
-          <h2 class="sub">Using an AI coding agent?</h2>
-          <p style="margin:0">If you work with Claude Code, Gemini CLI, Codex or similar, paste this prompt and let it drive. It can clone the repo, create the Sheet and its bound script with clasp, and push the code. It cannot click Google's dialogs, so it will hand those to you one at a time.</p>
+          <details class="acc">
+            <summary><span class="acc-title">Using an AI coding agent? Paste this prompt</span><span class="acc-sub">Claude Code, Gemini CLI, Codex or similar</span><span class="acc-chev" aria-hidden="true">▾</span></summary>
+            <p style="margin:0 0 12px">Let the agent drive. It can clone the repo, create the Sheet and its bound script with clasp, and push the code. It cannot click Google's dialogs, so it hands those to you one at a time.</p>
           <div class="prompt-box">
             <div class="prompt-head"><span>PROMPT FOR YOUR AGENT</span><button type="button" class="pbtn" data-copy-from="agentPrompt">Copy prompt</button></div>
 <pre id="agentPrompt">I want to set up Vaulter in my Google Workspace for Education district.
@@ -253,6 +266,7 @@ Work through the guide with me, in order:
 6. When the first run finishes, help me read Run_Log and the dashboard, and use
    the troubleshooting table at the end of the guide if something is off.</pre>
           </div>
+          </details>
           <h2 class="sub">Checklist</h2>
           <div class="check">
             <label><input type="checkbox" data-k="b1">Gemini is on for the student OUs I want to watch</label>
